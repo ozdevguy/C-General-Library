@@ -1,0 +1,43 @@
+String Library.
+
+----------------------------------------------------------------------------------
+string* _string_new()
+
+Creates a new empty string object.
+----------------------------------------------------------------------------------
+string* _string_new_fbytes(byte* data)
+
+Creates a new string object from a null terminated byte array.
+----------------------------------------------------------------------------------
+void _string_delete(string* str)
+
+Comletely deletes a string object.
+----------------------------------------------------------------------------------
+void _string_delete_pair(string_pair* pair)
+
+Completely deletes the strings encapsulated in a string pair object.
+----------------------------------------------------------------------------------
+byte* _string_pull(string* str)
+
+Create a raw byte/char array from the string object (this array must be manually freed when finished).
+----------------------------------------------------------------------------------
+void _string_append_fbytes(string* str, byte* append)
+
+Append the characters contained in a null terminated byte array to the string object.
+----------------------------------------------------------------------------------
+void _string_append_fstring(string* str, string* append)
+
+Append a string to the str string object.
+----------------------------------------------------------------------------------
+void _string_append_fchar(string* str, utf8_char* append)
+
+Append an individual character to the string.
+----------------------------------------------------------------------------------
+void _string_insert(string* str, string* insert, size_t pos)
+
+Insert a string (insert) into string (str) at position (pos).
+----------------------------------------------------------------------------------
+long _string_position_fbytes(string* str, byte* find, size_t s_pos)
+
+Find the position of the sequence of characters contained in a null terminated byte array if the sequence exists within string (str). If the sequence does not exist, -1 is returned.
+----------------------------------------------------------------------------------
