@@ -4,134 +4,105 @@
 Written by Bobby Crawford
 */
 
-typedef struct sys_stack sys_stack;
-typedef struct sys_stack_item sys_stack_item;
+static void int_stack_resize(stack* st){
 
+	size_t new_size = st->size * 2, i;
 
-//A stack entry.
-struct sys_stack_item{
+	stack_item* entries = allocate(st->ctx, (sizeof(stack_item) * new_size));
 
-	//The data.
-	void* data;
+	for(i = 1; i < st->size; i++)
+		entries[i] = st->entries[i];
 
-	//The size of the data.
-	unsigned int size;
+	destroy(st->ctx, st->entries);
 
-	//The type of data.
-	unsigned short type;
-
-};
-
-
-//Stack object.
-struct sys_stack{
-
-	//The stack array.
-	sys_stack_item* entries;
-
-	//Size of the stack.
-	unsigned int size;
-
-	//Top of the stack.
-	unsigned int top;
-
-};
-
-static void stack_resize(sys_stack* stack){
-
-	unsigned int new_size = stack->size * 2, i;
-
-	sys_stack_item* entries = calloc(1, (sizeof(sys_stack_item) * new_size));
-
-	for(i = 1; i < stack->size; i++)
-		entries[i] = stack->entries[i];
-
-	free(stack->entries);
-
-	stack->entries = entries;
-	stack->size = new_size;
+	st->entries = entries;
+	st->size = new_size;
 }
 
-void stack_destroy(sys_stack* stack){
+void _stack_delete(stack* st){
 
-	if(!stack)
+	if(!st)
 		return;
 
-	free(stack->entries);
-	free(stack);
+	destroy(st->ctx, st->entries);
+	destroy(st->ctx, st);
 
 }
 
-void stack_destroy_all(sys_stack* stack){
+void _stack_delete_all(stack* st){
 
-	if(!stack)
+	if(!st)
 		return;
 
-	int i;
+	size_t i;
 
-	for(i = 1; i < stack->top; i++){
+	for(i = 1; i < st->top; i++){
 
-		if(stack->entries[i].data){
-			free(stack->entries[i].data);
-		}
+		if(st->entries[i].data)
+			destroy(st->ctx, st->entries[i].data);
+		
 	}
 
-	stack_destroy(stack);
+	_stack_delete(st);
 
 }
 
-sys_stack* stack_create(unsigned int start_size){
+stack* _stack_new(standard_library_context* ctx, size_t start_size){
 
-	sys_stack* stack = calloc(1, sizeof(sys_stack));
-	stack->entries = calloc(1, (sizeof(sys_stack_item) * start_size));
+	stack* st = allocate(ctx, sizeof(stack));
+	st->entries = allocate(ctx, (sizeof(stack_item) * start_size));
+	st->ctx = ctx;
+	st->size = start_size;
 
-	stack->size = start_size;
-
-	return stack;
+	return st;
 
 }
 
-void stack_push(sys_stack* stack, void* data, unsigned short type, unsigned int size){
+void _stack_push(stack* st, void* data, uint8_t type, size_t size){
 
-	if(!stack)
+	if(!st)
 		return;
 
-	if(stack->top == stack->size - 1)
-		stack_resize(stack);
+	if(st->top == st->size - 1)
+		int_stack_resize(st);
 
-	stack->top++;
-	stack->entries[stack->top].data = data;
-	stack->entries[stack->top].size = size;
-	stack->entries[stack->top].type = type;
+	st->top++;
+	st->entries[st->top].data = data;
+	st->entries[st->top].size = size;
+	st->entries[st->top].type = type;
 
 }
 
-sys_stack_item* stack_pop(sys_stack* stack){
+stack_item _stack_pop(stack* st){
 
-	if(!stack)
-		return;
+	stack_item item;
 
-	if(!stack->top)
-		return 0;
+	if(!st)
+		return item;
 
-	sys_stack_item* item = (stack->entries + stack->top--);
+	if(!st->top)
+		return item;
+
+	item = st->entries[st->top--];
 
 	return item;
 
 }
 
-sys_stack_item* stack_peek(sys_stack* stack){
+stack_item _stack_peek(stack* st){
 
-	if(!stack)
-		return;
+	stack_item item;
 
-	if(!stack)
-		return;
+	if(!st)
+		return item;
 
-	if(!stack->top)
-		return 0;
+	if(!st)
+		return item;
 
-	sys_stack_item* item = (stack->entries + stack->top);
+	if(!st->top)
+		return item;
+
+	item = st->entries[st->top];
 
 	return item;
 

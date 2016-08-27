@@ -2,6 +2,7 @@
 #include "../lib/utf8.h"
 #include "../lib/string.h"
 #include "../lib/vector.h"
+#include "../lib/stack.h"
 
 void main(){
 
@@ -13,22 +14,33 @@ void main(){
 
 	_std_lib_default(&ctx);
 
-	ctx.logger("hello there!\n", 1, 1, 1);
+	_log_info(&ctx, "Hello world!->\n", 11);
 
 
 	queue* myQueue = _queue_new(&ctx, 1);
 	string* str = _string_new(&ctx);
+	stack* myStack = _stack_new(&ctx, 1);
+	vector* myVector = _vector_new(&ctx, 10, sizeof(string));
 
 	_queue_enqueue(myQueue, &first, 1, sizeof(first));
 	_queue_enqueue(myQueue, &second, 1, sizeof(second));
 	_queue_enqueue(myQueue, &third, 1, sizeof(third));
 
-	printf("Hello: %d\n", *((int*)_queue_dequeue(myQueue).data));
+	_stack_push(myStack, &first, 1, sizeof(first));
+	_stack_push(myStack, &second, 1, sizeof(second));
+	_stack_push(myStack, &third, 1, sizeof(third));
 
+
+	int i = 0;
+
+	for(i = 0; i < 3; i++)
+		printf("Dequeue: %d\n", *((int*)_queue_dequeue(myQueue).data));
+
+	for(i = 0; i < 3; i++)
+		printf("Stack Pop: %d\n", *((int*)_stack_pop(myStack).data));
 
 	_queue_delete(myQueue);
-
-	vector* myVector = _vector_new(&ctx, 10, sizeof(string));
+	_stack_delete(myStack);
 
 	_vector_add(myVector, str);
 

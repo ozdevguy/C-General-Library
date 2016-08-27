@@ -1,8 +1,30 @@
 //Include system libraries header.
 #ifndef SYS_LIBS
 	
-	#define SYS_LIBS 1
-	#include "sys_include.h"
+	#ifdef __linux__
+
+		#define SYS_LIBS 1
+		#include "sys_include.h"
+
+	#elif _WIN32
+		
+		#ifdef _WIN64
+
+			//TO DO (64 bit windows server)
+
+		#endif
+
+		#ifndef _WIN64
+
+			//TO DO (32 bit windows server)
+
+		#endif
+	
+	#elif __APPLE__
+		
+		//TO DO (Mac OS)
+
+	#endif
 
 #endif
 
@@ -21,6 +43,11 @@
 	#include "global/environment.h"
 
 #endif
+
+/* OVERRIDES */
+#define malloc allocate
+#define calloc allocate
+#define free destroy
 
 //Include memory managment header.
 #ifndef STD_LIBS_MEMORY
