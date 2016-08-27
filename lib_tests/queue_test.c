@@ -1,16 +1,7 @@
 #include "../lib/queue.h"
 #include "../lib/utf8.h"
 #include "../lib/string.h"
-
-void* logger(byte* data, size_t size, uint8_t type, uint32_t id){
-
-	printf("Data: %s\n", (char*)data);
-
-	return 0;
-
-}
-
-
+#include "../lib/vector.h"
 
 void main(){
 
@@ -18,15 +9,15 @@ void main(){
 	int second = 1213;
 	int third = 3543;
 
-	_std_lib_environment_setup(3232);
-	_std_lib_environment_set_memory_allocator(0);
-	_std_lib_environment_set_memory_deallocator(0);
-	_std_lib_environment_set_logger(logger);
+	standard_library_context ctx;
 
-	STD_LIB_STATIC_ENV.logger("hello there!\n", 1, 1, 1);
+	_std_lib_default(&ctx);
+
+	ctx.logger("hello there!\n", 1, 1, 1);
 
 
-	queue* myQueue = _queue_new(1);
+	queue* myQueue = _queue_new(&ctx, 1);
+	string* str = _string_new(&ctx);
 
 	_queue_enqueue(myQueue, &first, 1, sizeof(first));
 	_queue_enqueue(myQueue, &second, 1, sizeof(second));
@@ -36,6 +27,13 @@ void main(){
 
 
 	_queue_delete(myQueue);
+
+	vector* myVector = _vector_new(&ctx, 10, sizeof(string));
+
+	_vector_add(myVector, str);
+
+	_vector_delete(myVector);
+	_string_delete(str);
 
 	return;
 

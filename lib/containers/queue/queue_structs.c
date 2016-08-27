@@ -18,6 +18,9 @@ struct queue_entry{
 //Representation of a queue.
 struct queue{
 
+	//Standard library context.
+	standard_library_context* ctx;
+	
 	//Queue entries (array).
 	queue_entry* entries;
 

@@ -3,6 +3,9 @@ typedef struct string_pair string_pair;
 
 struct string{
 
+	//Standard library context.
+	standard_library_context* ctx;
+	
 	//String data.
 	byte* data;
 

@@ -2,17 +2,20 @@ typedef struct vector vector;
 
 struct vector{
 
+	//Standard library context.
+	standard_library_context* ctx;
+
 	//Size of this vector.
-	unsigned long size;
+	size_t size;
 
 	//Used spaces.
-	unsigned long used;
+	size_t used;
 
 	//Data size.
-	unsigned short data_size;
+	size_t data_size;
 
 	//Vector iterator counter.
-	unsigned long iterator;
+	size_t iterator;
 	
 	//Vector data.
 	byte* data;

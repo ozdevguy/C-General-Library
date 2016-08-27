@@ -12,7 +12,7 @@ static void int_queue_resize(queue* q){
 	size_t new_size = q->size * 2, i, j = 0;
 
 	//Create a new, larger queue.
-	queue_entry* entries = allocate(sizeof(queue_entry) * new_size);
+	queue_entry* entries = allocate(q->ctx, sizeof(queue_entry) * new_size);
 
 	//Copy over the data.
 	for(i = q->front; j < q->size; i = ((i + 1) % q->size)){
@@ -28,7 +28,7 @@ static void int_queue_resize(queue* q){
 	q->size = new_size;
 
 	//Free previously used memory.
-	destroy(q->entries);
+	destroy(q->ctx, q->entries);
 
 	//Reassign the pointer.
 	q->entries = entries;
@@ -40,8 +40,8 @@ void _queue_delete(queue* q){
 	if(!q)
 		return;
 
-	destroy(q->entries);
-	destroy(q);
+	destroy(q->ctx, q->entries);
+	destroy(q->ctx, q);
 
 }
 
@@ -52,7 +52,7 @@ void _queue_delete_all(queue* q){
 	for(i = 0; i < q->size; i++){
 
 		if(q->entries[i].data)
-			destroy(q->entries[i].data);
+			destroy(q->ctx, q->entries[i].data);
 
 	}
 
@@ -60,14 +60,15 @@ void _queue_delete_all(queue* q){
 	
 }
 
-queue* _queue_new(size_t start_size){
+queue* _queue_new(standard_library_context* ctx, size_t start_size){
 
 	//Create a new object.
-	queue* q = allocate(sizeof(queue));
+	queue* q = allocate(ctx, sizeof(queue));
 
 	//Create a new queue array.
-	q->entries = allocate(sizeof(queue_entry) * start_size);
+	q->entries = allocate(ctx, sizeof(queue_entry) * start_size);
 	q->size = start_size;
+	q->ctx = ctx;
 
 	return q;
 

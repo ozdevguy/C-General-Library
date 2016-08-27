@@ -2,9 +2,10 @@
 
 void main(){
 
+	standard_library_context ctx;
+	_std_lib_default(&ctx);
 
-
-	string* myString = _string_new();
+	string* myString = _string_new(&ctx);
 	size_t size;
 
 
@@ -20,11 +21,11 @@ void main(){
 
 	char* str = (char*)_string_pull(myString, &size);
 
-	destroy(str);
+	destroy(&ctx, str);
 
 	//printf("\n%s\n", str);
 
-	string* string2 = _string_new_fbytes(".....................");
+	string* string2 = _string_new_fbytes(&ctx, ".....................");
 
 	//_string_insert(myString, string2, 0);
 
@@ -47,7 +48,7 @@ void main(){
 
 	printf("Length: %ld\n", substr->length);
 
-	destroy(substrchar);
+	destroy(&ctx, substrchar);
 
 	_string_set_ci(myString, true);
 	_string_replace_all_fbytes(myString, "name", "Robert");
@@ -61,7 +62,7 @@ void main(){
 
 	printf("%s\n", str);
 
-	destroy(str);
+	destroy(&ctx, str);
 
 	//Test string split.
 
@@ -73,8 +74,8 @@ void main(){
 	printf("%s\n", s1);
 	printf("%s\n", s2);
 
-	destroy(s1);
-	destroy(s2);
+	destroy(&ctx, s1);
+	destroy(&ctx, s2);
 
 	utf8_char get_char = _string_char_at(myString, 15);
 
@@ -106,8 +107,8 @@ void main(){
 	printf("%s\n", d0);
 	printf("%s\n", d1);
 
-	destroy(d0);
-	destroy(d1);
+	destroy(&ctx, d0);
+	destroy(&ctx, d1);
 
 	_string_delete_pair(&tpair);
 
@@ -117,7 +118,7 @@ void main(){
 	_string_delete(substr);
 
 
-	string* trimTest = _string_new_fbytes("       Hello world!                  ");
+	string* trimTest = _string_new_fbytes(&ctx, "       Hello world!                  ");
 
 	_string_uppercase(trimTest);
 
@@ -127,7 +128,7 @@ void main(){
 
 	printf("TRIMMED=====|%s|=======\n\n", tt);
 
-	destroy(tt);
+	destroy(&ctx, tt);
 
 	string_pair tpair2 = _string_split_fbytes(trimTest, " W", 0);
 
@@ -137,12 +138,12 @@ void main(){
 	tt = (char*)_string_pull(tpair2.s1, &l);
 	printf("%s\n", tt);
 
-	destroy(tt);
+	destroy(&ctx, tt);
 
 	tt = (char*)_string_pull(tpair2.s2, &l);
 	printf("%s\n", tt);
 
-	destroy(tt);
+	destroy(&ctx, tt);
 
 	_string_delete(trimTest);
 	_string_delete_pair(&tpair2);

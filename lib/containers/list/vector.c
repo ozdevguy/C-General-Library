@@ -1,10 +1,11 @@
 
-vector* _vector_new(unsigned long start_size, size_t data_size){
+vector* _vector_new(standard_library_context* ctx, size_t start_size, size_t data_size){
 
-	vector* vect = allocate(sizeof(vector));
+	vector* vect = allocate(ctx, sizeof(vector));
+	vect->ctx = ctx;
 	vect->data_size = data_size;
 
-	vect->data = allocate(data_size * start_size);
+	vect->data = allocate(ctx, data_size * start_size);
 	vect->size = start_size;
 
 	return vect;
@@ -13,16 +14,16 @@ vector* _vector_new(unsigned long start_size, size_t data_size){
 
 static void int_vector_resize(vector* vect){
 
-	int i;
+	size_t i;
 	byte* data = vect->data;
-	byte* new_data = allocate(vect->data_size * vect->size * 2);
+	byte* new_data = allocate(vect->ctx, vect->data_size * vect->size * 2);
 
 	for(i = 0; i < (vect->used * vect->data_size); i++)
 		new_data[i] = data[i];
 	
 
 	vect->size *= 2;
-	destroy(data);
+	destroy(vect->ctx, data);
 
 	vect->data = new_data;
 
@@ -30,7 +31,7 @@ static void int_vector_resize(vector* vect){
 
 void _vector_add(vector* vect, void* data){
 
-	int i = 0;
+	size_t i = 0;
 
 	byte* dat = data;
 
@@ -45,7 +46,7 @@ void _vector_add(vector* vect, void* data){
 
 }
 
-void* _vector_get(vector* vect, unsigned int pos){
+void* _vector_get(vector* vect, size_t pos){
 
 	if(pos < vect->used)
 		return (void*)(vect->data + (pos * vect->data_size));
@@ -69,12 +70,10 @@ void* _vector_get_next(vector* vect){
 
 }
 
+void _vector_delete(vector* vect){
 
-
-void _vector_destroy(vector* vect){
-
-	destroy(vect->data);
-	destroy(vect);
+	destroy(vect->ctx, vect->data);
+	destroy(vect->ctx, vect);
 
 }
 

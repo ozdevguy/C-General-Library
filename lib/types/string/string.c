@@ -1,7 +1,7 @@
 
 //String creators.
-string* _string_new();				//COMPLETE
-string* _string_new_fbytes(byte*);  //COMPLETE
+string* _string_new(standard_library_context*);	//COMPLETE
+string* _string_new_fbytes(standard_library_context*, byte*);  //COMPLETE
 void _string_delete(string*);		//COMPLETE
 void _string_delete_pair(string_pair*); //COMPLETE
 void _string_set_ci(string*, bool);	//COMPLETE
@@ -62,11 +62,12 @@ long _string_index_of(string*, utf8_char*, size_t); //COMPLETE
 /* ===============CREATE AND DESTROY============= */
 
 //Create a new string from scratch.
-string* _string_new(){
+string* _string_new(standard_library_context* ctx){
 
 	//Create a new string of size 10.
-	string* str = allocate(sizeof(string));
-	str->data = allocate(sizeof(utf8_char) * 10);
+	string* str = allocate(ctx, sizeof(string));
+	str->data = allocate(ctx, sizeof(utf8_char) * 10);
+	str->ctx = ctx;
 	str->size = 10;
 
 	return str;
@@ -74,7 +75,7 @@ string* _string_new(){
 }
 
 //Create a new string from an existing byte array.
-string* _string_new_fbytes(byte* data){
+string* _string_new_fbytes(standard_library_context* ctx, byte* data){
 
 	size_t i = 0, j = 0, k = 0, cs = sizeof(utf8_char), length = 0;
 	string* str;
@@ -93,9 +94,10 @@ string* _string_new_fbytes(byte* data){
 	if(i == 1000000)
 		return 0;
 
-	str = allocate(sizeof(string));
-	str->data = allocate(sizeof(utf8_char) * length);
+	str = allocate(ctx, sizeof(string));
+	str->data = allocate(ctx, sizeof(utf8_char) * length);
 	str->length = length;
+	str->ctx = ctx;
 	str->size = length;
 
 	while(j < i)
@@ -112,9 +114,9 @@ void _string_delete(string* str){
 		return;
 
 	if(str->data)
-		destroy(str->data);
+		destroy(str->ctx, str->data);
 
-	destroy(str);
+	destroy(str->ctx, str);
 
 }
 
@@ -146,7 +148,7 @@ byte* _string_pull(string* str, size_t* length){
 		total += characters[i].size;
 
 	//Allocate a byte array.
-	data = allocate(total + 1);
+	data = allocate(str->ctx, total + 1);
 
 	//Copy the data into the byte array.
 	for(i = 0; i < str->length; i++){
@@ -197,7 +199,7 @@ void _string_append_fbytes(string* str, byte* append){
 		return;
 
 	//First, create a new string from the byte data.
-	string* to_append = _string_new_fbytes(append);
+	string* to_append = _string_new_fbytes(str->ctx, append);
 
 	if(!to_append)
 		return;
@@ -237,7 +239,7 @@ void _string_append_fstring(string* str, string* append){
 	}
 
 	//Not enough space. Allocate a bigger string.
-	data = allocate(sizeof(utf8_char) * (new_size + 10));
+	data = allocate(str->ctx, sizeof(utf8_char) * (new_size + 10));
 
 	//Copy original string.
 	for(i = 0; i < str_byte_total; i++)
@@ -248,7 +250,7 @@ void _string_append_fstring(string* str, string* append){
 		data[i + str_byte_total] = append->data[i];
 
 
-	destroy(str->data);
+	destroy(str->ctx, str->data);
 
 	str->data = data;
 	str->size = new_size + 10;
@@ -289,7 +291,7 @@ void _string_insert(string* str, string* insert, size_t pos){
 	size_t section_three_size = (str->length - pos) * sizeof(utf8_char);
 
 	//Allocate a new string.
-	data = allocate(new_size * sizeof(utf8_char));
+	data = allocate(str->ctx, new_size * sizeof(utf8_char));
 
 	for(i = 0; i < section_one_size; i++)
 		data[i] = str->data[i];
@@ -300,7 +302,7 @@ void _string_insert(string* str, string* insert, size_t pos){
 	for(i = 0; i < section_three_size; i++)
 		data[i + section_one_size + section_two_size] = str->data[i + section_one_size];
 
-	destroy(str->data);
+	destroy(str->ctx, str->data);
 
 	str->data = data;
 	str->size = new_size;
@@ -317,7 +319,7 @@ long _string_position_fbytes(string* str, byte* find, size_t s_pos){
 	if(!str || !find)
 		return -1;
 
-	string* new_string = _string_new_fbytes(find);
+	string* new_string = _string_new_fbytes(str->ctx, find);
 
 	result = _string_position_fstring(str, new_string, s_pos);
 
@@ -367,8 +369,8 @@ bool _string_replace_fbytes(string* str, byte* pattern, byte* replace, size_t s_
 	if(!str || !pattern || !replace)
 		return false;
 
-	string* pattern_string = _string_new_fbytes(pattern);
-	string* replacement_string = _string_new_fbytes(replace);
+	string* pattern_string = _string_new_fbytes(str->ctx, pattern);
+	string* replacement_string = _string_new_fbytes(str->ctx, replace);
 
 	result = _string_replace_fstring(str, pattern_string, replacement_string, s_pos);
 
@@ -406,7 +408,7 @@ bool _string_replace_fstring(string* str, string* pattern, string* replace, size
 	}
 	else{
 
-		s1 = _string_new();
+		s1 = _string_new(str->ctx);
 		s2 = _string_substr(str, find_pos + pattern->length, str->length - 1);
 
 	}
@@ -415,11 +417,11 @@ bool _string_replace_fstring(string* str, string* pattern, string* replace, size
 	_string_append_fstring(s1, s2);
 	_string_delete(s2);
 
-	destroy(str->data);
+	destroy(str->ctx, str->data);
 	str->data = s1->data;
 	str->length = s1->length;
 	str->size = s1->size;
-	destroy(s1);
+	destroy(str->ctx, s1);
 
 	return true;
 
@@ -428,8 +430,8 @@ bool _string_replace_fstring(string* str, string* pattern, string* replace, size
 //Replace all instances of a matching substring within a string.
 bool _string_replace_all_fbytes(string* str, byte* pattern, byte* replace){
 
-	string* pattern_string = _string_new_fbytes(pattern);
-	string* replacement_string = _string_new_fbytes(replace);
+	string* pattern_string = _string_new_fbytes(str->ctx, pattern);
+	string* replacement_string = _string_new_fbytes(str->ctx, replace);
 
 	_string_replace_all_fstring(str, pattern_string, replacement_string);
 
@@ -465,7 +467,7 @@ bool _string_replace_all_fstring(string* str, string* pattern, string* replace){
 		}
 		else if(!s1){
 
-			s1 = _string_new();
+			s1 = _string_new(str->ctx);
 			s2 = _string_substr(str, find_pos + pattern->length, str->length - 1);
 
 		}
@@ -496,11 +498,11 @@ bool _string_replace_all_fstring(string* str, string* pattern, string* replace){
 	if(!s1)
 		return false;
 
-	destroy(str->data);
+	destroy(str->ctx, str->data);
 	str->data = s1->data;
 	str->length = s1->length;
 	str->size = s1->size;
-	destroy(s1);
+	destroy(str->ctx, s1);
 
 	return true;
 
@@ -565,15 +567,16 @@ string* _string_substr(string* str, size_t s_pos, size_t e_pos){
 	end_pos = (e_pos + 1) * sizeof(utf8_char);
 
 	//Allocate a new utf8 byte array.
-	data = allocate((end_pos - start_pos) + sizeof(utf8_char));
+	data = allocate(str->ctx, (end_pos - start_pos) + sizeof(utf8_char));
 
 	//Allocate a new string.
-	new_string = allocate(sizeof(string));
+	new_string = allocate(str->ctx, sizeof(string));
 
 	for(i = start_pos; i <= end_pos; i++)
 		data[i - start_pos] = str->data[i];
 
 
+	new_string->ctx = str->ctx;
 	new_string->data = data;
 	new_string->length = e_pos - s_pos + 1;
 	new_string->size = new_string->length;
@@ -661,7 +664,7 @@ void _string_trim(string* str){
 
 	if(s_pos == e_pos){
 
-		destroy(str->data);
+		destroy(str->ctx, str->data);
 		str->length = 0;
 		return;
 
@@ -682,11 +685,11 @@ void _string_trim(string* str){
 
 	trimmed = _string_substr(str, s_pos, e_pos);
 
-	destroy(str->data);
+	destroy(str->ctx, str->data);
 	str->data = trimmed->data;
 	str->length = trimmed->length;
 	str->size = trimmed->size;
-	destroy(trimmed);
+	destroy(str->ctx, trimmed);
 
 }
 
@@ -705,7 +708,7 @@ string_pair _string_split_fbytes(string* str, byte* delim, size_t s_pos){
 
 	}
 
-	delim_string = _string_new_fbytes(delim);
+	delim_string = _string_new_fbytes(str->ctx, delim);
 
 	pair = _string_split_fstring(str, delim_string, s_pos);
 

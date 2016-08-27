@@ -1,11 +1,11 @@
-void* allocate(size_t size){
+void* allocate(standard_library_context* ctx, size_t size){
 
-	void* ptr = calloc(size, 1);
+	return ctx->memory_allocator(size, ctx->instance_id);
 	
 }
 
-bool destroy(void* ptr){
+bool destroy(standard_library_context* ctx, void* ptr){
 
-	free(ptr);
+	return ctx->memory_dealloc(ptr, ctx->instance_id);
 
 }
