@@ -8,10 +8,10 @@ struct queue_entry{
 	void* data;
 
 	//Data size.
-	unsigned int size;
+	size_t size;
 
 	//Type of data in this entry.
-	unsigned short type;
+	uint8_t type;
 
 };
 
@@ -22,15 +22,15 @@ struct queue{
 	queue_entry* entries;
 
 	//Size of the current queue array.
-	unsigned int size;
+	size_t size;
 
 	//Current amount of space used.
-	unsigned int used;
+	size_t used;
 
 	//Front of the queue.
-	unsigned int front;
+	size_t front;
 
 	//Back of the queue.
-	unsigned int back;
+	size_t back;
 
 };
