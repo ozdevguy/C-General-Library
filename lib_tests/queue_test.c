@@ -13,16 +13,6 @@ void main(){
 	_queue_enqueue(myQueue, &third, 1, sizeof(third));
 
 
-	printf("%d\n", *((int*)_queue_dequeue(myQueue).data));
-
-	printf("%d\n", *((int*)_queue_peek(myQueue).data));
-
-	printf("%d\n", *((int*)_queue_peek(myQueue).data));
-
-	printf("%d\n", *((int*)_queue_dequeue(myQueue).data));
-
-	printf("%d\n", *((int*)_queue_dequeue(myQueue).data));
-
 	_queue_delete(myQueue);
 
 	return;
