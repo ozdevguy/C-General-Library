@@ -12,6 +12,8 @@ void main(){
 	_queue_enqueue(myQueue, &second, 1, sizeof(second));
 	_queue_enqueue(myQueue, &third, 1, sizeof(third));
 
+	printf("Hello: %d\n", *((int*)_queue_dequeue(myQueue).data));
+
 
 	_queue_delete(myQueue);
 
