@@ -1,9 +1,10 @@
 //Include system libraries header.
 #ifndef SYS_LIBS
 	
+	#define SYS_LIBS 1
+
 	#ifdef __linux__
 
-		#define SYS_LIBS 1
 		#include "sys_include.h"
 
 	#elif _WIN32
@@ -23,6 +24,16 @@
 	#elif __APPLE__
 		
 		//TO DO (Mac OS)
+
+	#elif __DITTO_COMPILER_DIRECT__
+		
+		//Compile for the Ditto Virtual Machine.
+		#include "spec/dvmetal_sys_include.h"
+
+	#elif __MAESTRO__
+		
+		//Compile for the Maestro virtual operating system.
+		#include "sys_include.h"
 
 	#endif
 

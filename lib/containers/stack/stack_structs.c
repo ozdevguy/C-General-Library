@@ -6,7 +6,7 @@ typedef struct stack_item stack_item;
 struct stack_item{
 
 	//The data.
-	void* data;
+	byte* data;
 
 	//The size of the data.
 	size_t size;

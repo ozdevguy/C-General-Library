@@ -4,6 +4,30 @@
 Written by Bobby Crawford
 */
 
+//Create a new stack.
+stack* _stack_new(standard_library_context*, size_t);
+
+//Delete a stack instance.
+void _stack_delete(stack*);
+
+//Stack deallocator.
+void _stack_dealloc(void*);
+
+//Delete a stack + all its items using a deallocator.
+void _stack_delete_all(stack*, void (void*));
+
+//Push a new item to the stack.
+void _stack_push(stack*, void*, uint8_t, size_t);
+
+//Pop an item from the stack.
+stack_item _stack_pop(stack*);
+
+//Peek at the item on top of the stack.
+stack_item _stack_peek(stack*);
+
+
+
+
 static void int_stack_resize(stack* st){
 
 	size_t new_size = st->size * 2, i;
@@ -29,7 +53,13 @@ void _stack_delete(stack* st){
 
 }
 
-void _stack_delete_all(stack* st){
+void _stack_dealloc(void* st){
+
+	_stack_delete((stack*)st);
+	
+}
+
+void _stack_delete_all(stack* st, void (*dealloc)(void*)){
 
 	if(!st)
 		return;
@@ -38,8 +68,12 @@ void _stack_delete_all(stack* st){
 
 	for(i = 1; i < st->top; i++){
 
-		if(st->entries[i].data)
+		if(st->entries[i].data){
+
+			dealloc(st->entries[i].data);
 			destroy(st->ctx, st->entries[i].data);
+
+		}
 		
 	}
 

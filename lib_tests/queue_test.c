@@ -3,6 +3,7 @@
 #include "../lib/string.h"
 #include "../lib/vector.h"
 #include "../lib/stack.h"
+#include "../lib/map.h"
 
 void main(){
 
@@ -20,7 +21,8 @@ void main(){
 	queue* myQueue = _queue_new(&ctx, 1);
 	string* str = _string_new(&ctx);
 	stack* myStack = _stack_new(&ctx, 1);
-	vector* myVector = _vector_new(&ctx, 10, sizeof(string));
+	vector* myVector = _vector_new(&ctx, sizeof(string), 10);
+	map* myMap = _map_new(&ctx, 10);
 
 	_queue_enqueue(myQueue, &first, 1, sizeof(first));
 	_queue_enqueue(myQueue, &second, 1, sizeof(second));

@@ -58,6 +58,15 @@ void _string_uppercase(string*); //COMPLETE
 //Get the index of a character.
 long _string_index_of(string*, utf8_char*, size_t); //COMPLETE
 
+//String deallocator.
+void _string_dealloc(void*); //COMPLETE
+
+//String pair deallocator.
+void _string_dealloc_pair(void*); //COMPLETE
+
+//Check to see if two strings are equal.
+bool _string_compare(string*, string*);
+
 
 /* ===============CREATE AND DESTROY============= */
 
@@ -128,6 +137,20 @@ void _string_delete_pair(string_pair* pair){
 
 	_string_delete(pair->s1);
 	_string_delete(pair->s2);
+
+}
+
+//Delete a string (deallocator).
+void _string_dealloc(void* str){
+
+	_string_delete((string*)str);
+
+}
+
+//Delete a string (deallocator).
+void _string_dealloc_pair(void* pair){
+
+	_string_delete_pair((string_pair*)pair);
 
 }
 
@@ -773,6 +796,33 @@ void _string_uppercase(string* str){
 	for(i = 0; i < str->length; i++)
 		_utf8_upper(data + i);
 	
+}
+
+//Check to see if two strings are equal.
+bool _string_compare(string* str1, string* str2){
+
+	size_t i;
+	utf8_char* data1;
+	utf8_char* data2;
+
+	if(!str1 || !str2)
+		return false;
+
+	if(str1->length != str2->length)
+		return false;
+
+	data1 = (utf8_char*)str1->data;
+	data2 = (utf8_char*)str2->data;
+
+	for(i = 0; i < str1->length; i++){
+
+		if(!_utf8_compare(data1 + i, data2 + i, str1->case_insensitive))
+			return false;
+
+	}
+
+	return true;
+
 }
 
 

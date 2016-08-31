@@ -6,6 +6,30 @@ Written by Bobby Crawford
 
 */
 
+//Create a new queue.
+queue* _queue_new(standard_library_context*, size_t);
+
+//Delete a queue.
+void _queue_delete(queue*);
+
+//Delete all data within the queue using a deallocator.
+void _queue_delete_all(queue*, void (void*));
+
+//Enqueue a new item.
+void _queue_enqueue(queue*, void*, uint8_t, size_t);
+
+//Remove the item at the front of the queue.
+queue_entry _queue_dequeue(queue*);
+
+//Peek at the front of the queue.
+queue_entry _queue_peek(queue*);
+
+//Queue deallocator.
+void _queue_dealloc(void*);
+
+
+
+
 static void int_queue_resize(queue* q){
 
 	//New queue size.
@@ -45,14 +69,24 @@ void _queue_delete(queue* q){
 
 }
 
-void _queue_delete_all(queue* q){
+void _queue_dealloc(void* q){
+
+	_queue_delete((queue*)q);
+
+}
+
+void _queue_delete_all(queue* q, void (*dealloc)(void*)){
 
 	size_t i;
 
 	for(i = 0; i < q->size; i++){
 
-		if(q->entries[i].data)
+		if(q->entries[i].data){
+
+			dealloc(q->entries[i].data);
 			destroy(q->ctx, q->entries[i].data);
+
+		}
 
 	}
 

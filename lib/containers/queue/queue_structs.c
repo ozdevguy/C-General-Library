@@ -5,7 +5,7 @@ typedef struct queue_entry queue_entry;
 struct queue_entry{
 
 	//Data
-	void* data;
+	byte* data;
 
 	//Data size.
 	size_t size;
