@@ -33,6 +33,7 @@ void main(){
 
 	_string_delete(myNameString);
 	_string_delete(myNameString2);
+	_hashmap_delete(myHashmap);
 	
 	return;
 }
