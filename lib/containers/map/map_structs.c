@@ -1,6 +1,7 @@
 typedef struct map map;
 typedef struct map_entry_int map_entry_int;
 typedef struct map_entry map_entry;
+typedef struct hashmap_ext hashmap_ext;
 
 struct map_entry{
 
@@ -18,6 +19,9 @@ struct map_entry{
 
 	//Data pointer.
 	byte* data;
+
+	//Other data?
+	void* ext;
 
 };
 
@@ -38,8 +42,11 @@ struct map_entry_int{
 	//Data pointer.
 	byte* data;
 
-	//Next hashmap entry.
+	//Next map entry.
 	map_entry_int* next;
+
+	//Other data?
+	void* ext;
 
 };
 
@@ -62,5 +69,8 @@ struct map{
 
 	//Table.
 	map_entry_int* map_table;
+
+	//Hash function (hashmap only).
+	size_t (*hash_algorithm)(byte*);
 
 };
