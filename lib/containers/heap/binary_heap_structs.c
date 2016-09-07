@@ -1,12 +1,12 @@
 typedef struct binary_heap binary_heap;
-typedef struct int_binary_heap_entry int_binary_heap_entry;
+typedef struct binary_heap_entry binary_heap_entry;
 
-struct int_binary_heap_entry{
+struct binary_heap_entry{
 
-	//Value.
-	int32_t value;
+	//Value
+	int32_t key;
 
-	//Data.
+	//Data
 	void* data;
 
 };
@@ -17,9 +17,12 @@ struct binary_heap{
 	standard_library_context* ctx;
 
 	//Pointer to the heap.
-	int_binary_heap_entry* data;
+	binary_heap_entry* data;
 
-	//Number of items in the heap.
-	size_t total;
+	//Size of the heap.
+	size_t size;
+
+	//Total number of used positions in the heap.
+	size_t used;
 
 };
