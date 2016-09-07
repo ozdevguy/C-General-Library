@@ -74,6 +74,11 @@ map* _hashmap_new(standard_library_context* ctx, size_t start_size){
 
 bool _hashmap_delete(map* hashmap){
 
+	_map_reset_iterator(hashmap);
+
+	while(_map_has_next(hashmap))
+		_string_delete((string*)_map_get_next(hashmap).ext);
+
 	return _map_delete(hashmap);
 
 }
@@ -109,19 +114,29 @@ void _hashmap_dealloc(void* hashmap){
 bool _hashmap_insert_fbytes(map* hashmap, byte* key, void* data, uint8_t type, size_t size){
 
 	size_t hashed_key;
+	map_entry_int* entry;
 
 	if(!hashmap || !key || !data)
 		return false;
 
 	hashed_key = hashmap->hash_algorithm(key);
 
-	return _map_insert(hashmap, hashed_key, data, type, size);
+	if(_map_insert_ptr(hashmap, hashed_key, data, type, size, &entry)){
+
+		entry->ext = _string_new_fbytes(hashmap->ctx, key);
+
+		return true;
+
+	}
+
+	return false;
 
 }
 
 bool _hashmap_insert(map* hashmap, string* key, void* data, uint8_t type, size_t size){
 
 	size_t hashed_key;
+	map_entry_int* entry;
 	byte* key_data;
 
 	if(!hashmap || !key || !data)
@@ -131,10 +146,19 @@ bool _hashmap_insert(map* hashmap, string* key, void* data, uint8_t type, size_t
 
 	hashed_key = hashmap->hash_algorithm(key_data);
 
+	printf("Hashed key: %ld\n", hashed_key);
+
+	if(_map_insert_ptr(hashmap, hashed_key, data, type, size, &entry)){
+
+		entry->ext = _string_new_fbytes(hashmap->ctx, key_data);
+		destroy(hashmap->ctx, key_data);
+		return true;
+
+	}
+
+
 	destroy(hashmap->ctx, key_data);
-
-	return _map_insert(hashmap, hashed_key, data, type, size);
-
+	return false;
 
 
 }
@@ -142,13 +166,21 @@ bool _hashmap_insert(map* hashmap, string* key, void* data, uint8_t type, size_t
 bool _hashmap_remove_fbytes(map* hashmap, byte* key){
 
 	size_t hashed_key;
+	void* ext;
 
 	if(!hashmap || !key)
 		return false;
 
 	hashed_key = hashmap->hash_algorithm(key);
 
-	return _map_remove(hashmap, hashed_key);
+	if(_map_remove_eptr(hashmap, hashed_key, &ext)){
+
+		_string_delete((string*)ext);
+		return true;
+
+	}
+
+	return false;
 
 }
 
@@ -156,6 +188,7 @@ bool _hashmap_remove(map* hashmap, string* key){
 
 	size_t hashed_key;
 	byte* key_data;
+	void* ext;
 
 	if(!hashmap || !key)
 		return false;
@@ -166,7 +199,14 @@ bool _hashmap_remove(map* hashmap, string* key){
 
 	destroy(hashmap->ctx, key_data);
 
-	return _map_remove(hashmap, hashed_key);
+	if(_map_remove_eptr(hashmap, hashed_key, &ext)){
+
+		_string_delete((string*)ext);
+		return true;
+
+	}
+
+	return false;
 
 }
 

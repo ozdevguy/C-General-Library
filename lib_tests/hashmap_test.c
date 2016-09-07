@@ -31,6 +31,25 @@ void main(){
 
 	printf("Val: %d\n", *((int*)entry.data));
 
+
+	//Test...
+
+	_hashmap_reset_iterator(myHashmap);
+	map_entry ent;
+	size_t sz;
+
+	while(_hashmap_has_next(myHashmap)){
+
+		ent = _hashmap_get_next(myHashmap);
+
+		byte* dat = _string_pull((string*)ent.ext, &sz);
+
+		printf("%s %d\n", dat, *((int*)ent.data));
+
+		destroy(&ctx, dat);
+
+	}
+
 	_string_delete(myNameString);
 	_string_delete(myNameString2);
 	_hashmap_delete(myHashmap);
