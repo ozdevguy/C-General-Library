@@ -8,11 +8,28 @@ void main(){
 
 	_std_lib_default(&ctx);
 
-	binary_heap* myHeap = _binary_heap_new(&ctx, 10);
+	binary_heap* myHeap = _binary_heap_new(&ctx, 5);
 
-	_binary_heap_insert(myHeap, 23, 0);
-	_binary_heap_insert(myHeap, 24, 0);
-	_binary_heap_insert(myHeap, 25, 0);
-	
+	int i;
+
+	_binary_heap_ordering(myHeap, BINARY_HEAP_MIN);
+
+	for(i = 0; i < 10000000; i++)
+		_binary_heap_insert(myHeap, i, 0);
+
+
+	printf("test...\n");
+
+	for(i = 0; i < 10000000; i++){
+
+		binary_heap_entry entry;
+
+		entry = _binary_heap_remove_root(myHeap);
+
+		//printf("%d\n", entry.key);
+
+	}
+
+	_binary_heap_delete(myHeap);
 
 }
