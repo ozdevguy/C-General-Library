@@ -1,5 +1,6 @@
 typedef struct queue queue;
 typedef struct queue_entry queue_entry;
+typedef struct priority_queue priority_queue;
 
 //A queue entry
 struct queue_entry{
@@ -35,5 +36,16 @@ struct queue{
 
 	//Back of the queue.
 	size_t back;
+
+};
+
+//Representation of a priority queue.
+struct priority_queue{
+
+	//Standard library context.
+	standard_library_context* ctx;
+	
+	//Binary heap pointer.
+	void* heap;
 
 };

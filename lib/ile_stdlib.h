@@ -6,3 +6,4 @@
 #include "vector.h"
 #include "utf8.h"
 #include "binary_heap.h"
+#include "priority_queue.h"

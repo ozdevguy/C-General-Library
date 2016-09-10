@@ -1,0 +1,48 @@
+#include "../lib/ile_stdlib.h"
+
+void main(){
+
+	standard_library_context ctx;
+
+	_std_lib_default(&ctx);
+
+	int t1 = 3;
+	int t2 = 5;
+	int t3 = 1;
+	int t4 = 2;
+	int t5 = 4;
+
+	priority_queue* q = _priority_queue_new(&ctx, 5);
+
+	_priority_queue_enqueue(q, 124, &t1, 1, 1);
+	_priority_queue_enqueue(q, -1, &t2, 1, 1);
+	_priority_queue_enqueue(q, 200, &t3, 1, 1);
+	_priority_queue_enqueue(q, 150, &t4, 1, 1);
+
+
+	queue_entry entry;
+
+	entry = _priority_queue_dequeue(q);
+	printf("%d\n", *((int*)entry.data));
+
+	entry = _priority_queue_dequeue(q);
+	printf("%d\n", *((int*)entry.data));
+
+	_priority_queue_enqueue(q, 120, &t5, 1, 1);
+
+	entry = _priority_queue_dequeue(q);
+	printf("%d\n", *((int*)entry.data));
+
+	entry = _priority_queue_peek(q);
+	printf("%d\n", *((int*)entry.data));
+
+	entry = _priority_queue_dequeue(q);
+	printf("%d\n", *((int*)entry.data));
+
+	entry = _priority_queue_dequeue(q);
+	printf("%d\n", *((int*)entry.data));
+
+	_priority_queue_delete(q);
+
+
+}

@@ -347,8 +347,19 @@ binary_heap_entry _binary_heap_remove_root(binary_heap* heap){
 
 }
 
-void _binary_heap_sort(binary_heap* heap){
+binary_heap_entry _binary_heap_peek(binary_heap* heap){
 
+	binary_heap_entry entry;
+
+	if(!heap)
+		return entry;
+
+	if(!heap->used)
+		return entry;
+
+	entry = heap->data[0];
+
+	return entry;
 
 }
 
