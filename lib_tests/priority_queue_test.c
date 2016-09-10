@@ -14,10 +14,10 @@ void main(){
 
 	priority_queue* q = _priority_queue_new(&ctx, 5);
 
-	_priority_queue_enqueue(q, 124, &t1, 1, 1);
-	_priority_queue_enqueue(q, -1, &t2, 1, 1);
-	_priority_queue_enqueue(q, 200, &t3, 1, 1);
-	_priority_queue_enqueue(q, 150, &t4, 1, 1);
+	_priority_queue_enqueue(q, 124, &t1, TYPE_INT, 1);
+	_priority_queue_enqueue(q, -1, &t2, TYPE_INT, 1);
+	_priority_queue_enqueue(q, 200, &t3, TYPE_INT, 1);
+	_priority_queue_enqueue(q, 150, &t4, TYPE_INT, 1);
 
 
 	queue_entry entry;
