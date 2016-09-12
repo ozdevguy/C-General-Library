@@ -17,6 +17,9 @@ void _vector_add(vector*, void*);
 //Get an item from the vector.
 void* _vector_get(vector*, size_t);
 
+//Change an item at a particular index.
+bool _vector_mod(vector*, void*, size_t);
+
 //Remove an item from the vector.
 void _vector_remove(vector*, size_t);
 
@@ -76,6 +79,24 @@ void _vector_add(vector* vect, void* data){
 	vect->used++;
 
 
+}
+
+bool _vector_mod(vector* vect, void* data, size_t pos){
+
+	size_t i;
+	byte* dat = data;
+
+	if(!vect)
+		return false;
+
+	if(pos >= vect->used)
+		return false;
+
+	for(i = 0; i < vect->data_size; i++)
+		vect->data[(pos * vect->data_size) + i] = dat[i];
+
+	return true;
+	
 }
 
 void* _vector_get(vector* vect, size_t pos){

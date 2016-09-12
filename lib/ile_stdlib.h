@@ -4,6 +4,7 @@
 #include "stack.h"
 #include "string.h"
 #include "vector.h"
+#include "list.h"
 #include "utf8.h"
 #include "binary_heap.h"
 #include "priority_queue.h"
