@@ -1,0 +1,58 @@
+Standard Library
+-------------------
+UTF8 Characters -> Complete
+Strings -> Complete (need to implement logging and error handling).
+Stacks -> Complete (need to implement logging and error handling).
+Queues -> Complete (need to implement logging and error handling).
+Binary Heaps -> Complete (need to implement logging and error handling).
+Priority Queues -> Complete (need to implement logging and error handling).
+Vectors -> Complete (need to implement logging and error handling).
+Lists (like vectors, but uses pointers to data instead of copying data). -> Complete
+Maps -> Complete
+Hashmaps -> Complete
+Undirected Graphs
+Undirected Weighted Graphs
+Directed Graphs
+Directed Weighted Graphs
+AVL Tree
+Red-Black Tree
+Unbalanced Binary Search Tree
+Trie
+Ternary Search Tree
+B-Tree
+Merge Sort
+Heap Sort
+Radix Sort
+
+Algorithm
+-------------------
+Dynamic Programming Template
+Serialization
+
+Math
+----------------------
+Geometry
+Trig
+Integral
+Derivative
+Statistics
+
+
+Data/Protocols Library
+----------------------
+XML
+JSON
+HTTP
+HTML
+Javascript Builder
+
+
+Parsing
+----------------------
+Text Parser
+Binary Parser
+
+
+
+
+
