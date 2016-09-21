@@ -23,9 +23,9 @@
 #endif
 
 //Include undirected graph header.
-#ifndef STD_LIBS_CONTAINERS_UNDIRECTED_GRAPH
+#ifndef STD_LIBS_CONTAINERS_GRAPH
 
-	#define STD_LIBS_CONTAINERS_UNDIRECTED_GRAPH 1
-	#include "containers/graph/ugraph.h"
+	#define STD_LIBS_CONTAINERS_GRAPH 1
+	#include "containers/graph/graph.h"
 
 #endif

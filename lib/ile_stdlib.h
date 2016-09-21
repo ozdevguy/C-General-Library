@@ -8,4 +8,4 @@
 #include "utf8.h"
 #include "binary_heap.h"
 #include "priority_queue.h"
-#include "ugraph.h"
+#include "graph.h"

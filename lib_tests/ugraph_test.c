@@ -11,42 +11,92 @@ void main(){
 
 	_std_lib_default(&ctx);
 
-	//Create a new graph.
-	undirected_graph* graph = _undirected_graph_new(&ctx, 10);
+	graph* myNewGraph = _graph_new(&ctx, 3);
 
 	//Add the nodes.
-	_undirected_graph_add_node(graph, 2345, &data1);
+	_graph_add_node(myNewGraph, 2345, &data1);
 
-	_undirected_graph_add_node(graph, 2346, &data2);
+	_graph_add_node(myNewGraph, 2346, &data2);
 
-	_undirected_graph_add_node(graph, 2347, &data3);
+	_graph_add_node(myNewGraph, 2347, &data3);
 
-	_undirected_graph_add_node(graph, 2348, &data4);
+	_graph_add_node(myNewGraph, 2348, &data4);
 
-	_undirected_graph_add_node(graph, 2349, &data4);
+	_graph_add_node(myNewGraph, 2349, &data4);
 
-	_undirected_graph_add_node(graph, 2350, &data4);
+	_graph_add_node(myNewGraph, 2350, &data4);
 
-	_undirected_graph_add_node(graph, 2351, &data4);
+	_graph_add_node(myNewGraph, 2351, &data4);
+
+	_graph_add_node(myNewGraph, 2352, &data4);
+
+	_graph_add_node(myNewGraph, 2353, &data4);
+
+	
+	graph_edge* e1;
+	graph_edge* e2;
 
 	//Create some edges in order to build our graph.
-	_undirected_graph_add_edge(graph, 2345, 2346);
+	_graph_add_double_edge(myNewGraph, 2345, 2346, &e1, &e2);
 
-	_undirected_graph_add_edge(graph, 2345, 2347);
+	_graph_add_double_edge(myNewGraph, 2345, 2347, &e1, &e2);
 
-	_undirected_graph_add_edge(graph, 2346, 2350);
+	_graph_add_double_edge(myNewGraph, 2346, 2350, &e1, &e2);
 
-	_undirected_graph_add_edge(graph, 2346, 2349);
+	_graph_add_double_edge(myNewGraph, 2346, 2349, &e1, &e2);
 
-	_undirected_graph_add_edge(graph, 2347, 2348);
+	_graph_add_double_edge(myNewGraph, 2347, 2348, &e1, &e2);
 
-	_undirected_graph_add_edge(graph, 2348, 2349);
+	_graph_add_double_edge(myNewGraph, 2348, 2349, &e1, &e2);
 
-	_undirected_graph_add_edge(graph, 2348, 2350);
+	_graph_add_double_edge(myNewGraph, 2348, 2350, &e1, &e2);
 
-	_undirected_graph_add_edge(graph, 2348, 2351);
+	_graph_add_double_edge(myNewGraph, 2348, 2351, &e1, &e2);
 
-	_undirected_graph_delete(graph);
+	_graph_add_double_edge(myNewGraph, 2351, 2352, &e1, &e2);
 
+	_graph_add_double_edge(myNewGraph, 2347, 2353, &e1, &e2);
+
+	_graph_add_double_edge(myNewGraph, 2351, 2353, &e1, &e2);
+
+
+	graph_path path = _graph_bfs(myNewGraph, 2345, 2353);
+
+	int i;
+
+	printf("Hops: %ld\n", path.hops);
+
+	for(i = 0; i < path.hops; i++){
+
+		printf("Step%d: %ld\n", i, path.list[i]->key);
+
+	}
+
+	_graph_delete_path(path);
+
+	printf("\n\n");
+
+	_graph_clear_paths(myNewGraph);
+
+	path = _graph_dfs(myNewGraph, 2345, 2353);
+
+	printf("Hops: %ld\n", path.hops);
+
+	for(i = 0; i < path.hops; i++){
+
+		printf("Step%d: %ld\n", i, path.list[i]->key);
+
+	}
+
+	_graph_delete_path(path);
+
+	//_graph_delete_node(myNewGraph, 2347);
+
+	//Find a path using breadth first search.
+	//undirected_graph_path path = _undirected_graph_bfs(graph, 2345, 2352);
+
+
+	_graph_delete(myNewGraph);
+	
 	
 }
