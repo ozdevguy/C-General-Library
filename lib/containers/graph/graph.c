@@ -12,6 +12,12 @@ graph_node* _graph_add_node(graph*, size_t, void*); //FINISHED
 //Create an edge (one direction).
 bool _graph_add_edge(graph*, size_t, size_t, graph_edge**); //FINISHED
 
+//Get a node.
+graph_node* _graph_get_node(graph*, size_t); //FINISHED
+
+//Get an edge.
+graph_edge* _graph_get_edge(graph*, size_t, size_t); //FINISHED
+
 //Create an edge (bi-directional).
 bool _graph_add_double_edge(graph*, size_t, size_t, graph_edge**, graph_edge**); //FINISHED
 
@@ -124,7 +130,7 @@ static graph_path int_graph_build_path(graph* gr, graph_node* node){
 		return path;
 
 	path.exists = true;
-	
+
 	next = node;
 
 	while(next){
@@ -135,7 +141,7 @@ static graph_path int_graph_build_path(graph* gr, graph_node* node){
 	}
 
 	//Setup the path.
-	data_size = hops * sizeof(size_t);
+	data_size = (hops + 1) * sizeof(size_t);
 
 	path.hops = hops;
 	path.list = allocate(gr->ctx, data_size);
@@ -143,7 +149,7 @@ static graph_path int_graph_build_path(graph* gr, graph_node* node){
 
 	next = node;
 
-	for(i = hops - 1; i >= 0; i--){
+	for(i = hops; i >= 0; i--){
 
 		path.list[i] = next;
 
@@ -193,7 +199,66 @@ bool _graph_delete(graph* gr){
 
 void _graph_delete_path(graph_path path){
 
-	destroy(path.ctx, path.list);
+	if(path.list)
+		destroy(path.ctx, path.list);
+	
+}
+
+graph_node* _graph_get_node(graph* gr, size_t key){
+
+	size_t i;
+
+	if(!gr)
+		return 0;
+
+	for(i = 0; i < gr->used; i++){
+
+		if(gr->nodes[i].key == key)
+			return gr->nodes + i;
+	
+	}
+
+	return 0;
+
+}
+
+graph_edge* _graph_get_edge(graph* gr, size_t from, size_t to){
+
+	size_t i;
+	graph_node *from_node = 0, *to_node = 0;
+	graph_edge* e;
+
+	if(!gr)
+		return 0;
+
+	//Get the from and to nodes.
+	for(i = 0; i < gr->used; i++){
+
+		if(gr->nodes[i].key == from)
+			from_node = gr->nodes + i;
+
+		else if(gr->nodes[i].key == to)
+			to_node = gr->nodes + i;
+
+		if(to_node && from_node)
+			break;
+
+	}
+
+	if(!to_node || !from_node)
+		return 0;
+
+	e = from_node->edges;
+
+	while(e){
+
+		if(e->to == to_node)
+			return e;
+
+		e = e->next;
+	}
+
+	return 0;
 }
 
 graph_node* _graph_add_node(graph* gr, size_t key, void* ptr){

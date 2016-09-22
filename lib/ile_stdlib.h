@@ -9,3 +9,4 @@
 #include "binary_heap.h"
 #include "priority_queue.h"
 #include "graph.h"
+#include "weighted_graph.h"
