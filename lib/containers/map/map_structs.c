@@ -5,9 +5,6 @@ typedef struct hashmap_ext hashmap_ext;
 
 struct map_entry{
 
-	//Success?
-	bool success;
-
 	//Key.
 	size_t key;
 
@@ -18,7 +15,7 @@ struct map_entry{
 	uint8_t type;
 
 	//Data pointer.
-	byte* data;
+	void* data;
 
 	//Other data?
 	void* ext;
@@ -40,7 +37,7 @@ struct map_entry_int{
 	uint8_t type;
 
 	//Data pointer.
-	byte* data;
+	void* data;
 
 	//Next map entry.
 	map_entry_int* next;

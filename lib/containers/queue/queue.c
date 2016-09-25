@@ -19,10 +19,10 @@ void _queue_delete_all(queue*, void (void*));
 void _queue_enqueue(queue*, void*, uint8_t, size_t);
 
 //Remove the item at the front of the queue.
-queue_entry _queue_dequeue(queue*);
+bool _queue_dequeue(queue*, queue_entry*);
 
 //Peek at the front of the queue.
-queue_entry _queue_peek(queue*);
+bool _queue_peek(queue*, queue_entry*);
 
 //Queue deallocator.
 void _queue_dealloc(void*);
@@ -110,57 +110,40 @@ queue* _queue_new(standard_library_context* ctx, size_t start_size){
 }
 
 
-queue_entry _queue_dequeue(queue* q){
+bool _queue_dequeue(queue* q, queue_entry* entry){
 
-	queue_entry s_entry;
-
-	s_entry.data = 0;
-
-	if(!q)
-		return s_entry;
+	if(!q || !entry)
+		return false;
 
 	size_t frontpos = q->front;
 
 	if(!q->used)
-		return s_entry;
+		return false;
 
 	if(frontpos == q->size - 1)
 		frontpos = 0;
 	else
 		frontpos++;
 	
-	queue_entry* entry = (q->entries + q->front);
+	*entry = *(q->entries + q->front);
 	q->front = frontpos;
 	q->used--;
 
-	s_entry.data = entry->data;
-	s_entry.size = entry->size;
-	s_entry.type = entry->type;
-
-	return s_entry;
+	return true;
 
 }
 
-queue_entry _queue_peek(queue* q){
+bool _queue_peek(queue* q, queue_entry* entry){
 
-	queue_entry s_entry;
-	queue_entry* entry;
-
-	s_entry.data = 0;
-
-	if(!q)
-		return s_entry;
+	if(!q || !entry)
+		return false;
 
 	if(!q->used)
-		return s_entry;
+		return false;
 
-	entry = (q->entries + q->front);
+	*entry = *(q->entries + q->front);
 
-	s_entry.data = entry->data;
-	s_entry.size = entry->size;
-	s_entry.type = entry->type;
-
-	return s_entry;
+	return true;
 
 }
 

@@ -23,11 +23,11 @@ void main(){
 
 	map_entry entry;
 
-	entry = _hashmap_lookup(myHashmap, myNameString);
+	_hashmap_lookup(myHashmap, myNameString, &entry);
 
 	printf("Val: %d\n", *((int*)entry.data));
 
-	entry = _hashmap_lookup(myHashmap, myNameString2);
+	_hashmap_lookup(myHashmap, myNameString2, &entry);
 
 	printf("Val: %d\n", *((int*)entry.data));
 
@@ -40,7 +40,7 @@ void main(){
 
 	while(_hashmap_has_next(myHashmap)){
 
-		ent = _hashmap_get_next(myHashmap);
+		_hashmap_get_next(myHashmap, &ent);
 
 		byte* dat = _string_pull((string*)ent.ext, &sz);
 

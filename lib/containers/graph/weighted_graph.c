@@ -25,10 +25,10 @@ bool _weighted_graph_delete_edge(graph*, size_t, size_t); //FINISHED
 void _weighted_graph_clear_paths(graph*); //FINISHED
 
 //Get the shortest path from one node to another.
-graph_path _weighted_graph_spath(graph*, size_t, size_t);
+bool _weighted_graph_spath(graph*, size_t, size_t, graph_path*);
 
 //Get the shortest path from one node to another, while avoiding edges with a certain mask.
-graph_path _weighted_graph_spath_amask(graph*, size_t, size_t, size_t);
+bool _weighted_graph_spath_amask(graph*, size_t, size_t, size_t, graph_path*);
 
 
 
@@ -129,19 +129,16 @@ void _weighted_graph_clear_paths(graph* gr){
 
 }
 
-graph_path _weighted_graph_spath(graph* gr, size_t start, size_t end){
+bool _weighted_graph_spath(graph* gr, size_t start, size_t end, graph_path* path){
 
 	size_t i, length;
 	queue* bfs_queue;
 	graph_node *root = 0, *destination = 0, *current = 0, *discovery = 0;
 	graph_edge* c_edge;
-	graph_path path;
+	queue_entry entry;
 
-	path.hops = 0;
-	path.exists = false;
-
-	if(!gr)
-		return path;
+	if(!gr || !path)
+		return false;
 
 	//Find the root.
 	for(i = 0; i < gr->used; i++){
@@ -158,7 +155,7 @@ graph_path _weighted_graph_spath(graph* gr, size_t start, size_t end){
 	}
 
 	if(!root)
-		return path;
+		return false;
 
 	//Set the root to level 1.
 	root->level = 1;
@@ -171,7 +168,8 @@ graph_path _weighted_graph_spath(graph* gr, size_t start, size_t end){
 
 	while(bfs_queue->used){
 
-		current = (graph_node*)_queue_dequeue(bfs_queue).data;
+		_queue_dequeue(bfs_queue, &entry);
+		current = (graph_node*)entry.data;
 
 		c_edge = current->edges;
 
@@ -203,27 +201,25 @@ graph_path _weighted_graph_spath(graph* gr, size_t start, size_t end){
 	if(destination->parent){
 
 		_queue_delete(bfs_queue);
-		return int_graph_build_path(gr, destination);
+		int_graph_build_path(gr, destination, path);
+		return true;
 
 	}
 
 	_queue_delete(bfs_queue);
-	return path;
+	return false;
 }
 
-graph_path _weighted_graph_spath_amask(graph* gr, size_t start, size_t end, size_t mask){
+bool _weighted_graph_spath_amask(graph* gr, size_t start, size_t end, size_t mask, graph_path* path){
 
 	size_t i, length;
 	queue* bfs_queue;
 	graph_node *root = 0, *destination = 0, *current = 0, *discovery = 0;
 	graph_edge* c_edge;
-	graph_path path;
+	queue_entry entry;
 
-	path.hops = 0;
-	path.exists = false;
-
-	if(!gr)
-		return path;
+	if(!gr || !path)
+		return false;
 
 	//Find the root.
 	for(i = 0; i < gr->used; i++){
@@ -240,7 +236,7 @@ graph_path _weighted_graph_spath_amask(graph* gr, size_t start, size_t end, size
 	}
 
 	if(!root)
-		return path;
+		return false;
 
 	//Set the root to level 1.
 	root->level = 1;
@@ -253,7 +249,8 @@ graph_path _weighted_graph_spath_amask(graph* gr, size_t start, size_t end, size
 
 	while(bfs_queue->used){
 
-		current = (graph_node*)_queue_dequeue(bfs_queue).data;
+		_queue_dequeue(bfs_queue, &entry);
+		current = (graph_node*)entry.data;
 
 		c_edge = current->edges;
 
@@ -288,10 +285,11 @@ graph_path _weighted_graph_spath_amask(graph* gr, size_t start, size_t end, size
 	if(destination->parent){
 
 		_queue_delete(bfs_queue);
-		return int_graph_build_path(gr, destination);
+		int_graph_build_path(gr, destination, path);
+		return true;
 
 	}
 
 	_queue_delete(bfs_queue);
-	return path;
+	return false;
 }

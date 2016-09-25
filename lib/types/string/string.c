@@ -32,22 +32,22 @@ bool _string_replace_fbytes(string*, byte*, byte*, size_t); //COMPLETE
 bool _string_replace_fstring(string*, string*, string*, size_t); //COMPLETE
 
 //Get a character at a position.
-utf8_char _string_char_at(string*, size_t); //COMPLETE
+bool _string_char_at(string*, size_t, utf8_char*); //COMPLETE
 
 //Get a substring.
 string* _string_substr(string*, size_t, size_t); //COMPLETE
 
 //Get a section of a string up to a specific character.
-string_pair _string_split(string*, size_t); //COMPLETE
+bool _string_split(string*, size_t, string_pair*); //COMPLETE
 
-string_pair _string_split_delim(string*, utf8_char, size_t); //COMPLETE
+bool _string_split_delim(string*, utf8_char, size_t, string_pair*); //COMPLETE
 
 //Trim spaces from beginning and end of a string.
 void _string_trim(string* str); //COMPLETE
 
 //Get a section of a string up to a specific substring.
-string_pair _string_split_fbytes(string*, byte*, size_t); //COMPLETE
-string_pair _string_split_fstring(string*, string*, size_t); //COMPLETE
+bool _string_split_fbytes(string*, byte*, size_t, string_pair*); //COMPLETE
+bool _string_split_fstring(string*, string*, size_t, string_pair*); //COMPLETE
 
 //Convert a string to all lowercase.
 void _string_lowercase(string*); //COMPLETE
@@ -73,9 +73,16 @@ bool _string_compare(string*, string*);
 //Create a new string from scratch.
 string* _string_new(standard_library_context* ctx){
 
+	size_t total_bytes = 0;
+
+	if(!ctx)
+		return 0;
+
+	total_bytes = sizeof(utf8_char) * 10;
+
 	//Create a new string of size 10.
 	string* str = allocate(ctx, sizeof(string));
-	str->data = allocate(ctx, sizeof(utf8_char) * 10);
+	str->data = allocate(ctx, total_bytes);
 	str->ctx = ctx;
 	str->size = 10;
 
@@ -86,32 +93,31 @@ string* _string_new(standard_library_context* ctx){
 //Create a new string from an existing byte array.
 string* _string_new_fbytes(standard_library_context* ctx, byte* data){
 
-	size_t i = 0, j = 0, k = 0, cs = sizeof(utf8_char), length = 0;
+	size_t i = 0, j = 0, length = 0, size = 0;
 	string* str;
 
 	if(!data)
 		return 0;
 
-	while(data[i] != 0 && i < 1000000){
+	//Get the length of the string.
+	while(data[i] != 0){
 
-		utf8_char unichar = _utf8_fbyte(data + i);
+		utf8_char unichar = _utf8_fbytes(data + i);
 		i += unichar.size;
 		length++;
-
 	}
 
-	if(i == 1000000)
-		return 0;
+	size = length + 10;
 
 	str = allocate(ctx, sizeof(string));
-	str->data = allocate(ctx, sizeof(utf8_char) * length);
+	str->data = allocate(ctx, size * sizeof(utf8_char));
 	str->length = length;
+	str->size = size;
 	str->ctx = ctx;
-	str->size = length;
 
-	while(j < i)
-		j += _utf8_ptr_fbyte(((utf8_char*)(str->data)) + k++, data + j);
-	
+	for(i = 0; i < length; i++)
+		j += _utf8_ptr_fbytes(str->data + i, data + j);
+
 	return str;
 
 }
@@ -158,17 +164,14 @@ void _string_dealloc_pair(void* pair){
 byte* _string_pull(string* str, size_t* length){
 
 	size_t i, j = 0, k = 0, total = 0;
-	utf8_char* characters;
 	byte* data;
 
 	if(!str || !length)
 		return 0;
 
-	characters = (utf8_char*)(str->data);
-
-	//Get the total number of bytes in the string.
+	//Compute the total length of the string.
 	for(i = 0; i < str->length; i++)
-		total += characters[i].size;
+		total += _utf8_fbytes(str->data[i].data).size;
 
 	//Allocate a byte array.
 	data = allocate(str->ctx, total + 1);
@@ -176,12 +179,11 @@ byte* _string_pull(string* str, size_t* length){
 	//Copy the data into the byte array.
 	for(i = 0; i < str->length; i++){
 
-		utf8_char unichar = characters[i];
+		utf8_char unichar = str->data[i];
 
 		for(j = 0; j < unichar.size; j++)
 			data[k++] = unichar.data[j];
 					
-
 	}
 
 	*length = total;
@@ -192,15 +194,12 @@ byte* _string_pull(string* str, size_t* length){
 //Return a pointer to the character array.
 utf8_char* _string_pull_carr(string* str, size_t* length){
 
-	utf8_char* ptr;
-
 	if(!str)
 		return 0;
 
 	*length = str->length;
-	ptr = (utf8_char*)str->data;
 
-	return ptr;
+	return str->data;
 
 }
 
@@ -236,47 +235,45 @@ void _string_append_fbytes(string* str, byte* append){
 
 void _string_append_fstring(string* str, string* append){
 
-	size_t i, total_bytes;
-	byte* data;
+	size_t i, combined_size, new_size, new_byte_size;
+	utf8_char* data;
 
 	if(!str || !append)
 		return;
 
 	//How much space does the new string need?
-	size_t new_size = str->length + append->length;
-	size_t str_byte_total = str->length * sizeof(utf8_char);
-	size_t append_byte_total = append->length * sizeof(utf8_char);
+	combined_size = (str->length + append->length);
 
 	//There is enough space in the base string to append the new string.
-	if(new_size < str->size){
+	if(combined_size < str->size){
 
-		for(i = 0; i < append_byte_total; i++)
-			str->data[i + str_byte_total] = append->data[i];
-
+		for(i = 0; i < append->length; i++)
+			str->data[i + str->length] = append->data[i];
 
 		str->length += append->length;
-		
-
 		return;
 
 	}
 
+	new_size = (combined_size + 10);
+	new_byte_size = new_size * sizeof(utf8_char);
+
 	//Not enough space. Allocate a bigger string.
-	data = allocate(str->ctx, sizeof(utf8_char) * (new_size + 10));
+	data = allocate(str->ctx, new_byte_size);
 
 	//Copy original string.
-	for(i = 0; i < str_byte_total; i++)
+	for(i = 0; i < str->length; i++)
 		data[i] = str->data[i];
 
 	//Append the new string.
-	for(i = 0; i < append_byte_total; i++)
-		data[i + str_byte_total] = append->data[i];
+	for(i = 0; i < append->length; i++)
+		data[i + str->length] = append->data[i];
 
 
 	destroy(str->ctx, str->data);
 
 	str->data = data;
-	str->size = new_size + 10;
+	str->size = new_size;
 	str->length += append->length;
 
 }
@@ -293,8 +290,8 @@ void _string_append_fchar(string* str, utf8_char* append){
 //Insert substring at the given position.
 void _string_insert(string* str, string* insert, size_t pos){
 
-	size_t i;
-	byte* data;
+	size_t i, new_size, new_byte_size;
+	utf8_char* data;
 
 	if(!str || !insert)
 		return;
@@ -302,35 +299,32 @@ void _string_insert(string* str, string* insert, size_t pos){
 	if(pos > str->length){
 
 		_string_append_fstring(str, insert);
-
 		return;
 
 	}
 
-	//Calculate the number of bytes needed for each string portion.
-	size_t new_size = str->length + insert->length + 20;
-	size_t section_one_size = pos * sizeof(utf8_char);
-	size_t section_two_size = insert->length * sizeof(utf8_char);
-	size_t section_three_size = (str->length - pos) * sizeof(utf8_char);
+	new_size = (str->length + insert->length + 10);
+	new_byte_size = new_size * sizeof(utf8_char);
 
-	//Allocate a new string.
-	data = allocate(str->ctx, new_size * sizeof(utf8_char));
+	data = allocate(str->ctx, new_byte_size);
 
-	for(i = 0; i < section_one_size; i++)
+	//Copy section one of str.
+	for(i = 0; i < pos; i++)
 		data[i] = str->data[i];
 
-	for(i = 0; i < section_two_size; i++)
-		data[i + section_one_size] = insert->data[i];
+	//Copy insert.
+	for(i = 0; i < insert->length; i++)
+		data[i + pos] = insert->data[i];
 
-	for(i = 0; i < section_three_size; i++)
-		data[i + section_one_size + section_two_size] = str->data[i + section_one_size];
+	//Copy section two of str.
+	for(i = pos; i < str->length; i++)
+		data[i + insert->length] = str->data[i];
 
 	destroy(str->ctx, str->data);
 
 	str->data = data;
 	str->size = new_size;
 	str->length += insert->length;
-
 
 }
 
@@ -356,8 +350,6 @@ long _string_position_fbytes(string* str, byte* find, size_t s_pos){
 long _string_position_fstring(string* str, string* find, size_t s_pos){
 
 	size_t i, j;
-	utf8_char* characters = (utf8_char*)str->data;
-	utf8_char* find_characters = (utf8_char*)find->data;
 
 	if(!str || !find)
 		return 0;
@@ -367,15 +359,14 @@ long _string_position_fstring(string* str, string* find, size_t s_pos){
 
 	for(i = s_pos; i < str->length; i++){
 
-
 		for(j = 0; j < find->size; j++){
 
-			if(!_utf8_compare(characters + i + j, find_characters + j, str->case_insensitive))
+			if(!_utf8_compare(str->data + i + j, find->data + j, str->case_insensitive))
 				break;
 
 		}
 
-		if(j == find->size)
+		if(j == find->length)
 			return i;
 	
 	}
@@ -383,6 +374,7 @@ long _string_position_fstring(string* str, string* find, size_t s_pos){
 	return -1;
 
 }
+
 
 //Replace the first instance of a matching substring within a string.
 bool _string_replace_fbytes(string* str, byte* pattern, byte* replace, size_t s_pos){
@@ -442,13 +434,15 @@ bool _string_replace_fstring(string* str, string* pattern, string* replace, size
 
 	destroy(str->ctx, str->data);
 	str->data = s1->data;
-	str->length = s1->length;
 	str->size = s1->size;
+	str->length = s1->length;
 	destroy(str->ctx, s1);
 
 	return true;
 
 }
+
+
 
 //Replace all instances of a matching substring within a string.
 bool _string_replace_all_fbytes(string* str, byte* pattern, byte* replace){
@@ -523,8 +517,8 @@ bool _string_replace_all_fstring(string* str, string* pattern, string* replace){
 
 	destroy(str->ctx, str->data);
 	str->data = s1->data;
-	str->length = s1->length;
 	str->size = s1->size;
+	str->length = s1->length;
 	destroy(str->ctx, s1);
 
 	return true;
@@ -543,11 +537,9 @@ long _string_index_of(string* str, utf8_char* unichar, size_t pos){
 	if(pos < 0 || pos >= str->length)
 		return 1;
 
-	data = (utf8_char*)(str->data);
-
 	for(i = pos; i < str->length; i++){
 
-		if(_utf8_compare(unichar, data + i, str->case_insensitive))
+		if(_utf8_compare(unichar, str->data + i, str->case_insensitive))
 			return i;
 
 	}
@@ -557,27 +549,24 @@ long _string_index_of(string* str, utf8_char* unichar, size_t pos){
 }
 
 //Get a character at a position.
-utf8_char _string_char_at(string* str, size_t pos){
+bool _string_char_at(string* str, size_t pos, utf8_char* unichar){
 
-	utf8_char unichar;
-
-	unichar.value = 0;
-
-	if(!str || pos < 0)
-		return unichar;
+	if(!str || !unichar || pos < 0)
+		return false;
 
 	if(pos >= str->length)
-		return unichar;
+		return false;
 
-	return ((utf8_char*)(str->data))[pos];
+	*unichar = str->data[pos];
 
+	return true;
 }
 
 //Get a substring.
 string* _string_substr(string* str, size_t s_pos, size_t e_pos){
 
-	size_t i, start_pos, end_pos;
-	byte* data;
+	size_t i, new_byte_size, new_size;
+	utf8_char* data;
 	string* new_string;
 
 	if(!str)
@@ -586,79 +575,66 @@ string* _string_substr(string* str, size_t s_pos, size_t e_pos){
 	if(s_pos >= str->length || e_pos < s_pos || e_pos >= str->length)
 		return 0;
 
-	start_pos = s_pos * sizeof(utf8_char);
-	end_pos = (e_pos + 1) * sizeof(utf8_char);
+	new_size = e_pos - s_pos + 10;
+	new_byte_size = new_size * sizeof(utf8_char);
 
 	//Allocate a new utf8 byte array.
-	data = allocate(str->ctx, (end_pos - start_pos) + sizeof(utf8_char));
+	data = allocate(str->ctx, new_byte_size);
 
 	//Allocate a new string.
 	new_string = allocate(str->ctx, sizeof(string));
 
-	for(i = start_pos; i <= end_pos; i++)
-		data[i - start_pos] = str->data[i];
+	for(i = s_pos; i <= e_pos; i++)
+		data[i - s_pos] = str->data[i];
 
 
 	new_string->ctx = str->ctx;
 	new_string->data = data;
 	new_string->length = e_pos - s_pos + 1;
-	new_string->size = new_string->length;
+	new_string->size = new_size;
 
 	return new_string;
 
 }
 
 //Split a string at the given index.
-string_pair _string_split(string* str, size_t pos){
+bool _string_split(string* str, size_t pos, string_pair* pair){
 
 	size_t s1_size, s2_size;
-	string_pair pair;
 	string* s1, s2;
 	byte* data;
 
-	if(!str){
+	if(!str || !pair)
+		return false;
 
-		pair.error = true;
-		return pair;
+	if(pos <= 0 || pos >= str->length)
+		return false;
 
-	}
+	pair->s1 = _string_substr(str, 0, pos);
+	pair->s2 = _string_substr(str, pos + 1, str->length - 1);	
 
-	if(pos <= 0 || pos >= str->length){
-
-		pair.error = true;
-		return pair;
-
-	}
-
-	pair.error = false;
-	pair.s1 = _string_substr(str, 0, pos);
-	pair.s2 = _string_substr(str, pos + 1, str->length - 1);	
-
-	return pair;
+	return true;
 
 }
 
-//Get a section of a string up to a specific character.
-string_pair _string_split_delim(string* str, utf8_char delim, size_t s_pos){
 
-	string_pair pair;
+//Get a section of a string up to a specific character.
+bool _string_split_delim(string* str, utf8_char delim, size_t s_pos, string_pair* pair){
+
 	long pos;
 
-	pair.s1 = 0;
-	pair.s2 = 0;
-
-	if(!str){
-		pair.error = true;
-		return pair;
-
-	}
+	if(!str || !pair)
+		return false;
 
 	pos = _string_index_of(str, &delim, s_pos);
 
-	pair.s1 = _string_substr(str, 0, pos - 1);
-	pair.s2 = _string_substr(str, pos + 1, str->length - 1);
+	if(pos < 0)
+		return false;
 
-	return pair;
+	pair->s1 = _string_substr(str, 0, pos - 1);
+	pair->s2 = _string_substr(str, pos + 1, str->length - 1);
+
+	return true;
 
 }
 
@@ -667,17 +643,15 @@ void _string_trim(string* str){
 
 	size_t i, s_pos = 0, e_pos = 0;
 	string* trimmed;
-	utf8_char* data;
 
 	if(!str)
 		return;
 
-	data = (utf8_char*)str->data;
 	e_pos = str->length - 1;
 
 	for(i = 0; i < str->length; i++){
 
-		if(data[i].value == 32)
+		if(str->data[i].value == 32)
 			s_pos++;
 
 		else
@@ -695,7 +669,7 @@ void _string_trim(string* str){
 
 	for(i = str->length - 1; i >= 0; i--){
 
-		if(data[i].value == 32)
+		if(str->data[i].value == 32)
 			e_pos--;
 
 		else
@@ -717,51 +691,42 @@ void _string_trim(string* str){
 }
 
 //Get a section of a string up to a specific substring.
-string_pair _string_split_fbytes(string* str, byte* delim, size_t s_pos){
+bool _string_split_fbytes(string* str, byte* delim, size_t s_pos, string_pair* pair){
 
-	string_pair pair;
 	string* delim_string;
+	bool success;
 
-	pair.error = false;
-
-	if(!str || !delim){
-
-		pair.error = true;
-		return pair;
-
-	}
+	if(!str || !delim || !pair)
+		return false;
 
 	delim_string = _string_new_fbytes(str->ctx, delim);
 
-	pair = _string_split_fstring(str, delim_string, s_pos);
+	success = _string_split_fstring(str, delim_string, s_pos, pair);
 
 	_string_delete(delim_string);
 
-	return pair;
+
+	return success;
 
 }
 
-string_pair _string_split_fstring(string* str, string* delim, size_t s_pos){
+bool _string_split_fstring(string* str, string* delim, size_t s_pos, string_pair* pair){
 
-	string_pair pair;
 	long pos;
 
-	pair.error = true;
-
-	if(!str || !delim)
-		return pair;
+	if(!str || !delim || !pair)
+		return false;
 
 	pos = _string_position_fstring(str, delim, s_pos);
 
 	if(pos < 0)		
-		return pair;
+		return false;
 
-	pair.error = false;
-	pair.s1 = _string_substr(str, 0, pos - 1);
+	pair->s1 = _string_substr(str, 0, pos - 1);
 
-	pair.s2 = _string_substr(str, pos + delim->length, str->length - 1);
+	pair->s2 = _string_substr(str, pos + delim->length, str->length - 1);
 
-	return pair;
+	return true;
 
 }
 
@@ -774,10 +739,8 @@ void _string_lowercase(string* str){
 	if(!str)
 		return;
 
-	data = (utf8_char*)str->data;
-
 	for(i = 0; i < str->length; i++)
-		_utf8_lower(data + i);
+		_utf8_lower(str->data + i);
 
 
 }
@@ -786,15 +749,12 @@ void _string_lowercase(string* str){
 void _string_uppercase(string* str){
 
 	size_t i;
-	utf8_char* data;
 
 	if(!str)
 		return;
 
-	data = (utf8_char*)str->data;
-
 	for(i = 0; i < str->length; i++)
-		_utf8_upper(data + i);
+		_utf8_upper(str->data + i);
 	
 }
 
@@ -802,8 +762,6 @@ void _string_uppercase(string* str){
 bool _string_compare(string* str1, string* str2){
 
 	size_t i;
-	utf8_char* data1;
-	utf8_char* data2;
 
 	if(!str1 || !str2)
 		return false;
@@ -811,12 +769,9 @@ bool _string_compare(string* str1, string* str2){
 	if(str1->length != str2->length)
 		return false;
 
-	data1 = (utf8_char*)str1->data;
-	data2 = (utf8_char*)str2->data;
-
 	for(i = 0; i < str1->length; i++){
 
-		if(!_utf8_compare(data1 + i, data2 + i, str1->case_insensitive))
+		if(!_utf8_compare(str1->data + i, str2->data + i, str1->case_insensitive))
 			return false;
 
 	}
@@ -824,6 +779,3 @@ bool _string_compare(string* str1, string* str2){
 	return true;
 
 }
-
-
-

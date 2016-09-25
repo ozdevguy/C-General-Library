@@ -20,10 +20,10 @@ void _stack_delete_all(stack*, void (void*));
 void _stack_push(stack*, void*, uint8_t, size_t);
 
 //Pop an item from the stack.
-stack_item _stack_pop(stack*);
+bool _stack_pop(stack*, stack_item*);
 
 //Peek at the item on top of the stack.
-stack_item _stack_peek(stack*);
+bool _stack_peek(stack*, stack_item*);
 
 
 
@@ -107,37 +107,30 @@ void _stack_push(stack* st, void* data, uint8_t type, size_t size){
 
 }
 
-stack_item _stack_pop(stack* st){
+bool _stack_pop(stack* st, stack_item* item){
 
-	stack_item item;
-
-	if(!st)
-		return item;
+	if(!st || !item)
+		return false;
 
 	if(!st->top)
-		return item;
+		return false;
 
-	item = st->entries[st->top--];
+	*item = st->entries[st->top--];
 
-	return item;
+	return true;
 
 }
 
-stack_item _stack_peek(stack* st){
+bool _stack_peek(stack* st, stack_item* item){
 
-	stack_item item;
-
-	if(!st)
-		return item;
-
-	if(!st)
-		return item;
+	if(!st || !item)
+		return false;
 
 	if(!st->top)
-		return item;
+		return false;
 
-	item = st->entries[st->top];
+	*item = st->entries[st->top];
 
-	return item;
+	return true;
 
 }

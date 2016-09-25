@@ -12,21 +12,26 @@ void main(){
 
 	int i;
 
-	_binary_heap_ordering(myHeap, BINARY_HEAP_MIN);
+	_binary_heap_ordering(myHeap, BINARY_HEAP_MAX);
 
-	for(i = 0; i < 10000000; i++)
+	for(i = 100; i >= 0; i--)
 		_binary_heap_insert(myHeap, i, 0);
 
+	for(i = 0; i < 100; i++)
+		printf("%d\n", myHeap->data[i].key);
 
-	printf("test...\n");
 
-	for(i = 0; i < 10000000; i++){
+	printf("\n\n\n\n");
+
+	for(i = 0; i < 100; i++){
+
+		int j;
 
 		binary_heap_entry entry;
 
-		entry = _binary_heap_remove_root(myHeap);
+		_binary_heap_remove_root(myHeap, &entry);
 
-		//printf("%d\n", entry.key);
+		printf("%d\n", entry.key);
 
 	}
 

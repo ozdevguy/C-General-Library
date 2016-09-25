@@ -7,7 +7,7 @@ struct string{
 	standard_library_context* ctx;
 	
 	//String data.
-	byte* data;
+	utf8_char* data;
 
 	//Case-insensitive matching.
 	bool case_insensitive;

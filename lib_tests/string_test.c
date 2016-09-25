@@ -12,6 +12,11 @@ void main(){
 	//utf8_char* characters = (utf8_char*)myString->data;
 
 	_string_append_fbytes(myString, "Name: ");
+
+	//printf("String length: %ld | Byte size: %ld\n", myString->length, myString->bytes_used);
+
+
+	
 	_string_append_fbytes(myString, "Bobby!");
 
 
@@ -66,7 +71,9 @@ void main(){
 
 	//Test string split.
 
-	string_pair pair = _string_split(myString, 21);
+	string_pair pair;
+
+	_string_split(myString, 21, &pair);
 
 	char* s1 = (char*)_string_pull(pair.s1, &size);
 	char* s2 = (char*)_string_pull(pair.s2, &size);
@@ -77,13 +84,15 @@ void main(){
 	destroy(&ctx, s1);
 	destroy(&ctx, s2);
 
-	utf8_char get_char = _string_char_at(myString, 15);
+	utf8_char get_char; 
+
+	_string_char_at(myString, 15, &get_char);
 
 
 	printf("Char: %s\n", get_char.data);
 
 	//Find position.
-	utf8_char tchar = _utf8_fbyte("T");
+	utf8_char tchar = _utf8_fbytes("T");
 
 
 	long ctest = _string_position_fbytes(myString, "BObBaI!", 0);
@@ -96,8 +105,10 @@ void main(){
 
 	printf("Position of character: %ld\n", cpos);
 
-	utf8_char tchar2 = _utf8_fbyte("☺");
-	string_pair tpair = _string_split_delim(myString, tchar2, 0);
+	utf8_char tchar2 = _utf8_fbytes("☺");
+	string_pair tpair;
+
+	_string_split_delim(myString, tchar2, 0, &tpair);
 
 	size_t l;
 
@@ -130,7 +141,9 @@ void main(){
 
 	destroy(&ctx, tt);
 
-	string_pair tpair2 = _string_split_fbytes(trimTest, " W", 0);
+	string_pair tpair2;
+
+	_string_split_fbytes(trimTest, " W", 0, &tpair2);
 
 	if(tpair2.error)
 		printf("ERROR!");
@@ -150,4 +163,5 @@ void main(){
 
 
 	return;
+	
 }

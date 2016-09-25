@@ -24,10 +24,10 @@ bool _hashmap_insert_fbytes(map*, byte*, void*, uint8_t, size_t);
 bool _hashmap_insert(map*, string*, void*, uint8_t, size_t);
 
 //Get an item from the hashmap.
-map_entry _hashmap_lookup_fbytes(map*, byte*);
+bool _hashmap_lookup_fbytes(map*, byte*, map_entry*);
 
 //Get an item from the hashmap.
-map_entry _hashmap_lookup(map*, string*);
+bool _hashmap_lookup(map*, string*, map_entry*);
 
 //Remove an item from a hashmap.
 bool _hashmap_remove_fbytes(map*, byte*);
@@ -42,7 +42,7 @@ void _hashmap_reset_iterator(map*);
 bool _hashmap_has_next(map*);
 
 //Pull the next item in the iteration.
-map_entry _hashmap_get_next(map*);
+bool _hashmap_get_next(map*, map_entry*);
 
 
 static size_t int_hashmap_hash(byte* input){
@@ -74,10 +74,15 @@ map* _hashmap_new(standard_library_context* ctx, size_t start_size){
 
 bool _hashmap_delete(map* hashmap){
 
+	map_entry entry;
+
 	_map_reset_iterator(hashmap);
 
-	while(_map_has_next(hashmap))
-		_string_delete((string*)_map_get_next(hashmap).ext);
+	while(_map_has_next(hashmap)){
+
+		_map_get_next(hashmap, &entry);
+		_string_delete((string*)entry.ext);
+	}
 
 	return _map_delete(hashmap);
 
@@ -210,15 +215,13 @@ bool _hashmap_remove(map* hashmap, string* key){
 
 }
 
-map_entry _hashmap_lookup(map* hashmap, string* key){
+bool _hashmap_lookup(map* hashmap, string* key, map_entry* ext){
 
 	size_t hashed_key;
 	byte* key_data;
-	map_entry entry;
-	entry.success = false;
 
-	if(!hashmap || !key)
-		return entry;
+	if(!hashmap || !key || !ext)
+		return false;
 
 	key_data = _string_pull(key, &hashed_key);
 
@@ -226,22 +229,20 @@ map_entry _hashmap_lookup(map* hashmap, string* key){
 
 	destroy(hashmap->ctx, key_data);
 
-	return _map_lookup(hashmap, hashed_key);
+	return _map_lookup(hashmap, hashed_key, ext);
 
 }
 
-map_entry _hashmap_lookup_fbytes(map* hashmap, byte* key){
+bool _hashmap_lookup_fbytes(map* hashmap, byte* key, map_entry* ext){
 
 	size_t hashed_key;
-	map_entry entry;
-	entry.success = false;
 
-	if(!hashmap || !key)
-		return entry;
+	if(!hashmap || !key || !ext)
+		return false;
 
 	hashed_key = hashmap->hash_algorithm(key);
 
-	return _map_lookup(hashmap, hashed_key);
+	return _map_lookup(hashmap, hashed_key, ext);
 
 }
 
@@ -263,14 +264,11 @@ bool _hashmap_has_next(map* hashmap){
 
 }
 
-map_entry _hashmap_get_next(map* hashmap){
-
-	map_entry entry;
-	entry.success = false;
+bool _hashmap_get_next(map* hashmap, map_entry* ext){
 
 	if(!hashmap)
-		return entry;
+		return false;
 
-	return _map_get_next(hashmap);
+	return _map_get_next(hashmap, ext);
 
 }

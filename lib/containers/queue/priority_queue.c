@@ -11,10 +11,10 @@ void _priority_queue_delete_all(priority_queue*, void (void*)); //FINISHED
 void _priority_queue_enqueue(priority_queue*, int32_t, void*, uint8_t, size_t); //FINISHED
 
 //Remove the item at the front of the queue.
-queue_entry _priority_queue_dequeue(priority_queue*); //FINISHED
+bool _priority_queue_dequeue(priority_queue*, queue_entry*); //FINISHED
 
 //Peek at the front of the queue.
-queue_entry _priority_queue_peek(priority_queue*); //FINISHED
+bool _priority_queue_peek(priority_queue*, queue_entry*); //FINISHED
 
 //Priority queue deallocator.
 void _priority_queue_dealloc(void*); //FINISHED
@@ -39,6 +39,7 @@ void _priority_queue_delete(priority_queue* queue){
 
 	size_t i;
 	binary_heap* heap;
+	binary_heap_entry heap_entry;
 
 	if(!queue)
 		return;
@@ -47,8 +48,12 @@ void _priority_queue_delete(priority_queue* queue){
 
 	_binary_heap_reset_iterator(queue->heap);
 
-	while(_binary_heap_has_next(queue->heap))
-		destroy(queue->ctx, _binary_heap_get_next(queue->heap).data);
+	while(_binary_heap_has_next(queue->heap)){
+
+		_binary_heap_get_next(queue->heap, &heap_entry);
+		destroy(queue->ctx, heap_entry.data);
+
+	}
 
 	_binary_heap_delete(queue->heap);
 
@@ -61,6 +66,7 @@ void _priority_queue_delete_all(priority_queue* queue, void (*dealloc)(void*)){
 	size_t i;
 	binary_heap* heap;
 	queue_entry* entry;
+	binary_heap_entry heap_entry;
 
 	if(!queue)
 		return;
@@ -71,7 +77,9 @@ void _priority_queue_delete_all(priority_queue* queue, void (*dealloc)(void*)){
 
 	while(_binary_heap_has_next(queue->heap)){
 
-		entry = _binary_heap_get_next(queue->heap).data;
+		_binary_heap_get_next(queue->heap, &heap_entry);
+
+		entry = heap_entry.data;
 
 		dealloc(entry->data);
 		destroy(queue->ctx, entry);
@@ -106,40 +114,46 @@ void _priority_queue_enqueue(priority_queue* queue, int32_t priority, void* data
 
 }
 
-queue_entry _priority_queue_dequeue(priority_queue* queue){
+bool _priority_queue_dequeue(priority_queue* queue, queue_entry* entry){
 
-	queue_entry entry;
 	binary_heap_entry heap_entry;
 
-	if(!queue)
-		return entry;
+	if(!queue || !entry)
+		return false;
 
-	heap_entry = _binary_heap_remove_root(queue->heap);
+	if(_binary_heap_remove_root(queue->heap, &heap_entry)){
 
-	if(heap_entry.data)
-		entry = *((queue_entry*)heap_entry.data);
+		if(heap_entry.data)
+			*entry = *((queue_entry*)heap_entry.data);
 
-	destroy(queue->ctx, heap_entry.data);
+		destroy(queue->ctx, heap_entry.data);
 
-	return entry;
+		return true;
+
+	}
+
+	return false;
 
 }
 
-queue_entry _priority_queue_peek(priority_queue* queue){
+bool _priority_queue_peek(priority_queue* queue, queue_entry* entry){
 
-	queue_entry entry;
 	binary_heap_entry heap_entry;
 
-	if(!queue)
-		return entry;
+	if(!queue || !entry)
+		return false;
 
-	heap_entry = _binary_heap_peek(queue->heap);
+	if(_binary_heap_peek(queue->heap, &heap_entry)){
 
-	if(heap_entry.data)
-		entry = *((queue_entry*)heap_entry.data);
+		if(heap_entry.data)
+			*entry = *((queue_entry*)heap_entry.data);
 
-	return entry;
+		return true;
 
+	}
+
+	return false;
+	
 }
 
 size_t _priority_queue_total(priority_queue* queue){

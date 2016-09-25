@@ -27,7 +27,7 @@ bool _map_remove(map*, size_t);
 bool _map_remove_eptr(map*, size_t, void**);
 
 //Get an item from the map.
-map_entry _map_lookup(map*, size_t);
+bool _map_lookup(map*, size_t, map_entry*);
 
 //Reset the map iterator.
 void _map_reset_iterator(map*);
@@ -36,7 +36,7 @@ void _map_reset_iterator(map*);
 bool _map_has_next(map*);
 
 //Pull the next item in the iteration.
-map_entry _map_get_next(map*);
+bool _map_get_next(map*, map_entry*);
 
 
 static void int_map_int_copy(map_entry_int* to, map_entry_int* from){
@@ -50,17 +50,13 @@ static void int_map_int_copy(map_entry_int* to, map_entry_int* from){
 
 }
 
-static map_entry int_map_copy(map_entry_int* ent){
+static void int_map_copy(map_entry_int* ent, map_entry* ext){
 
-	map_entry entry;
-
-	entry.key = ent->key;
-	entry.size = ent->size;
-	entry.type = ent->type;
-	entry.data = ent->data;
-	entry.ext = ent->ext;
-
-	return entry;
+	ext->key = ent->key;
+	ext->size = ent->size;
+	ext->type = ent->type;
+	ext->data = ent->data;
+	ext->ext = ent->ext;
 
 }
 
@@ -112,7 +108,7 @@ bool _map_resize(map* mp, size_t new_size){
 
 		while(_map_has_next(mp)){
 
-			e = _map_get_next(mp);
+			_map_get_next(mp, &e);
 
 			_map_insert(new_map, e.key, e.data, e.type, e.size);
 
@@ -191,17 +187,19 @@ bool _map_has_next(map* mp){
 
 }
 
-map_entry _map_get_next(map* mp){
+bool _map_get_next(map* mp, map_entry* entry){
 
-	map_entry entry;
+	if(!mp || !entry)
+		return false;
 
-	if(!mp)
-		return entry;
+	if(mp->iter_list){
 
-	if(mp->iter_list)
-		return int_map_copy(mp->iter_list);
+		int_map_copy(mp->iter_list, entry);
+		return true;
 
-	return entry;
+	}
+
+	return false;
 }
 
 map* _map_new(standard_library_context* ctx, size_t start_size){
@@ -515,16 +513,13 @@ bool _map_remove_eptr(map* mp, size_t key, void** eptr){
 
 }
 
-map_entry _map_lookup(map* mp, size_t key){
+bool _map_lookup(map* mp, size_t key, map_entry* ext){
 
-	map_entry ret;
 	map_entry_int* entry;
 	size_t table_pos;
 
-	ret.success = false;
-
-	if(!mp)
-		return ret;
+	if(!mp || !ext)
+		return false;
 
 	table_pos = key % mp->size;
 	entry = mp->map_table + table_pos;
@@ -536,12 +531,8 @@ map_entry _map_lookup(map* mp, size_t key){
 
 			if(entry->key == key){
 
-				ret.success = true;
-				ret.size = entry->size;
-				ret.type = entry->type;
-				ret.data = entry->data;
-				ret.key = entry->key;
-				return ret;
+				int_map_copy(entry, ext);
+				return true;
 
 			}
 
@@ -551,7 +542,7 @@ map_entry _map_lookup(map* mp, size_t key){
 
 	}
 
-	return ret;
+	return false;
 }
 
 bool _map_exists(map* mp, size_t key){

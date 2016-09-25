@@ -74,9 +74,6 @@ struct graph_path{
 	//Context.
 	standard_library_context* ctx;
 
-	//Path exists?
-	bool exists;
-
 	//Number of steps.
 	size_t hops;
 

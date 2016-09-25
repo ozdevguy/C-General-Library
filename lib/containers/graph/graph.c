@@ -28,10 +28,10 @@ bool _graph_delete_node(graph*, size_t); //FINISHED
 bool _graph_delete_edge(graph*, size_t, size_t); //FINISHED
 
 //Bredth first search for a node.
-graph_path _graph_bfs(graph*, size_t, size_t);
+bool _graph_bfs(graph*, size_t, size_t, graph_path*);
 
 //Depth first search for a node.
-graph_path _graph_dfs(graph*, size_t, size_t);
+bool _graph_dfs(graph*, size_t, size_t, graph_path*);
 
 //Clear the graph of levels/parents.
 void _graph_clear_paths(graph*);
@@ -127,19 +127,13 @@ static bool int_graph_node_remove_edge(graph* gr, graph_node* node, size_t key){
 }
 
 //Create a path.
-static graph_path int_graph_build_path(graph* gr, graph_node* node){
+static void int_graph_build_path(graph* gr, graph_node* node, graph_path* path){
 
-	graph_path path;
 	graph_node* next;
 	size_t hops = 0, data_size = 0, i;
 
-	path.hops = 0;
-	path.exists = false;
-
-	if(!gr || !node)
-		return path;
-
-	path.exists = true;
+	if(!gr || !node || !path)
+		return;
 
 	next = node;
 
@@ -153,15 +147,15 @@ static graph_path int_graph_build_path(graph* gr, graph_node* node){
 	//Setup the path.
 	data_size = (hops + 1) * sizeof(size_t);
 
-	path.hops = hops;
-	path.list = allocate(gr->ctx, data_size);
-	path.ctx = gr->ctx;
+	path->hops = hops;
+	path->list = allocate(gr->ctx, data_size);
+	path->ctx = gr->ctx;
 
 	next = node;
 
-	for(i = hops; i >= 0; i--){
+	for(i = hops - 1; i >= 0; i--){
 
-		path.list[i] = next;
+		path->list[i] = next;
 
 		if(!next->parent)
 			break;
@@ -170,7 +164,6 @@ static graph_path int_graph_build_path(graph* gr, graph_node* node){
 
 	}
 
-	return path;
 }
 
 graph* _graph_new(standard_library_context* ctx, size_t start_size){
@@ -465,19 +458,16 @@ void _graph_clear_paths(graph* gr){
 	}
 }
 
-graph_path _graph_bfs(graph* gr, size_t start, size_t end){
+bool _graph_bfs(graph* gr, size_t start, size_t end, graph_path* path){
 
 	size_t i;
 	queue* bfs_queue;
 	graph_node *root = 0, *current = 0, *discovery = 0;
 	graph_edge* c_edge;
-	graph_path path;
+	queue_entry entry;
 
-	path.hops = 0;
-	path.exists = false;
-
-	if(!gr)
-		return path;
+	if(!gr || !path)
+		return false;
 
 	//Find the root.
 	for(i = 0; i < gr->used; i++){
@@ -488,7 +478,7 @@ graph_path _graph_bfs(graph* gr, size_t start, size_t end){
 	}
 
 	if(!root)
-		return path;
+		return false;
 
 	//Set the root to level 1.
 	root->level = 1;
@@ -501,7 +491,8 @@ graph_path _graph_bfs(graph* gr, size_t start, size_t end){
 
 	while(bfs_queue->used){
 
-		current = (graph_node*)_queue_dequeue(bfs_queue).data;
+		_queue_dequeue(bfs_queue, &entry);
+		current = (graph_node*)entry.data;
 
 		c_edge = current->edges;
 
@@ -519,7 +510,8 @@ graph_path _graph_bfs(graph* gr, size_t start, size_t end){
 				if(discovery->key == end){
 
 					_queue_delete(bfs_queue);
-					return int_graph_build_path(gr, discovery);
+					int_graph_build_path(gr, discovery, path);
+					return true;
 
 				}
 
@@ -533,23 +525,20 @@ graph_path _graph_bfs(graph* gr, size_t start, size_t end){
 	}
 
 	_queue_delete(bfs_queue);
-	return path;
+	return false;
 
 }
 
-graph_path _graph_dfs(graph* gr, size_t start, size_t end){
+bool _graph_dfs(graph* gr, size_t start, size_t end, graph_path* path){
 
 	size_t i;
 	stack* dfs_stack;
 	graph_node *root = 0, *current = 0, *discovery = 0;
 	graph_edge* c_edge;
-	graph_path path;
+	stack_item item;
 
-	path.hops = 0;
-	path.exists = false;
-
-	if(!gr)
-		return path;
+	if(!gr | !path)
+		return false;
 
 	//Find the root.
 	for(i = 0; i < gr->used; i++){
@@ -560,7 +549,7 @@ graph_path _graph_dfs(graph* gr, size_t start, size_t end){
 	}
 
 	if(!root)
-		return path;
+		return false;
 
 	//Set the root to level 1.
 	root->level = 1;
@@ -571,7 +560,8 @@ graph_path _graph_dfs(graph* gr, size_t start, size_t end){
 
 	while(dfs_stack->top){
 
-		current = (graph_node*)_stack_peek(dfs_stack).data;
+		_stack_peek(dfs_stack, &item);
+		current = (graph_node*)item.data;
 
 		c_edge = current->edges;
 
@@ -588,7 +578,8 @@ graph_path _graph_dfs(graph* gr, size_t start, size_t end){
 				if(discovery->key == end){
 
 					_stack_delete(dfs_stack);
-					return int_graph_build_path(gr, discovery);
+					int_graph_build_path(gr, discovery, path);
+					return true;
 
 				}
 
@@ -602,13 +593,13 @@ graph_path _graph_dfs(graph* gr, size_t start, size_t end){
 		}
 
 		if(!c_edge)
-			_stack_pop(dfs_stack);
+			_stack_pop(dfs_stack, &item);
 
 
 	}
 
 	_stack_delete(dfs_stack);
-	return path;
+	return true;
 
 }
 

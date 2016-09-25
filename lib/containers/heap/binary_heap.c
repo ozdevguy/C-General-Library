@@ -22,17 +22,19 @@ void _binary_heap_reset_iterator(binary_heap*); //FINISHED
 //Iterator has next?
 bool _binary_heap_has_next(binary_heap*); //FINISHED
 
+/* CHANGED */
+
 //Get the next item.
-binary_heap_entry _binary_heap_get_next(binary_heap*); //FINISHED
+bool _binary_heap_get_next(binary_heap*, binary_heap_entry*); //FINISHED
 
 //Get an item at the specified index.
-binary_heap_entry _binary_heap_get(binary_heap*, size_t); //FINISHED
+bool _binary_heap_get(binary_heap*, size_t, binary_heap_entry*); //FINISHED
 
 //Get and remove the root of the binary heap.
-binary_heap_entry _binary_heap_remove_root(binary_heap*); //FINISHED
+bool _binary_heap_remove_root(binary_heap*, binary_heap_entry*); //FINISHED
 
 //Peek at the root of the binary heap.
-binary_heap_entry _binary_heap_peek(binary_heap*); //TO DO
+bool _binary_heap_peek(binary_heap*, binary_heap_entry*); //TO DO
 
 
 
@@ -140,31 +142,38 @@ static void int_binary_heap_max_reverse_heapify(binary_heap* heap){
 		left = (2 * pos) + 1;
 		right = (2 * pos) + 2;
 
+		//No children; we're finished.
 		if(left >= heap->used)
 			return;
 
-		if(heap->data[left].key > heap->data[pos].key && heap->data[left].key > heap->data[right].key){
+		//The left child is the only child, and it is greater than the parent.
+		else if(heap->data[left].key > heap->data[pos].key && right >= heap->used){
+
+			int_binary_heap_swap(heap->data + left, heap->data + pos);
+			return;
+
+		}
+
+		//The left child is not the only child, but it is greater than the right child.
+		else if(heap->data[left].key > heap->data[pos].key && heap->data[left].key > heap->data[right].key){
 
 			int_binary_heap_swap(heap->data + left, heap->data + pos);
 			pos = left;
 
 		}
-		else if(right >= heap->used){
 
+		else if(right >= heap->used)
 			return;
 
-		}
+		//The right child is greater than the left child.
 		else if(heap->data[right].key > heap->data[pos].key && heap->data[right].key > heap->data[left].key){
 
 			int_binary_heap_swap(heap->data + right, heap->data + pos);
 			pos = right;
 
 		}
-		else{
-
+		else
 			return;
-
-		}
 
 	}
 
@@ -183,31 +192,39 @@ static void int_binary_heap_min_reverse_heapify(binary_heap* heap){
 		left = (2 * pos) + 1;
 		right = (2 * pos) + 2;
 
+		//No children; we're finished.
 		if(left >= heap->used)
 			return;
 
-		if(heap->data[left].key < heap->data[pos].key && heap->data[left].key < heap->data[right].key){
+		//The left child is the only child, and it is less than the parent.
+		else if(heap->data[left].key < heap->data[pos].key && right >= heap->used){
+
+			int_binary_heap_swap(heap->data + left, heap->data + pos);
+			return;
+
+		}
+
+		//The left child is not the only child, but it is less than the right child.
+		else if(heap->data[left].key < heap->data[pos].key && heap->data[left].key < heap->data[right].key){
 
 			int_binary_heap_swap(heap->data + left, heap->data + pos);
 			pos = left;
 
 		}
-		else if(right >= heap->used){
 
+		//There is no right child. We are finished.
+		else if(right >= heap->used)
 			return;
 
-		}
+		//The right child is less than the left child.
 		else if(heap->data[right].key < heap->data[pos].key && heap->data[right].key < heap->data[left].key){
 
 			int_binary_heap_swap(heap->data + right, heap->data + pos);
 			pos = right;
 
 		}
-		else{
-
+		else
 			return;
-			
-		}
 
 	}
 }
@@ -289,7 +306,6 @@ void _binary_heap_insert(binary_heap* heap, int32_t key, void* data){
 	else
 		int_binary_heap_min_heapify(heap, heap->used++);
 	
-
 }
 
 bool _binary_heap_delete(binary_heap* heap){
@@ -324,56 +340,53 @@ bool _binary_heap_has_next(binary_heap* heap){
 
 }
 
-binary_heap_entry _binary_heap_remove_root(binary_heap* heap){
+bool _binary_heap_remove_root(binary_heap* heap, binary_heap_entry* entry){
 
-	binary_heap_entry entry;
-
-	if(!heap)
-		return entry;
+	if(!heap || !entry)
+		return false;
 
 	if(!heap->used)
-		return entry;
+		return false;
 
-	entry = heap->data[0];
+	*entry = heap->data[0];
 
 	int_binary_heap_swap(heap->data, heap->data + (heap->used-- - 1));
 
-	if(heap->ordering == BINARY_HEAP_MAX)
+	if(heap->ordering == BINARY_HEAP_MAX)		
 		int_binary_heap_max_reverse_heapify(heap);
 	else
 		int_binary_heap_min_reverse_heapify(heap);
 
-	return entry;
+	return true;
 
 }
 
-binary_heap_entry _binary_heap_peek(binary_heap* heap){
+bool _binary_heap_peek(binary_heap* heap, binary_heap_entry* entry){
 
-	binary_heap_entry entry;
-
-	if(!heap)
-		return entry;
+	if(!heap || !entry)
+		return false;
 
 	if(!heap->used)
-		return entry;
+		return false;
 
-	entry = heap->data[0];
+	*entry = heap->data[0];
 
-	return entry;
+	return true;
 
 }
 
-binary_heap_entry _binary_heap_get_next(binary_heap* heap){
+bool _binary_heap_get_next(binary_heap* heap, binary_heap_entry* entry){
 
-	binary_heap_entry entry;
+	if(!heap || !entry)
+		return false;
 
-	if(!heap)
-		return entry;
+	if(heap->iterator < heap->used){
 
-	if(heap->iterator < heap->used)
-		entry = heap->data[heap->iterator++];
+		*entry = heap->data[heap->iterator++];
+		return true;
+	}
 
-	return entry;
+	return false;
 
 }
 

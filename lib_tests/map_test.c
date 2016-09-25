@@ -32,9 +32,13 @@ void main(){
 	//Print the contents of the table.
 
 	_map_reset_iterator(myMap);
+	map_entry e;
+	while(_map_has_next(myMap)){
 
-	while(_map_has_next(myMap))
-		printf("Key: %ld\n", _map_get_next(myMap).key);
+		_map_get_next(myMap, &e);
+
+		printf("Key: %ld\n", e.key);
+	}
 
 
 	//while(_map_has_next(myMap))

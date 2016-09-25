@@ -38,7 +38,7 @@ void _int_utf8_pad(utf8_char* unichar){
 }
 
 //Create a unicode character from a byte array.
-utf8_char _utf8_fbyte(byte* data){
+utf8_char _utf8_fbytes(byte* data){
 
 	int8_t size, i;
 	uint32_t modifier = 0, dec = 0;
@@ -82,7 +82,7 @@ utf8_char _utf8_fbyte(byte* data){
 }
 
 //Create a unicode character using an existing object.
-size_t _utf8_ptr_fbyte(utf8_char* unichar, byte* data){
+size_t _utf8_ptr_fbytes(utf8_char* unichar, byte* data){
 
 	int8_t size, i;
 	uint32_t modifier = 0, dec = 0;

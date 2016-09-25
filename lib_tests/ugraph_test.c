@@ -11,7 +11,9 @@ void main(){
 
 	_std_lib_default(&ctx);
 
-	/*
+
+
+	
 	graph* myNewGraph = _graph_new(&ctx, 3);
 
 	//Add the nodes.
@@ -60,36 +62,45 @@ void main(){
 
 	_graph_add_double_edge(myNewGraph, 2351, 2353, &e1, &e2);
 
-
-	graph_path path = _graph_bfs(myNewGraph, 2345, 2353);
-
 	int i;
+	graph_path path;
 
-	printf("Hops: %ld\n", path.hops);
+	printf("===BFS===\n");
+	if(_graph_bfs(myNewGraph, 2345, 2353, &path)){
 
-	for(i = 0; i < path.hops; i++){
+		printf("Hops: %ld\n", path.hops);
 
-		printf("Step%d: %ld\n", i, path.list[i]->key);
+		printf("Path: %p\n", path.list);
+
+		for(i = 0; i < path.hops; i++){
+
+			printf("Step%d: %ld\n", i, path.list[i]->key);
+
+		}
+
+		_graph_delete_path(path);
 
 	}
-
-	_graph_delete_path(path);
+	
 
 	printf("\n\n");
 
 	_graph_clear_paths(myNewGraph);
 
-	path = _graph_dfs(myNewGraph, 2345, 2353);
+	printf("====DFS====\n");
+	if(_graph_dfs(myNewGraph, 2345, 2353, &path)){
 
-	printf("Hops: %ld\n", path.hops);
+		printf("Hops: %ld\n", path.hops);
 
-	for(i = 0; i < path.hops; i++){
+		for(i = 0; i < path.hops; i++){
 
-		printf("Step%d: %ld\n", i, path.list[i]->key);
+			printf("Step%d: %ld\n", i, path.list[i]->key);
+
+		}
+
+		_graph_delete_path(path);
 
 	}
-
-	_graph_delete_path(path);
 
 	//_graph_delete_node(myNewGraph, 2347);
 
@@ -99,7 +110,6 @@ void main(){
 
 	_graph_delete(myNewGraph);
 
-	*/
 
 	//Create a new weighted graph.
 	graph* weightedGraph = _weighted_graph_new(&ctx, 10);
@@ -135,7 +145,6 @@ void main(){
 	_weighted_graph_add_node(weightedGraph, 44, &data2);
 
 
-	int i;
 	int nodes[10001];
 	srand(time(0));
 
@@ -149,9 +158,6 @@ void main(){
 
 
 	//Add the edges...
-
-	graph_edge* e1;
-	graph_edge* e2;
 
 	for(i = 0; i < 10000; i++)		
 		_weighted_graph_add_double_edge(weightedGraph, nodes[rand() % 10000], nodes[rand() % 10000], rand(), &e1, &e2);
@@ -204,22 +210,28 @@ void main(){
 
 
 	//Find the shortest path between two nodes.
-	int dest = nodes[rand() % 10000];
-
-	graph_path path = _weighted_graph_spath(weightedGraph, 31, dest);
-
-	printf("Hops: %ld from 31 to %d\n", path.hops, dest);
+	int dest = 43;
 
 	
-	for(i = 0; i <= path.hops; i++){
+	printf("\n\n===SHORTEST PATH===\n");
 
-		if(path.list[i])
-			printf("Step%d: %ld, length: %ld\n", i, path.list[i]->key, path.list[i]->level);
+	if(_weighted_graph_spath(weightedGraph, 31, dest, &path)){
+
+		printf("Hops: %ld from 31 to %d\n", path.hops, dest);
+
+		
+		for(i = 0; i < path.hops; i++){
+
+			if(path.list[i])
+				printf("Step%d: %ld, length: %ld\n", i, path.list[i]->key, path.list[i]->level);
+
+		}
+
+		_graph_delete_path(path);
 
 	}
-	
 
-	_graph_delete_path(path);
+	
 
 	_weighted_graph_delete(weightedGraph);
 

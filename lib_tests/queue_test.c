@@ -19,10 +19,7 @@ void main(){
 
 
 	queue* myQueue = _queue_new(&ctx, 1);
-	string* str = _string_new(&ctx);
 	stack* myStack = _stack_new(&ctx, 1);
-	vector* myVector = _vector_new(&ctx, sizeof(string), 10);
-	map* myMap = _map_new(&ctx, 10);
 
 	_queue_enqueue(myQueue, &first, 1, sizeof(first));
 	_queue_enqueue(myQueue, &second, 1, sizeof(second));
@@ -35,19 +32,26 @@ void main(){
 
 	int i = 0;
 
-	for(i = 0; i < 3; i++)
-		printf("Dequeue: %d\n", *((int*)_queue_dequeue(myQueue).data));
+	for(i = 0; i < 3; i++){
 
-	for(i = 0; i < 3; i++)
-		printf("Stack Pop: %d\n", *((int*)_stack_pop(myStack).data));
+		queue_entry entry;
+
+		if(_queue_dequeue(myQueue, &entry))
+			printf("Dequeue: %d\n", *((int*)entry.data));
+	}
+
+	for(i = 0; i < 3; i++){
+
+		stack_item item;
+
+		if(_stack_pop(myStack, &item))
+			printf("Stack Pop: %d\n", *((int*)item.data));
+	}
 
 	_queue_delete(myQueue);
 	_stack_delete(myStack);
 
-	_vector_add(myVector, str);
 
-	_vector_delete(myVector);
-	_string_delete(str);
 
 	return;
 

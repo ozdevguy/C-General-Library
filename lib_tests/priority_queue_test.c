@@ -22,25 +22,30 @@ void main(){
 
 	queue_entry entry;
 
-	entry = _priority_queue_dequeue(q);
+	_priority_queue_dequeue(q, &entry);
 	printf("%d\n", *((int*)entry.data));
 
-	entry = _priority_queue_dequeue(q);
+	_priority_queue_dequeue(q, &entry);
 	printf("%d\n", *((int*)entry.data));
 
-	_priority_queue_enqueue(q, 120, &t5, 1, 1);
+	_priority_queue_enqueue(q, 120, &t2, 1, 1);
 
-	entry = _priority_queue_dequeue(q);
+	
+	_priority_queue_dequeue(q, &entry);
 	printf("%d\n", *((int*)entry.data));
 
-	entry = _priority_queue_peek(q);
+	_priority_queue_dequeue(q, &entry);
 	printf("%d\n", *((int*)entry.data));
 
-	entry = _priority_queue_dequeue(q);
+
+	_priority_queue_dequeue(q, &entry);
 	printf("%d\n", *((int*)entry.data));
 
-	entry = _priority_queue_dequeue(q);
-	printf("%d\n", *((int*)entry.data));
+	
+	
+	if(_priority_queue_dequeue(q, &entry))
+		printf("%d\n", *((int*)entry.data));
+	
 
 	_priority_queue_delete(q);
 

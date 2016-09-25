@@ -10,3 +10,5 @@
 #include "priority_queue.h"
 #include "graph.h"
 #include "weighted_graph.h"
+#include "set.h"
+#include "object_set.h"

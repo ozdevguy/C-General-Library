@@ -12,6 +12,8 @@ Maps -> Complete
 Hashmaps -> Complete
 Graph -> Complete
 Weighted Graph -> Complete
+Set
+Object Set
 AVL Tree
 Red-Black Tree
 Unbalanced Binary Search Tree
