@@ -23,6 +23,9 @@ struct graph{
 	//Graph type.
 	uint8_t type;
 
+	//Graph iterator.
+	size_t iterator;
+
 };
 
 struct graph_node{

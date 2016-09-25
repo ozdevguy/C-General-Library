@@ -39,6 +39,16 @@ void _graph_clear_paths(graph*);
 //Destroy a path object.
 void _graph_delete_path(graph_path);
 
+//Reset the graph node iterator.
+void _graph_reset_iterator(graph*);
+
+//Check to see if the graph has another node.
+bool _graph_has_next(graph*);
+
+//Get the next node in the graph.
+graph_node* _graph_get_next(graph*);
+
+
 //Increase the size of the node array.
 static void int_graph_resize(graph* gr, size_t new_size){
 
@@ -599,6 +609,39 @@ graph_path _graph_dfs(graph* gr, size_t start, size_t end){
 
 	_stack_delete(dfs_stack);
 	return path;
+
+}
+
+void _graph_reset_iterator(graph* gr){
+
+	if(!gr)
+		return;
+
+	gr->iterator = 0;
+
+}
+
+bool _graph_has_next(graph* gr){
+
+	if(!gr)
+		return false;
+
+	if(gr->iterator < gr->used)
+		return true;
+
+	return false;
+
+}
+
+graph_node* _graph_get_next(graph* gr){
+
+	if(!gr)
+		return 0;
+
+	if(gr->iterator >= gr->used)
+		return 0;
+
+	return gr->nodes + gr->iterator++;
 
 }
 

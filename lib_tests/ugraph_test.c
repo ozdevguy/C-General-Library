@@ -161,7 +161,6 @@ void main(){
 	_weighted_graph_add_double_edge(weightedGraph, 32, nodes[rand() % 10000], 50, &e1, &e2);
 
 	_weighted_graph_add_double_edge(weightedGraph, 35, nodes[rand() % 10000], 50, &e1, &e2);
-
 	
 	_weighted_graph_add_double_edge(weightedGraph, 31, 32, 2, &e1, &e2);
 
@@ -205,7 +204,7 @@ void main(){
 
 
 	//Find the shortest path between two nodes.
-	int dest = 44;
+	int dest = nodes[rand() % 10000];
 
 	graph_path path = _weighted_graph_spath(weightedGraph, 31, dest);
 
