@@ -15,16 +15,10 @@ bool _map_delete_all(map*, void (void*));
 void _map_dealloc(void*);
 
 //Map an item.
-bool _map_insert(map*, size_t, void*, uint8_t, size_t);
-
-//Map an item (and return its pointer).
-bool _map_insert_ptr(map*, size_t, void*, uint8_t, size_t, map_entry_int**);
+bool _map_insert(map*, size_t, void*);
 
 //Remove an item from the map.
-bool _map_remove(map*, size_t);
-
-//Remove an item from the map (and return its ext pointer).
-bool _map_remove_eptr(map*, size_t, void**);
+bool _map_remove(map*, size_t, map_entry*);
 
 //Get an item from the map.
 bool _map_lookup(map*, size_t, map_entry*);
@@ -43,8 +37,6 @@ static void int_map_int_copy(map_entry_int* to, map_entry_int* from){
 
 	to->used = from->used;
 	to->key = from->key;
-	to->size = from->size;
-	to->type = from->type;
 	to->data = from->data;
 	to->next = from->next;
 
@@ -53,8 +45,6 @@ static void int_map_int_copy(map_entry_int* to, map_entry_int* from){
 static void int_map_copy(map_entry_int* ent, map_entry* ext){
 
 	ext->key = ent->key;
-	ext->size = ent->size;
-	ext->type = ent->type;
 	ext->data = ent->data;
 	ext->ext = ent->ext;
 
@@ -220,7 +210,7 @@ map* _map_new(standard_library_context* ctx, size_t start_size){
 
 }
 
-bool _map_insert(map* mp, size_t key, void* dat, uint8_t type, size_t size){
+bool _map_insert(map* mp, size_t key, void* dat){
 
 	size_t table_pos;
 	map_entry_int* entry;
@@ -243,8 +233,6 @@ bool _map_insert(map* mp, size_t key, void* dat, uint8_t type, size_t size){
 
 		entry->data = data;
 		entry->key = key;
-		entry->size = size;
-		entry->type = type;
 		entry->used = true;
 		entry->next = 0;
 
@@ -267,8 +255,6 @@ bool _map_insert(map* mp, size_t key, void* dat, uint8_t type, size_t size){
 			entry = entry->next;
 			entry->data = data;
 			entry->key = key;
-			entry->size = size;
-			entry->type = type;
 			entry->used = true;
 			entry->next = 0;
 
@@ -285,74 +271,7 @@ bool _map_insert(map* mp, size_t key, void* dat, uint8_t type, size_t size){
 
 }
 
-bool _map_insert_ptr(map* mp, size_t key, void* dat, uint8_t type, size_t size, map_entry_int** ptr){
-
-	size_t table_pos;
-	map_entry_int* entry;
-	byte* data;
-
-	if(!mp || !dat)
-		return;
-
-	data = dat;
-
-	//Compute the position of the item within the table.
-	table_pos = key % mp->size;
-	entry = mp->map_table + table_pos;
-
-	//This table position has not been used yet.
-	if(!entry->data){
-
-		if(entry->key == key)
-			return false;
-
-		entry->data = data;
-		entry->key = key;
-		entry->size = size;
-		entry->type = type;
-		entry->used = true;
-		entry->next = 0;
-
-		mp->total++;
-		*ptr = entry;
-
-		return true;
-
-	}
-
-	//Find the last item in the list.
-	while(entry){
-
-		if(entry->key == key)
-			return false;
-
-		if(!entry->next){
-
-			//Insert data at the next position.
-			entry->next = allocate(mp->ctx, sizeof(map_entry_int));
-			entry = entry->next;
-			entry->data = data;
-			entry->key = key;
-			entry->size = size;
-			entry->type = type;
-			entry->used = true;
-			entry->next = 0;
-
-			mp->total++;
-			*ptr = entry;
-
-			return true;
-
-		}
-
-		entry = entry->next;
-
-	}
-
-
-}
-
-bool _map_remove(map* mp, size_t key){
+bool _map_remove(map* mp, size_t key, map_entry* ext){
 
 
 	map_entry_int *entry, *tmp, *prev;
@@ -367,6 +286,8 @@ bool _map_remove(map* mp, size_t key){
 	//Check to see if the first item is the item we're looking for.
 	if(entry->key == key){
 
+		*ext = *entry;
+
 		if(entry->next){
 
 			tmp = entry->next;
@@ -374,8 +295,6 @@ bool _map_remove(map* mp, size_t key){
 			int_map_int_copy(entry, tmp);
 
 			destroy(mp->ctx, tmp);
-
-			return true;
 
 		}
 
@@ -391,85 +310,6 @@ bool _map_remove(map* mp, size_t key){
 
 		}
 
-	}
-
-	prev = entry;
-	entry = entry->next;
-
-	while(entry){
-
-		if(entry->key == key){
-
-			tmp = entry->next;
-
-			if(tmp){
-
-				int_map_int_copy(entry, tmp);
-				destroy(mp->ctx, tmp);
-
-				mp->total--;
-
-			}
-			else{
-
-				destroy(mp->ctx, entry);
-				prev->next = 0;
-
-			}
-
-			return true;
-
-		}
-
-		prev = entry;
-		entry = entry->next;
-
-	}
-
-	return false;
-
-}
-
-bool _map_remove_eptr(map* mp, size_t key, void** eptr){
-
-
-	map_entry_int *entry, *tmp, *prev;
-	size_t table_pos;
-	void* eptr_i;
-
-	if(!mp)
-		return;
-
-	table_pos = key % mp->size;
-	entry = mp->map_table + table_pos;
-
-	//Check to see if the first item is the item we're looking for.
-	if(entry->key == key){
-
-		eptr_i = entry->ext;
-
-		if(entry->next){
-
-			tmp = entry->next;
-
-			int_map_int_copy(entry, tmp);
-
-			destroy(mp->ctx, tmp);
-
-		}
-
-		else{
-
-			entry->key = 0;
-			entry->size = 0;
-			entry->type = 0;
-			entry->data = 0;
-			entry->used = false;
-			entry->next = 0;
-
-		}
-
-		*eptr = eptr_i;
 		return true;
 
 	}
@@ -481,7 +321,8 @@ bool _map_remove_eptr(map* mp, size_t key, void** eptr){
 
 		if(entry->key == key){
 
-			eptr_i = entry->ext;
+			*ext = *entry;
+
 			tmp = entry->next;
 
 			if(tmp){
@@ -499,7 +340,6 @@ bool _map_remove_eptr(map* mp, size_t key, void** eptr){
 
 			}
 
-			*eptr = eptr_i;
 			return true;
 
 		}

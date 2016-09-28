@@ -3,7 +3,7 @@
 string* _string_new(standard_library_context*);	//COMPLETE
 string* _string_new_fbytes(standard_library_context*, byte*);  //COMPLETE
 void _string_delete(string*);		//COMPLETE
-void _string_delete_pair(string_pair*); //COMPLETE
+void _string_delete_ll(string_list*); //COMPLETE
 void _string_set_ci(string*, bool);	//COMPLETE
 
 //Append to a string.
@@ -38,16 +38,16 @@ bool _string_char_at(string*, size_t, utf8_char*); //COMPLETE
 string* _string_substr(string*, size_t, size_t); //COMPLETE
 
 //Get a section of a string up to a specific character.
-bool _string_split(string*, size_t, string_pair*); //COMPLETE
+string_list* _string_split(string*, size_t); //COMPLETE
 
-bool _string_split_delim(string*, utf8_char, size_t, string_pair*); //COMPLETE
+string_list* _string_split_delim(string*, utf8_char, size_t); //COMPLETE
 
 //Trim spaces from beginning and end of a string.
 void _string_trim(string* str); //COMPLETE
 
 //Get a section of a string up to a specific substring.
-bool _string_split_fbytes(string*, byte*, size_t, string_pair*); //COMPLETE
-bool _string_split_fstring(string*, string*, size_t, string_pair*); //COMPLETE
+string_list* _string_split_fbytes(string*, byte*, size_t); //COMPLETE
+string_list* _string_split_fstring(string*, string*, size_t); //COMPLETE
 
 //Convert a string to all lowercase.
 void _string_lowercase(string*); //COMPLETE
@@ -136,13 +136,22 @@ void _string_delete(string* str){
 }
 
 //Delete a string pair.
-void _string_delete_pair(string_pair* pair){
+void _string_delete_ll(string_list* lst){
 
-	if(!pair)
+	string_list* tmp;
+	standard_library_context* ctx;
+
+	if(!lst)
 		return;
 
-	_string_delete(pair->s1);
-	_string_delete(pair->s2);
+	while(lst){
+
+		tmp = lst->next;
+		ctx = lst->s->ctx;
+		_string_delete(lst->s);
+		destroy(ctx, lst);
+		lst = tmp;
+	}
 
 }
 
@@ -150,13 +159,6 @@ void _string_delete_pair(string_pair* pair){
 void _string_dealloc(void* str){
 
 	_string_delete((string*)str);
-
-}
-
-//Delete a string (deallocator).
-void _string_dealloc_pair(void* pair){
-
-	_string_delete_pair((string_pair*)pair);
 
 }
 
@@ -463,7 +465,6 @@ bool _string_replace_all_fstring(string* str, string* pattern, string* replace){
 	size_t i;
 	long find_pos;
 	byte* data;
-	string_pair pair;
 	string *s1 = 0, *s2 = 0, *tmp;
 
 	if(!str || !pattern || !replace)
@@ -598,43 +599,50 @@ string* _string_substr(string* str, size_t s_pos, size_t e_pos){
 }
 
 //Split a string at the given index.
-bool _string_split(string* str, size_t pos, string_pair* pair){
+string_list* _string_split(string* str, size_t pos){
 
 	size_t s1_size, s2_size;
-	string* s1, s2;
+	string_list* lst;
 	byte* data;
 
-	if(!str || !pair)
-		return false;
+	if(!str)
+		return 0;
 
 	if(pos <= 0 || pos >= str->length)
-		return false;
+		return 0;
 
-	pair->s1 = _string_substr(str, 0, pos);
-	pair->s2 = _string_substr(str, pos + 1, str->length - 1);	
+	lst = allocate(str->ctx, sizeof(string_list));
+	lst->s = _string_substr(str, 0, pos);
 
-	return true;
+	lst->next = allocate(str->ctx, sizeof(string_list));
+	lst->next->s = _string_substr(str, pos + 1, str->length - 1);	
+
+	return lst;
 
 }
 
 
 //Get a section of a string up to a specific character.
-bool _string_split_delim(string* str, utf8_char delim, size_t s_pos, string_pair* pair){
+string_list* _string_split_delim(string* str, utf8_char delim, size_t s_pos){
 
+	string_list* lst;
 	long pos;
 
-	if(!str || !pair)
-		return false;
+	if(!str)
+		return 0;
 
 	pos = _string_index_of(str, &delim, s_pos);
 
 	if(pos < 0)
-		return false;
+		return 0;
 
-	pair->s1 = _string_substr(str, 0, pos - 1);
-	pair->s2 = _string_substr(str, pos + 1, str->length - 1);
+	lst = allocate(str->ctx, sizeof(string_list));
+	lst->s = _string_substr(str, 0, pos - 1);
 
-	return true;
+	lst->next = allocate(str->ctx, sizeof(string_list));
+	lst->next->s = _string_substr(str, pos + 1, str->length - 1);
+
+	return lst;
 
 }
 
@@ -691,42 +699,45 @@ void _string_trim(string* str){
 }
 
 //Get a section of a string up to a specific substring.
-bool _string_split_fbytes(string* str, byte* delim, size_t s_pos, string_pair* pair){
+string_list* _string_split_fbytes(string* str, byte* delim, size_t s_pos){
 
 	string* delim_string;
-	bool success;
+	string_list* lst;
 
-	if(!str || !delim || !pair)
-		return false;
+	if(!str || !delim)
+		return 0;
 
 	delim_string = _string_new_fbytes(str->ctx, delim);
 
-	success = _string_split_fstring(str, delim_string, s_pos, pair);
+	lst = _string_split_fstring(str, delim_string, s_pos);
 
 	_string_delete(delim_string);
 
 
-	return success;
+	return lst;
 
 }
 
-bool _string_split_fstring(string* str, string* delim, size_t s_pos, string_pair* pair){
+string_list* _string_split_fstring(string* str, string* delim, size_t s_pos){
 
+	string_list* lst;
 	long pos;
 
-	if(!str || !delim || !pair)
-		return false;
+	if(!str || !delim)
+		return 0;
 
 	pos = _string_position_fstring(str, delim, s_pos);
 
 	if(pos < 0)		
-		return false;
+		return 0;
 
-	pair->s1 = _string_substr(str, 0, pos - 1);
+	lst = allocate(str->ctx, sizeof(string_list));
+	lst->s = _string_substr(str, 0, pos - 1);
 
-	pair->s2 = _string_substr(str, pos + delim->length, str->length - 1);
+	lst->next = allocate(str->ctx, sizeof(string_list));
+	lst->next->s = _string_substr(str, pos + delim->length, str->length - 1);
 
-	return true;
+	return lst;
 
 }
 

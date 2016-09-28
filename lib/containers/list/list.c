@@ -14,17 +14,11 @@ void _list_delete_all(list*, void (void*)); //COMPLETE
 //Add an item to the list.
 void _list_add(list*, void*); //COMPLETE
 
-//Change an item at a particular index.
-bool _list_mod(list*, void*, size_t); //COMPLETE
-
 //Get an item from the list.
 void* _list_get(list*, size_t); //COMPLETE
 
 //Remove an item from the list.
 void _list_remove(list*, size_t); //COMPLETE
-
-//Find a pointer in the list.
-size_t _list_find(list*, void*, size_t); //COMPLETE
 
 //Reset the iterator.
 void _list_reset_iterator(list*); //COMPLETE
@@ -37,7 +31,7 @@ void* _list_get_next(list*); //COMPLETE
 
 static void int_list_resize(list* lst, size_t new_size){
 
-	byte* new_data;
+	byte** new_data;
 	size_t i;
 
 	if(!lst)
@@ -48,7 +42,7 @@ static void int_list_resize(list* lst, size_t new_size){
 
 	new_data = allocate(lst->ctx, new_size * sizeof(size_t));
 
-	for(i = 0; i < (lst->used * sizeof(size_t)); i++)
+	for(i = 0; i < lst->used; i++)
 		new_data[i] = lst->data[i];
 
 	destroy(lst->ctx, lst->data);
@@ -103,11 +97,6 @@ void _list_dealloc(void* lst){
 void _list_add(list* lst, void* data){
 
 	int8_t i;
-	size_t val;
-	byte* ptr_dat;
-
-	val = (size_t)data;
-	ptr_dat = (byte*)&val;
 
 	if(!lst)
 		return;
@@ -115,13 +104,8 @@ void _list_add(list* lst, void* data){
 	if(lst->used == lst->size)
 		int_list_resize(lst, lst->size * 2);
 
-	for(i = 0; i < sizeof(size_t); i++)
-		lst->data[(lst->used * sizeof(size_t)) + i] = ptr_dat[i];
-
-
-	lst->used++;
+	lst->data[lst->used++] = (byte*)data;
 	
-
 }
 
 void _list_reset_iterator(list* lst){
@@ -154,9 +138,7 @@ void* _list_get_next(list* lst){
 	if(lst->iterator >= lst->used)
 		return 0;
 
-	l = (size_t*)lst->data;
-
-	return (void*)l[lst->iterator++];
+	return (void*)lst->data[lst->iterator++];
 
 }
 
@@ -171,8 +153,8 @@ void _list_remove(list* lst, size_t pos){
 	if(pos >= lst->used)
 		return;
 
-	for(i = ((pos + 1) * sizeof(size_t)); i < (lst->used * sizeof(size_t)); i++)
-		lst->data[i - sizeof(size_t)] = lst->data[i];
+	for(i = pos; i < (lst->used - 1); i++)
+		lst->data[i] = lst->data[i + 1];
 
 	lst->used--;
 
@@ -188,52 +170,8 @@ void* _list_get(list* lst, size_t pos){
 	if(pos >= lst->used)
 		return 0;
 
-	l = (size_t*)lst->data;
 
-	return (void*)l[pos];
+	return (void*)lst->data[pos];
 
 }
 
-size_t _list_find(list* lst, void* ptr, size_t start_pos){
-
-	size_t i;
-
-	if(!lst)
-		return 0;
-
-	if(start_pos >= lst->used)
-		return 0;
-
-	for(i = start_pos; i < lst->used; i++){
-
-		if(_list_get(lst, i) == ptr)
-			return i;
-
-	}
-
-	return 0;
-}
-
-bool _list_mod(list* lst, void* data, size_t pos){
-
-	int8_t i;
-	size_t val;
-	byte* ptr_dat;
-
-	val = (size_t)data;
-	ptr_dat = (byte*)&val;
-
-	if(!lst)
-		return false;
-
-	if(pos >= lst->used)
-		return false;
-
-	if(lst->used == lst->size)
-		int_list_resize(lst, lst->size * 2);
-
-	for(i = 0; i < sizeof(size_t); i++)
-		lst->data[(pos * sizeof(size_t)) + i] = ptr_dat[i];
-
-	return true;
-}

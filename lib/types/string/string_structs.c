@@ -1,5 +1,5 @@
 typedef struct string string;
-typedef struct string_pair string_pair;
+typedef struct string_list string_list;
 
 struct string{
 
@@ -20,15 +20,12 @@ struct string{
 
 };
 
-struct string_pair{
+struct string_list{
 
-	//String 1.
-	string* s1;
+	//String
+	string* s;
 
-	//String 2.
-	string* s2;
-
-	//Error.
-	bool error;
+	//Next string.
+	string_list* next;
 
 };

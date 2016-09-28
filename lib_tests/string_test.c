@@ -71,12 +71,10 @@ void main(){
 
 	//Test string split.
 
-	string_pair pair;
+	string_list* lst = _string_split(myString, 21);
 
-	_string_split(myString, 21, &pair);
-
-	char* s1 = (char*)_string_pull(pair.s1, &size);
-	char* s2 = (char*)_string_pull(pair.s2, &size);
+	char* s1 = (char*)_string_pull(lst->s, &size);
+	char* s2 = (char*)_string_pull(lst->next->s, &size);
 
 	printf("%s\n", s1);
 	printf("%s\n", s2);
@@ -106,14 +104,13 @@ void main(){
 	printf("Position of character: %ld\n", cpos);
 
 	utf8_char tchar2 = _utf8_fbytes("☺");
-	string_pair tpair;
 
-	_string_split_delim(myString, tchar2, 0, &tpair);
+	string_list* tlst = _string_split_delim(myString, tchar2, 0);
 
 	size_t l;
 
-	char* d0 = (char*)_string_pull(tpair.s1, &l);
-	char* d1 = (char*)_string_pull(tpair.s2, &l);
+	char* d0 = (char*)_string_pull(tlst->s, &l);
+	char* d1 = (char*)_string_pull(tlst->next->s, &l);
 
 	printf("%s\n", d0);
 	printf("%s\n", d1);
@@ -121,9 +118,9 @@ void main(){
 	destroy(&ctx, d0);
 	destroy(&ctx, d1);
 
-	_string_delete_pair(&tpair);
+	_string_delete_ll(lst);
 
-	_string_delete_pair(&pair);
+	_string_delete_ll(tlst);
 	_string_delete(myString);
 	_string_delete(string2);
 	_string_delete(substr);
@@ -141,25 +138,23 @@ void main(){
 
 	destroy(&ctx, tt);
 
-	string_pair tpair2;
+	string_list* tlst2 = _string_split_fbytes(trimTest, " W", 0);
 
-	_string_split_fbytes(trimTest, " W", 0, &tpair2);
-
-	if(tpair2.error)
+	if(!tlst2)
 		printf("ERROR!");
 
-	tt = (char*)_string_pull(tpair2.s1, &l);
+	tt = (char*)_string_pull(tlst2->s, &l);
 	printf("%s\n", tt);
 
 	destroy(&ctx, tt);
 
-	tt = (char*)_string_pull(tpair2.s2, &l);
+	tt = (char*)_string_pull(tlst2->next->s, &l);
 	printf("%s\n", tt);
 
 	destroy(&ctx, tt);
 
 	_string_delete(trimTest);
-	_string_delete_pair(&tpair2);
+	_string_delete_ll(tlst2);
 
 
 	return;

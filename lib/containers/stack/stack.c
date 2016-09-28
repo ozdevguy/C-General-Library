@@ -17,13 +17,13 @@ void _stack_dealloc(void*);
 void _stack_delete_all(stack*, void (void*));
 
 //Push a new item to the stack.
-void _stack_push(stack*, void*, uint8_t, size_t);
+void _stack_push(stack*, void*);
 
 //Pop an item from the stack.
-bool _stack_pop(stack*, stack_item*);
+void* _stack_pop(stack*);
 
 //Peek at the item on top of the stack.
-bool _stack_peek(stack*, stack_item*);
+void* _stack_peek(stack*);
 
 
 
@@ -32,7 +32,7 @@ static void int_stack_resize(stack* st){
 
 	size_t new_size = st->size * 2, i;
 
-	stack_item* entries = allocate(st->ctx, (sizeof(stack_item) * new_size));
+	byte** entries = allocate(st->ctx, (sizeof(size_t) * new_size));
 
 	for(i = 1; i < st->size; i++)
 		entries[i] = st->entries[i];
@@ -61,19 +61,14 @@ void _stack_dealloc(void* st){
 
 void _stack_delete_all(stack* st, void (*dealloc)(void*)){
 
+	size_t i;
+
 	if(!st)
 		return;
 
-	size_t i;
+	for(i = 0; i < st->top; i++){
 
-	for(i = 1; i < st->top; i++){
-
-		if(st->entries[i].data){
-
-			dealloc(st->entries[i].data);
-			destroy(st->ctx, st->entries[i].data);
-
-		}
+		dealloc(st->entries[i]);
 		
 	}
 
@@ -84,7 +79,7 @@ void _stack_delete_all(stack* st, void (*dealloc)(void*)){
 stack* _stack_new(standard_library_context* ctx, size_t start_size){
 
 	stack* st = allocate(ctx, sizeof(stack));
-	st->entries = allocate(ctx, (sizeof(stack_item) * start_size));
+	st->entries = allocate(ctx, (sizeof(size_t) * start_size));
 	st->ctx = ctx;
 	st->size = start_size;
 
@@ -92,7 +87,7 @@ stack* _stack_new(standard_library_context* ctx, size_t start_size){
 
 }
 
-void _stack_push(stack* st, void* data, uint8_t type, size_t size){
+void _stack_push(stack* st, void* data){
 
 	if(!st)
 		return;
@@ -101,36 +96,31 @@ void _stack_push(stack* st, void* data, uint8_t type, size_t size){
 		int_stack_resize(st);
 
 	st->top++;
-	st->entries[st->top].data = data;
-	st->entries[st->top].size = size;
-	st->entries[st->top].type = type;
+	st->entries[st->top] = data;
 
 }
 
-bool _stack_pop(stack* st, stack_item* item){
+void* _stack_pop(stack* st){
 
-	if(!st || !item)
-		return false;
+	if(!st)
+		return 0;
 
 	if(!st->top)
-		return false;
+		return 0;
 
-	*item = st->entries[st->top--];
-
-	return true;
+	return (void*)(st->entries[st->top--]);
 
 }
 
-bool _stack_peek(stack* st, stack_item* item){
+void* _stack_peek(stack* st){
 
-	if(!st || !item)
-		return false;
+	if(!st)
+		return 0;
 
 	if(!st->top)
-		return false;
+		return 0;
 
-	*item = st->entries[st->top];
+	return (void*)(st->entries[st->top]);
 
-	return true;
 
 }

@@ -1,4 +1,4 @@
-#include "../lib/ile_stdlib.h"
+#include "../lib/list.h"
 
 void main(){
 
@@ -35,7 +35,6 @@ void main(){
 	while(_list_has_next(myList))
 		printf("%d\n", *((int*)_list_get_next(myList)));
 
-	printf("\n\n%d", *((int*)_list_get(myList, _list_find(myList, &d, 0))));
 
 	_list_delete(myList);
 

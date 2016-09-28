@@ -17,9 +17,6 @@ void _vector_add(vector*, void*);
 //Get an item from the vector.
 void* _vector_get(vector*, size_t);
 
-//Change an item at a particular index.
-bool _vector_mod(vector*, void*, size_t);
-
 //Remove an item from the vector.
 void _vector_remove(vector*, size_t);
 
@@ -50,15 +47,13 @@ vector* _vector_new(standard_library_context* ctx, size_t data_size, size_t star
 static void int_vector_resize(vector* vect){
 
 	size_t i;
-	byte* data = vect->data;
 	byte* new_data = allocate(vect->ctx, vect->data_size * vect->size * 2);
 
 	for(i = 0; i < (vect->used * vect->data_size); i++)
-		new_data[i] = data[i];
+		new_data[i] = vect->data[i];
 	
-
 	vect->size *= 2;
-	destroy(vect->ctx, data);
+	destroy(vect->ctx, vect->data);
 
 	vect->data = new_data;
 
@@ -68,35 +63,13 @@ void _vector_add(vector* vect, void* data){
 
 	size_t i = 0;
 
-	byte* dat = data;
-
-	if(vect->used >= vect->size)
+	if(vect->used == vect->size)
 		int_vector_resize(vect);
 
 	for(i = 0; i < vect->data_size; i++)
-		vect->data[(vect->used * vect->data_size) + i] = dat[i];
-
-	vect->used++;
+		vect->data[(vect->used++ * vect->data_size) + i] = (byte*)data[i];
 
 
-}
-
-bool _vector_mod(vector* vect, void* data, size_t pos){
-
-	size_t i;
-	byte* dat = data;
-
-	if(!vect)
-		return false;
-
-	if(pos >= vect->used)
-		return false;
-
-	for(i = 0; i < vect->data_size; i++)
-		vect->data[(pos * vect->data_size) + i] = dat[i];
-
-	return true;
-	
 }
 
 void* _vector_get(vector* vect, size_t pos){
@@ -110,34 +83,21 @@ void* _vector_get(vector* vect, size_t pos){
 
 void _vector_remove(vector* vect, size_t pos){
 
-	size_t i, j, b_size;
-	byte* new_data;
+	size_t i, b_size;
 
 	if(!vect)
 		return;
 
 	vect->iterator = 0;
 
-	if(pos < vect->used - 1){
+	if(pos >= vect->used)
+		return;
 
-		b_size = vect->used * vect->data_size;
-		pos *= vect->data_size;
+	b_size = (--vect->used * vect->data_size);
+	pos *= vect->data_size;
 
-		for(i = pos; i < b_size; i++){
-
-			for(j = i; j < (i + vect->data_size); j++)
-				vect->data[j] = vect->data[j + vect->data_size];
-
-			i = j;
-
-		}
-
-		vect->used--;
-
-	}
-
-	else if(pos < vect->used)
-		vect->used--;
+	for(i = pos; i < b_size; i++)
+		vect->data[i] = vect->data[i + vect->data_size];
 
 }
 

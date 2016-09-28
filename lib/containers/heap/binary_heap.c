@@ -1,9 +1,6 @@
 //Create a binary heap.
 binary_heap* _binary_heap_new(standard_library_context*, size_t); //FINISHED
 
-//Create a binary heap from a list.
-binary_heap* _binary_heap_new_flist(standard_library_context*, void*); //TO DO
-
 //Delete a binary heap.
 bool _binary_heap_delete(binary_heap*); //FINISHED
 
@@ -11,7 +8,7 @@ bool _binary_heap_delete(binary_heap*); //FINISHED
 void _binary_heap_insert(binary_heap*, int32_t, void*); //FINISHED
 
 //Remove an item from the binary heap at the given index.
-void _binary_heap_remove(binary_heap*, size_t); //TO DO
+bool _binary_heap_remove(binary_heap*, size_t, binary_heap_entry*); //TO DO
 
 //Set heap ordering.
 void _binary_heap_ordering(binary_heap*, uint8_t); //FINISHED
@@ -22,19 +19,21 @@ void _binary_heap_reset_iterator(binary_heap*); //FINISHED
 //Iterator has next?
 bool _binary_heap_has_next(binary_heap*); //FINISHED
 
-/* CHANGED */
-
 //Get the next item.
-bool _binary_heap_get_next(binary_heap*, binary_heap_entry*); //FINISHED
+binary_heap_entry* _binary_heap_get_next(binary_heap*); //FINISHED
 
 //Get an item at the specified index.
-bool _binary_heap_get(binary_heap*, size_t, binary_heap_entry*); //FINISHED
+binary_heap_entry* _binary_heap_get(binary_heap*, size_t); //FINISHED
 
 //Get and remove the root of the binary heap.
 bool _binary_heap_remove_root(binary_heap*, binary_heap_entry*); //FINISHED
 
 //Peek at the root of the binary heap.
-bool _binary_heap_peek(binary_heap*, binary_heap_entry*); //TO DO
+bool _binary_heap_peek(binary_heap*, binary_heap_entry*); //FINISHED
+
+//Rebuild the heap.
+void _binary_heap_build(binary_heap*);
+
 
 
 
@@ -130,9 +129,9 @@ static void int_binary_heap_min_heapify(binary_heap* heap, size_t pos){
 }
 
 //Max-reverse heapify (move from pos to end).
-static void int_binary_heap_max_reverse_heapify(binary_heap* heap){
+static void int_binary_heap_max_reverse_heapify(binary_heap* heap, size_t pos){
 
-	size_t pos = 0, left, right;
+	size_t left, right;
 
 	if(!heap)
 		return;
@@ -180,9 +179,9 @@ static void int_binary_heap_max_reverse_heapify(binary_heap* heap){
 }
 
 //Min-reverse heapify (move from pos to end).
-static void int_binary_heap_min_reverse_heapify(binary_heap* heap){
+static void int_binary_heap_min_reverse_heapify(binary_heap* heap, size_t pos){
 
-	size_t pos = 0, left, right;
+	size_t left, right;
 
 	if(!heap)
 		return;
@@ -229,34 +228,6 @@ static void int_binary_heap_min_reverse_heapify(binary_heap* heap){
 	}
 }
 
-//Build max heap.
-static void int_binary_heap_build_max(binary_heap* heap){
-
-	size_t i;
-
-	if(!heap)
-		return;
-
-	for(i = 1; i < heap->used; i++)
-		int_binary_heap_max_heapify(heap, i);
-
-
-}
-
-//Build min heap.
-static void int_binary_heap_build_min(binary_heap* heap){
-
-	size_t i;
-
-	if(!heap)
-		return;
-
-	for(i = 1; i < heap->used; i++)
-		int_binary_heap_min_heapify(heap, i);
-
-
-}
-
 
 binary_heap* _binary_heap_new(standard_library_context* ctx, size_t start_size){
 
@@ -277,16 +248,46 @@ binary_heap* _binary_heap_new(standard_library_context* ctx, size_t start_size){
 
 void _binary_heap_ordering(binary_heap* heap, uint8_t ordering){
 
+	size_t i;
+
 	if(!heap)
 		return;
 
 	heap->ordering = ordering;
 
-	if(ordering == BINARY_HEAP_MAX)
-		int_binary_heap_build_max(heap);
-	else
-		int_binary_heap_build_min(heap);
+	if(ordering == BINARY_HEAP_MAX){
 
+		for(i = heap->used / 2; i >= 0; i--)
+			int_binary_heap_max_reverse_heapify(heap, i);
+
+	}
+	else{
+
+		for(i = heap->used / 2; i >= 0; i--)
+			int_binary_heap_min_reverse_heapify(heap, i);
+	}
+
+
+}
+
+void _binary_heap_build(binary_heap* heap){
+
+	size_t i;
+
+	if(!heap)
+		return;
+
+	if(heap->ordering == BINARY_HEAP_MAX){
+
+		for(i = heap->used / 2; i >= 0; i--)
+			int_binary_heap_max_reverse_heapify(heap, i);
+
+	}
+	else{
+
+		for(i = heap->used / 2; i >= 0; i--)
+			int_binary_heap_min_reverse_heapify(heap, i);
+	}
 
 }
 
@@ -306,6 +307,22 @@ void _binary_heap_insert(binary_heap* heap, int32_t key, void* data){
 	else
 		int_binary_heap_min_heapify(heap, heap->used++);
 	
+}
+
+bool _binary_heap_remove(binary_heap* heap, size_t pos, binary_heap_entry* entry){
+
+	if(!heap)
+		return false;
+
+	if(pos > heap->used)
+		return false;
+
+	*entry = heap->data[pos];
+	heap->data[pos] = heap->data[heap->used-- - 1];
+	_binary_heap_build(heap);
+
+	return true;
+
 }
 
 bool _binary_heap_delete(binary_heap* heap){
@@ -353,9 +370,9 @@ bool _binary_heap_remove_root(binary_heap* heap, binary_heap_entry* entry){
 	int_binary_heap_swap(heap->data, heap->data + (heap->used-- - 1));
 
 	if(heap->ordering == BINARY_HEAP_MAX)		
-		int_binary_heap_max_reverse_heapify(heap);
+		int_binary_heap_max_reverse_heapify(heap, 0);
 	else
-		int_binary_heap_min_reverse_heapify(heap);
+		int_binary_heap_min_reverse_heapify(heap, 0);
 
 	return true;
 
@@ -375,20 +392,32 @@ bool _binary_heap_peek(binary_heap* heap, binary_heap_entry* entry){
 
 }
 
-bool _binary_heap_get_next(binary_heap* heap, binary_heap_entry* entry){
+binary_heap_entry* _binary_heap_get_next(binary_heap* heap){
 
-	if(!heap || !entry)
-		return false;
+	if(!heap)
+		return 0;
 
-	if(heap->iterator < heap->used){
+	if(heap->iterator < heap->used)
+		 return heap->data + heap->iterator++;
 
-		*entry = heap->data[heap->iterator++];
-		return true;
-	}
-
-	return false;
+	return 0;
 
 }
+
+binary_heap_entry* _binary_heap_get(binary_heap* heap, size_t index){
+
+	binary_heap_entry* entry = 0;
+
+	if(!heap)
+		return 0;
+
+	if(index < heap->used)
+		return heap->data + index;
+
+	return 0;
+
+}
+
 
 
 

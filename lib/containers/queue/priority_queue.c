@@ -8,28 +8,32 @@ void _priority_queue_delete(priority_queue*); //FINISHED
 void _priority_queue_delete_all(priority_queue*, void (void*)); //FINISHED
 
 //Enqueue a new item.
-void _priority_queue_enqueue(priority_queue*, int32_t, void*, uint8_t, size_t); //FINISHED
+void _priority_queue_enqueue(priority_queue*, int32_t, void*); //FINISHED
 
 //Remove the item at the front of the queue.
-bool _priority_queue_dequeue(priority_queue*, queue_entry*); //FINISHED
+void* _priority_queue_dequeue(priority_queue*); //FINISHED
 
 //Peek at the front of the queue.
-bool _priority_queue_peek(priority_queue*, queue_entry*); //FINISHED
+void* _priority_queue_peek(priority_queue*); //FINISHED
 
 //Priority queue deallocator.
 void _priority_queue_dealloc(void*); //FINISHED
+
+//Change the queue type.
+void _priority_queue_type(uint8_t);
+
+//Get a pointer to an item.
+binary_heap_entry* _priority_queue_get(priority_queue*, size_t);
 
 
 priority_queue* _priority_queue_new(standard_library_context* ctx, size_t start_size){
 
 	priority_queue* pq;
-	binary_heap* bh;
 
 	pq = allocate(ctx, sizeof(priority_queue));
-	bh = _binary_heap_new(ctx, start_size);
+	pq->heap = _binary_heap_new(ctx, start_size);
 
 	pq->ctx = ctx;
-	pq->heap = bh;
 
 	return pq;
 
@@ -38,22 +42,9 @@ priority_queue* _priority_queue_new(standard_library_context* ctx, size_t start_
 void _priority_queue_delete(priority_queue* queue){
 
 	size_t i;
-	binary_heap* heap;
-	binary_heap_entry heap_entry;
 
 	if(!queue)
 		return;
-
-	heap = queue->heap;
-
-	_binary_heap_reset_iterator(queue->heap);
-
-	while(_binary_heap_has_next(queue->heap)){
-
-		_binary_heap_get_next(queue->heap, &heap_entry);
-		destroy(queue->ctx, heap_entry.data);
-
-	}
 
 	_binary_heap_delete(queue->heap);
 
@@ -63,28 +54,8 @@ void _priority_queue_delete(priority_queue* queue){
 
 void _priority_queue_delete_all(priority_queue* queue, void (*dealloc)(void*)){
 
-	size_t i;
-	binary_heap* heap;
-	queue_entry* entry;
-	binary_heap_entry heap_entry;
-
 	if(!queue)
 		return;
-
-	heap = queue->heap;
-
-	_binary_heap_reset_iterator(queue->heap);
-
-	while(_binary_heap_has_next(queue->heap)){
-
-		_binary_heap_get_next(queue->heap, &heap_entry);
-
-		entry = heap_entry.data;
-
-		dealloc(entry->data);
-		destroy(queue->ctx, entry);
-
-	}
 
 	_binary_heap_delete(queue->heap);
 
@@ -98,73 +69,60 @@ void _priority_queue_dealloc(void* queue){
 
 }
 
-void _priority_queue_enqueue(priority_queue* queue, int32_t priority, void* data, uint8_t type, size_t data_size){
+void _priority_queue_enqueue(priority_queue* queue, int32_t priority, void* data){
 
 	queue_entry* entry;
 
 	if(!queue)
 		return;
 
-	entry = allocate(queue->ctx, sizeof(queue_entry));
-	entry->data = data;
-	entry->size = data_size;
-	entry->type = type;
-
-	_binary_heap_insert(queue->heap, priority, entry);
+	_binary_heap_insert(queue->heap, priority, data);
 
 }
 
-bool _priority_queue_dequeue(priority_queue* queue, queue_entry* entry){
+void* _priority_queue_dequeue(priority_queue* queue){
 
 	binary_heap_entry heap_entry;
-
-	if(!queue || !entry)
-		return false;
-
-	if(_binary_heap_remove_root(queue->heap, &heap_entry)){
-
-		if(heap_entry.data)
-			*entry = *((queue_entry*)heap_entry.data);
-
-		destroy(queue->ctx, heap_entry.data);
-
-		return true;
-
-	}
-
-	return false;
-
-}
-
-bool _priority_queue_peek(priority_queue* queue, queue_entry* entry){
-
-	binary_heap_entry heap_entry;
-
-	if(!queue || !entry)
-		return false;
-
-	if(_binary_heap_peek(queue->heap, &heap_entry)){
-
-		if(heap_entry.data)
-			*entry = *((queue_entry*)heap_entry.data);
-
-		return true;
-
-	}
-
-	return false;
-	
-}
-
-size_t _priority_queue_total(priority_queue* queue){
-
-	binary_heap* heap;
 
 	if(!queue)
 		return 0;
 
-	heap = queue->heap;
+	if(_binary_heap_remove_root(queue->heap, &heap_entry))
+		return heap_entry.data;
 
-	return heap->used;
 
+	return 0;
+
+}
+
+void* _priority_queue_peek(priority_queue* queue){
+
+	binary_heap_entry heap_entry;
+
+	if(!queue)
+		return 0;
+
+	if(_binary_heap_peek(queue->heap, &heap_entry))
+		return heap_entry.data;
+
+
+	return 0;
+	
+}
+
+binary_heap_entry* _priority_queue_get(priority_queue* queue, size_t pos){
+
+	if(!queue)
+		return 0;
+
+	return _binary_heap_get(queue->heap, pos);
+
+}
+
+void _priority_queue_rebuild(priority_queue* queue){
+
+	if(!queue)
+		return;
+
+	_binary_heap_build(queue->heap);
 }

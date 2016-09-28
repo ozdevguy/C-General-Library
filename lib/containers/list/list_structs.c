@@ -15,6 +15,6 @@ struct list{
 	size_t iterator;
 
 	//Data
-	byte* data;
+	byte** data;
 
 };

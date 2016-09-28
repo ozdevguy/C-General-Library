@@ -16,18 +16,16 @@ void _queue_delete(queue*);
 void _queue_delete_all(queue*, void (void*));
 
 //Enqueue a new item.
-void _queue_enqueue(queue*, void*, uint8_t, size_t);
+void _queue_enqueue(queue*, void*);
 
 //Remove the item at the front of the queue.
-bool _queue_dequeue(queue*, queue_entry*);
+void* _queue_dequeue(queue*);
 
 //Peek at the front of the queue.
-bool _queue_peek(queue*, queue_entry*);
+void* _queue_peek(queue*);
 
 //Queue deallocator.
 void _queue_dealloc(void*);
-
-
 
 
 static void int_queue_resize(queue* q){
@@ -36,13 +34,12 @@ static void int_queue_resize(queue* q){
 	size_t new_size = q->size * 2, i, j = 0;
 
 	//Create a new, larger queue.
-	queue_entry* entries = allocate(q->ctx, sizeof(queue_entry) * new_size);
+	byte** entries = allocate(q->ctx, sizeof(size_t) * new_size);
 
 	//Copy over the data.
 	for(i = q->front; j < q->size; i = ((i + 1) % q->size)){
 
-		entries[j].data = q->entries[i].data;
-		entries[j].size = q->entries[i].size;
+		entries[j] = q->entries[i];
 		j++;
 
 	}
@@ -81,12 +78,8 @@ void _queue_delete_all(queue* q, void (*dealloc)(void*)){
 
 	for(i = 0; i < q->size; i++){
 
-		if(q->entries[i].data){
-
-			dealloc(q->entries[i].data);
-			destroy(q->ctx, q->entries[i].data);
-
-		}
+		if(q->entries[i])
+			dealloc(q->entries[i]);
 
 	}
 
@@ -100,7 +93,7 @@ queue* _queue_new(standard_library_context* ctx, size_t start_size){
 	queue* q = allocate(ctx, sizeof(queue));
 
 	//Create a new queue array.
-	q->entries = allocate(ctx, sizeof(queue_entry) * start_size);
+	q->entries = allocate(ctx, sizeof(size_t) * start_size);
 	q->size = start_size;
 	q->ctx = ctx;
 
@@ -110,44 +103,48 @@ queue* _queue_new(standard_library_context* ctx, size_t start_size){
 }
 
 
-bool _queue_dequeue(queue* q, queue_entry* entry){
+void* _queue_dequeue(queue* q){
 
-	if(!q || !entry)
-		return false;
+	void* entry;
+
+	if(!q)
+		return 0;
 
 	size_t frontpos = q->front;
 
 	if(!q->used)
-		return false;
+		return 0;
 
 	if(frontpos == q->size - 1)
 		frontpos = 0;
 	else
 		frontpos++;
 	
-	*entry = *(q->entries + q->front);
+	entry = (void*)(q->entries[q->front]);
 	q->front = frontpos;
 	q->used--;
 
-	return true;
+	return entry;
 
 }
 
-bool _queue_peek(queue* q, queue_entry* entry){
+void* _queue_peek(queue* q){
 
-	if(!q || !entry)
-		return false;
+	void* entry;
+
+	if(!q)
+		return 0;
 
 	if(!q->used)
-		return false;
+		return 0;
 
-	*entry = *(q->entries + q->front);
+	entry = (void*)(q->entries[q->front]);
 
-	return true;
+	return entry;
 
 }
 
-void _queue_enqueue(queue* q, void* data, uint8_t type, size_t size){
+void _queue_enqueue(queue* q, void* data){
 
 	if(!q)
 		return;
@@ -163,9 +160,7 @@ void _queue_enqueue(queue* q, void* data, uint8_t type, size_t size){
 	else
 		backpos = q->back + 1;
 
-	q->entries[q->back].data = data;
-	q->entries[q->back].size = size;
-	q->entries[q->back].type = type;
+	q->entries[q->back] = data;
 
 	q->back = backpos;
 	q->used++;

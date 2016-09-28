@@ -1,4 +1,4 @@
-#include "../lib/ile_stdlib.h"
+#include "../lib/priority_queue.h"
 
 void main(){
 
@@ -6,48 +6,27 @@ void main(){
 
 	_std_lib_default(&ctx);
 
-	int t1 = 3;
-	int t2 = 5;
-	int t3 = 1;
-	int t4 = 2;
-	int t5 = 4;
+	priority_queue* pqueue = _priority_queue_new(&ctx, 5);
 
-	priority_queue* q = _priority_queue_new(&ctx, 5);
+	int a = 12;
+	int b = 34;
+	int c = 56;
+	int d = 78;
+	int e = 910;
 
-	_priority_queue_enqueue(q, 124, &t1, TYPE_INT, 1);
-	_priority_queue_enqueue(q, -1, &t2, TYPE_INT, 1);
-	_priority_queue_enqueue(q, 200, &t3, TYPE_INT, 1);
-	_priority_queue_enqueue(q, 150, &t4, TYPE_INT, 1);
-
-
-	queue_entry entry;
-
-	_priority_queue_dequeue(q, &entry);
-	printf("%d\n", *((int*)entry.data));
-
-	_priority_queue_dequeue(q, &entry);
-	printf("%d\n", *((int*)entry.data));
-
-	_priority_queue_enqueue(q, 120, &t2, 1, 1);
-
-	
-	_priority_queue_dequeue(q, &entry);
-	printf("%d\n", *((int*)entry.data));
-
-	_priority_queue_dequeue(q, &entry);
-	printf("%d\n", *((int*)entry.data));
+	_priority_queue_enqueue(pqueue, 20, &a);
+	_priority_queue_enqueue(pqueue, 5, &b);
+	_priority_queue_enqueue(pqueue, 1, &c);
+	_priority_queue_enqueue(pqueue, 100, &d);
+	_priority_queue_enqueue(pqueue, 50, &e);
 
 
-	_priority_queue_dequeue(q, &entry);
-	printf("%d\n", *((int*)entry.data));
+	int i;
 
-	
-	
-	if(_priority_queue_dequeue(q, &entry))
-		printf("%d\n", *((int*)entry.data));
+	for(i = 0; i < 5; i++)
+		printf("Value: %d\n", *((int*)_priority_queue_dequeue(pqueue)));
 	
 
-	_priority_queue_delete(q);
-
+	_priority_queue_delete(pqueue);
 
 }

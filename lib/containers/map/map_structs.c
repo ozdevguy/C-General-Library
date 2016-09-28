@@ -8,12 +8,6 @@ struct map_entry{
 	//Key.
 	size_t key;
 
-	//Size of the data in this entry.
-	size_t size;
-
-	//Data type.
-	uint8_t type;
-
 	//Data pointer.
 	void* data;
 
@@ -29,12 +23,6 @@ struct map_entry_int{
 
 	//Key
 	size_t key;
-	
-	//Size of the data in this entry.
-	size_t size;
-
-	//Data type.
-	uint8_t type;
 
 	//Data pointer.
 	void* data;
