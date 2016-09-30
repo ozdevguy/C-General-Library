@@ -129,13 +129,13 @@ void _weighted_graph_clear_paths(graph* gr){
 
 }
 
+//Dijkstra
 bool _weighted_graph_spath(graph* gr, size_t start, size_t end, graph_path* path){
 
 	size_t i, length;
 	queue* bfs_queue;
 	graph_node *root = 0, *destination = 0, *current = 0, *discovery = 0;
 	graph_edge* c_edge;
-	queue_entry entry;
 
 	if(!gr || !path)
 		return false;
@@ -164,13 +164,11 @@ bool _weighted_graph_spath(graph* gr, size_t start, size_t end, graph_path* path
 	bfs_queue = _queue_new(gr->ctx, 10);
 
 	//Enqueue the root.
-	_queue_enqueue(bfs_queue, root, 0, 0);
+	_queue_enqueue(bfs_queue, root);
 
 	while(bfs_queue->used){
 
-		_queue_dequeue(bfs_queue, &entry);
-		current = (graph_node*)entry.data;
-
+		current = (graph_node*)_queue_dequeue(bfs_queue);
 		c_edge = current->edges;
 
 		while(c_edge){
@@ -187,17 +185,16 @@ bool _weighted_graph_spath(graph* gr, size_t start, size_t end, graph_path* path
 				discovery->level = length;
 				discovery->parent = current;
 
-				_queue_enqueue(bfs_queue, discovery, 0, 0);
+				_queue_enqueue(bfs_queue, discovery);
 
 			}
-
 
 			c_edge = c_edge->next;
 		}
 
 	}
 
-	
+	//We have our shortest path!
 	if(destination->parent){
 
 		_queue_delete(bfs_queue);
@@ -206,17 +203,19 @@ bool _weighted_graph_spath(graph* gr, size_t start, size_t end, graph_path* path
 
 	}
 
+	//Crap, no shortest path...
 	_queue_delete(bfs_queue);
 	return false;
 }
 
+
+//Dijkstra, with edge masks!
 bool _weighted_graph_spath_amask(graph* gr, size_t start, size_t end, size_t mask, graph_path* path){
 
 	size_t i, length;
 	queue* bfs_queue;
 	graph_node *root = 0, *destination = 0, *current = 0, *discovery = 0;
 	graph_edge* c_edge;
-	queue_entry entry;
 
 	if(!gr || !path)
 		return false;
@@ -245,13 +244,11 @@ bool _weighted_graph_spath_amask(graph* gr, size_t start, size_t end, size_t mas
 	bfs_queue = _queue_new(gr->ctx, 10);
 
 	//Enqueue the root.
-	_queue_enqueue(bfs_queue, root, 0, 0);
+	_queue_enqueue(bfs_queue, root);
 
 	while(bfs_queue->used){
 
-		_queue_dequeue(bfs_queue, &entry);
-		current = (graph_node*)entry.data;
-
+		current = (graph_node*)_queue_dequeue(bfs_queue);
 		c_edge = current->edges;
 
 		while(c_edge){
@@ -270,7 +267,7 @@ bool _weighted_graph_spath_amask(graph* gr, size_t start, size_t end, size_t mas
 					discovery->level = length;
 					discovery->parent = current;
 
-					_queue_enqueue(bfs_queue, discovery, 0, 0);
+					_queue_enqueue(bfs_queue, discovery);
 
 				}
 
@@ -281,7 +278,7 @@ bool _weighted_graph_spath_amask(graph* gr, size_t start, size_t end, size_t mas
 
 	}
 
-	
+	//Found the shortest path!
 	if(destination->parent){
 
 		_queue_delete(bfs_queue);
@@ -290,6 +287,7 @@ bool _weighted_graph_spath_amask(graph* gr, size_t start, size_t end, size_t mas
 
 	}
 
+	//Crap...
 	_queue_delete(bfs_queue);
 	return false;
 }

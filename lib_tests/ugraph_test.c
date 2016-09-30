@@ -145,10 +145,10 @@ void main(){
 	_weighted_graph_add_node(weightedGraph, 44, &data2);
 
 
-	int nodes[100001];
+	int nodes[10001];
 	srand(time(0));
 
-	for(i = 0; i < 100000; i++){
+	for(i = 0; i < 10000; i++){
 
 		nodes[i] = rand();
 
@@ -159,14 +159,14 @@ void main(){
 
 	//Add the edges...
 
-	for(i = 0; i < 100000; i++)		
-		_weighted_graph_add_double_edge(weightedGraph, nodes[rand() % 100000], nodes[rand() % 10000], rand(), &e1, &e2);
+	for(i = 0; i < 10000; i++)		
+		_weighted_graph_add_double_edge(weightedGraph, nodes[rand() % 10000], nodes[rand() % 10000], rand(), &e1, &e2);
 
-	_weighted_graph_add_double_edge(weightedGraph, 39, nodes[rand() % 100000], 50, &e1, &e2);
+	_weighted_graph_add_double_edge(weightedGraph, 39, nodes[rand() % 10000], 50, &e1, &e2);
 
-	_weighted_graph_add_double_edge(weightedGraph, 32, nodes[rand() % 100000], 20, &e1, &e2);
+	_weighted_graph_add_double_edge(weightedGraph, 32, nodes[rand() % 10000], 20, &e1, &e2);
 
-	_weighted_graph_add_double_edge(weightedGraph, 35, nodes[rand() % 100000], 50, &e1, &e2);
+	_weighted_graph_add_double_edge(weightedGraph, 35, nodes[rand() % 10000], 50, &e1, &e2);
 	
 	_weighted_graph_add_double_edge(weightedGraph, 31, 32, 2, &e1, &e2);
 

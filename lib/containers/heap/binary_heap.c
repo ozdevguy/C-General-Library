@@ -233,7 +233,7 @@ binary_heap* _binary_heap_new(standard_library_context* ctx, size_t start_size){
 
 	binary_heap* heap;
 
-	if(!ctx)
+	if(!ctx || !start_size)
 		return 0;
 
 	heap = allocate(ctx, sizeof(binary_heap));
@@ -287,6 +287,7 @@ void _binary_heap_build(binary_heap* heap){
 
 		for(i = heap->used / 2; i >= 0; i--)
 			int_binary_heap_min_reverse_heapify(heap, i);
+		
 	}
 
 }

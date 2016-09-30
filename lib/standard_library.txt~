@@ -1,17 +1,17 @@
 Standard Library
 -------------------
 UTF8 Characters -> Complete <MODDED>
-Strings -> Complete (need to implement logging and error handling). <MODDED>
-Stacks -> Complete (need to implement logging and error handling). <MODDED>
-Queues -> Complete (need to implement logging and error handling). <MODDED>
-Binary Heaps -> Complete (need to implement logging and error handling). <MODDED>
-Priority Queues -> Complete (need to implement logging and error handling). <MODDED>
-Vectors -> Complete (need to implement logging and error handling). <MODDED>
-Lists (like vectors, but uses pointers to data instead of copying data). -> Complete <MODDED>
-Maps -> Complete
-Hashmaps -> Complete
-Graph -> Complete
-Weighted Graph -> Complete
+Strings -> Complete (need to implement logging and error handling). <MODDED> <CHECKED, FINISHED!>
+Stacks -> Complete (need to implement logging and error handling). <MODDED> <CHECKED, FINISHED!>
+Queues -> Complete (need to implement logging and error handling). <MODDED> <CHECKED, FINISHED!>
+Binary Heaps -> Complete (need to implement logging and error handling). <MODDED> <CHECKED, FINISHED!>
+Priority Queues -> Complete (need to implement logging and error handling). <MODDED> <CHECKED, FINISHED!>
+Vectors -> Complete (need to implement logging and error handling). <MODDED> <CHECKED, FINISHED!>
+Lists (like vectors, but uses pointers to data instead of copying data). -> Complete <MODDED> <CHECKED, FINISHED!>
+Maps -> Complete <MODDED> <CHECKED, FINISHED!>
+Hashmaps -> Complete <MODDED> <CHECKED, FINISHED!>
+Graph -> Complete <MODDED> <CHECKED, FINISHED!>
+Weighted Graph -> Complete <MODDED> <CHECKED, FINISHED!>
 Set
 Object Set
 AVL Tree

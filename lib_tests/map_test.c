@@ -1,6 +1,4 @@
 #include "../lib/map.h"
-#include "../lib/string.h"
-#include "../lib/hashmap.h"
 
 
 void main(){
@@ -9,106 +7,77 @@ void main(){
 	_std_lib_default(&ctx);
 
 	int data = 1200;
+	int data1 = 121212;
 	int data2 = 61092;
+	int data3 = 3822;
 
-	//Create a new map.
-	map* myMap = _map_new(&ctx, 5);
-
-	//Insert an item into the map.
-	_map_insert(myMap, 1234, &data, 1, 1);
-	_map_insert(myMap, 1244, &data, 1, 1);
-	_map_insert(myMap, 234, &data, 1, 1);
-	_map_insert(myMap, 56, &data, 1, 1);
-	_map_insert(myMap, 1223, &data2, 1, 1);
-	_map_insert(myMap, 567, &data, 1, 1);
-	_map_insert(myMap, 78, &data, 1, 1);
-	_map_insert(myMap, 12345, &data, 1, 1);
-	_map_insert(myMap, 5678, &data, 1, 1);
-	_map_insert(myMap, 5000, &data, 1, 1);
-	_map_insert(myMap, 5000, &data, 1, 1);
-	_map_insert(myMap, 78, &data, 1, 1);
+	map* myMap = _map_new(&ctx, 2);
 
 
-	//Print the contents of the table.
+	_map_insert(myMap, 23, &data);
+	_map_insert(myMap, 25, &data3);
+	_map_insert(myMap, 348, &data2);
+	_map_insert(myMap, 232323, &data2);
+	_map_insert(myMap, 21, &data1);
+
+	
+	int i;
+	map_entry* node;
+
+	for(i = 0; i < myMap->size; i++){
+
+		node = myMap->map_table + i;
+
+		while(node){
+
+			if(node->used)
+				printf("%d, ", *((int*)node->data));
+
+			node = node->next;
+
+		}
+
+		printf("\n");
+
+	}
+
+	printf("\n\n");
+
+	_map_resize(myMap, 20);
+
+	for(i = 0; i < myMap->size; i++){
+
+		node = myMap->map_table + i;
+
+		while(node){
+
+			if(node->used)
+				printf("%d, ", *((int*)node->data));
+
+			node = node->next;
+
+		}
+
+		printf("\n");
+
+	}
+	
+
+	printf("\n\n\n\n");
 
 	_map_reset_iterator(myMap);
-	map_entry e;
+
 	while(_map_has_next(myMap)){
 
-		_map_get_next(myMap, &e);
+		int *c;
 
-		printf("Key: %ld\n", e.key);
+		if((c = _map_get_next(myMap)))
+			printf("Data: %d\n", *c);
+		else
+			printf("Problem\n");
 	}
-
-
-	//while(_map_has_next(myMap))
-		//printf("Key: %ld, Value: %d\n", _map_next(myMap).key, *((int*)_map_next(myMap).data));
-
-
-	//printf("%d\n", *((int*)_map_lookup(myMap, 1223).data));
-	//printf("%d\n", *((int*)_map_lookup(myMap, 78).data));
-
-	int i;
-	map_entry_int* entry;
-
-	printf("\n\nPOST DELETE......\n");
-	for(i = 0; i < myMap->size; i++){
-
-		printf("Table Entry %d: ", i);
-
-		entry = myMap->map_table + i;
-
-		while(entry){
-
-			printf("%ld ", entry->key);
-			entry = entry->next;
-
-		}
-
-		printf("\n");
-	}
-
-	_map_resize(myMap, 1);
-
-	printf("\n\nPOST DELETE......\n");
-	for(i = 0; i < myMap->size; i++){
-
-		printf("Table Entry %d: ", i);
-
-		entry = myMap->map_table + i;
-
-		while(entry){
-
-			printf("%ld ", entry->key);
-			entry = entry->next;
-
-		}
-
-		printf("\n");
-	}
-
+	
 	_map_delete(myMap);
-
-
-	//Test deallocator.
-
-	map* map2 = _map_new(&ctx, 10);
-
-	string* myNewString1 = _string_new_fbytes(&ctx, "Hello world!\n");
-	string* myNewString2 = _string_new_fbytes(&ctx, "Hello world!\n");
-
-	if(_string_compare(myNewString1, myNewString2))
-		printf("Same!\n");
-	else
-		printf("Not the same!\n");
-
-
-	_map_insert(map2, 12, (byte*)myNewString1, 1, 1);
-	_map_insert(map2, 13, (byte*)myNewString2, 1, 1);
-
-
-	_map_delete_all(map2, _string_dealloc);
-
-	//_map_delete(map2);
+	
 
 }

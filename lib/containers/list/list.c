@@ -5,12 +5,6 @@ list* _list_new(standard_library_context*, size_t); //COMPLETE
 //Delete a list.
 void _list_delete(list*); //COMPLETE
 
-//List deallocator.
-void _list_dealloc(void*); //COMPLETE
-
-//List delete all.
-void _list_delete_all(list*, void (void*)); //COMPLETE
-
 //Add an item to the list.
 void _list_add(list*, void*); //COMPLETE
 
@@ -54,6 +48,9 @@ static void int_list_resize(list* lst, size_t new_size){
 
 list* _list_new(standard_library_context* ctx, size_t start_size){
 
+	if(!ctx || !start_size)
+		return 0;
+	
 	list* l = allocate(ctx, sizeof(list));
 	l->ctx = ctx;
 	l->data = allocate(ctx, sizeof(size_t) * start_size);
@@ -70,27 +67,6 @@ void _list_delete(list* lst){
 
 	destroy(lst->ctx, lst->data);
 	destroy(lst->ctx, lst);
-
-}
-
-void _list_delete_all(list* lst, void (*dealloc)(void*)){
-
-	size_t i;
-
-	if(!lst || !dealloc)
-		return;
-
-	for(i = 0; i < lst->used; i++)
-		dealloc(_list_get(lst, i));
-	
-
-	_list_delete(lst);
-
-}
-
-void _list_dealloc(void* lst){
-
-	_list_delete(lst);
 
 }
 

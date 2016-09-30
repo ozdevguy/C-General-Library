@@ -12,9 +12,6 @@ queue* _queue_new(standard_library_context*, size_t);
 //Delete a queue.
 void _queue_delete(queue*);
 
-//Delete all data within the queue using a deallocator.
-void _queue_delete_all(queue*, void (void*));
-
 //Enqueue a new item.
 void _queue_enqueue(queue*, void*);
 
@@ -23,9 +20,6 @@ void* _queue_dequeue(queue*);
 
 //Peek at the front of the queue.
 void* _queue_peek(queue*);
-
-//Queue deallocator.
-void _queue_dealloc(void*);
 
 
 static void int_queue_resize(queue* q){
@@ -66,29 +60,11 @@ void _queue_delete(queue* q){
 
 }
 
-void _queue_dealloc(void* q){
-
-	_queue_delete((queue*)q);
-
-}
-
-void _queue_delete_all(queue* q, void (*dealloc)(void*)){
-
-	size_t i;
-
-	for(i = 0; i < q->size; i++){
-
-		if(q->entries[i])
-			dealloc(q->entries[i]);
-
-	}
-
-	_queue_delete(q);
-	
-}
-
 queue* _queue_new(standard_library_context* ctx, size_t start_size){
 
+	if(!ctx || !start_size)
+		return 0;
+	
 	//Create a new object.
 	queue* q = allocate(ctx, sizeof(queue));
 
@@ -98,7 +74,6 @@ queue* _queue_new(standard_library_context* ctx, size_t start_size){
 	q->ctx = ctx;
 
 	return q;
-
 
 }
 
@@ -164,7 +139,6 @@ void _queue_enqueue(queue* q, void* data){
 
 	q->back = backpos;
 	q->used++;
-
 
 }
 

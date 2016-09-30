@@ -19,10 +19,17 @@ void main(){
 
 	int i;
 
+	_vector_reset_iterator(vect);
+
+	while(_vector_has_next(vect))
+		printf("Data: %d\n", *((int*)_vector_get_next(vect)));
+
 	
+	printf("\n\n\n\n");
 	printf("Data: %d\n", *((int*)_vector_get(vect, 0)));
 	printf("Data: %d\n", *((int*)_vector_get(vect, 1)));
 	printf("Data: %d\n", *((int*)_vector_get(vect, 2)));
+	
 
 	_vector_delete(vect);
 

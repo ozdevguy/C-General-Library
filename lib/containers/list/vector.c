@@ -5,12 +5,6 @@ vector* _vector_new(standard_library_context*, size_t, size_t);
 //Delete a vector.
 void _vector_delete(vector*);
 
-//Vector deallocator.
-void _vector_dealloc(void*);
-
-//Vector delete all.
-void _vector_delete_all(vector*, void (void*));
-
 //Add an item to the vector.
 void _vector_add(vector*, void*);
 
@@ -33,6 +27,9 @@ void* _vector_get_next(vector*);
 
 vector* _vector_new(standard_library_context* ctx, size_t data_size, size_t start_size){
 
+	if(!ctx || !start_size)
+		return 0;
+	
 	vector* vect = allocate(ctx, sizeof(vector));
 	vect->ctx = ctx;
 	vect->data_size = data_size;
@@ -63,12 +60,16 @@ void _vector_add(vector* vect, void* data){
 
 	size_t i = 0;
 
+	if(!vect)
+		return;
+	
 	if(vect->used == vect->size)
 		int_vector_resize(vect);
 
 	for(i = 0; i < vect->data_size; i++)
-		vect->data[(vect->used++ * vect->data_size) + i] = (byte*)data[i];
+		vect->data[(vect->used * vect->data_size) + i] = ((byte*)data)[i];
 
+	vect->used++;
 
 }
 
@@ -129,23 +130,6 @@ void _vector_delete(vector* vect){
 
 	destroy(vect->ctx, vect->data);
 	destroy(vect->ctx, vect);
-
-}
-
-void _vector_delete_all(vector* vect, void (*dealloc)(void*)){
-
-	size_t i;
-
-	for(i = 0; i < vect->used; i++)
-		dealloc(vect->data + (i * vect->data_size));
-
-	_vector_delete(vect);
-
-}
-
-void _vector_dealloc(void* vect){
-
-	_vector_delete((vector*)vect);
 
 }
 

@@ -1,22 +1,17 @@
 typedef struct map map;
-typedef struct map_entry_int map_entry_int;
 typedef struct map_entry map_entry;
-typedef struct hashmap_ext hashmap_ext;
+typedef struct hashmap_entry hashmap_entry;
 
-struct map_entry{
 
-	//Key.
-	size_t key;
+struct hashmap_entry{
 
-	//Data pointer.
+	string* key;
+
 	void* data;
-
-	//Other data?
-	void* ext;
-
+	
 };
 
-struct map_entry_int{
+struct map_entry{
 
 	//Used
 	bool used;
@@ -27,11 +22,11 @@ struct map_entry_int{
 	//Data pointer.
 	void* data;
 
-	//Next map entry.
-	map_entry_int* next;
-
 	//Other data?
 	void* ext;
+
+	//Next map entry.
+	map_entry* next;
 
 };
 
@@ -44,7 +39,7 @@ struct map{
 	size_t iter_tbl;
 
 	//Iterator list entry.
-	map_entry_int* iter_list;
+	map_entry* iter_list;
 
 	//Hash table size.
 	size_t size;
@@ -53,7 +48,7 @@ struct map{
 	size_t total;
 
 	//Table.
-	map_entry_int* map_table;
+	map_entry* map_table;
 
 	//Hash function (hashmap only).
 	size_t (*hash_algorithm)(byte*);

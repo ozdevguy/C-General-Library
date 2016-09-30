@@ -10,9 +10,6 @@ stack* _stack_new(standard_library_context*, size_t);
 //Delete a stack instance.
 void _stack_delete(stack*);
 
-//Stack deallocator.
-void _stack_dealloc(void*);
-
 //Delete a stack + all its items using a deallocator.
 void _stack_delete_all(stack*, void (void*));
 
@@ -51,12 +48,6 @@ void _stack_delete(stack* st){
 	destroy(st->ctx, st->entries);
 	destroy(st->ctx, st);
 
-}
-
-void _stack_dealloc(void* st){
-
-	_stack_delete((stack*)st);
-	
 }
 
 void _stack_delete_all(stack* st, void (*dealloc)(void*)){

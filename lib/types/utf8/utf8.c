@@ -1,13 +1,6 @@
-/*
-
-utf8.c
-
-This file contains the functions used to create and modify unicode characters.
-
-*/
 
 //Get utf8 character size.
-uint8_t _int_utf8_sz(byte b0){
+static uint8_t int_utf8_sz(byte b0){
 
 	byte b = (b0 & 128);
 
@@ -28,7 +21,7 @@ uint8_t _int_utf8_sz(byte b0){
 
 }
 
-void _int_utf8_pad(utf8_char* unichar){
+static void int_utf8_pad(utf8_char* unichar){
 
 	uint8_t i;
 
@@ -45,10 +38,10 @@ utf8_char _utf8_fbytes(byte* data){
 	utf8_char unichar;
 
 	//Fist, get the size of the character (in bytes).
-	size = _int_utf8_sz(*data);
+	size = int_utf8_sz(*data);
 	unichar.size = size;
 
-	_int_utf8_pad(&unichar);
+	int_utf8_pad(&unichar);
 
 	//Copy the character data to the structure.
 	for(i = 0; i < size; i++)
@@ -88,10 +81,10 @@ size_t _utf8_ptr_fbytes(utf8_char* unichar, byte* data){
 	uint32_t modifier = 0, dec = 0;
 
 	//Fist, get the size of the character (in bytes).
-	size = _int_utf8_sz(*data);
+	size = int_utf8_sz(*data);
 	unichar->size = size;
 
-	_int_utf8_pad(unichar);
+	int_utf8_pad(unichar);
 
 	//Copy the character data to the structure.
 	for(i = 0; i < size; i++)
@@ -194,7 +187,7 @@ utf8_char _utf8_fint(uint32_t input){
 		unichar.data[0] = input;
 		unichar.value = input;
 		unichar.size = 1;
-		_int_utf8_pad(&unichar);
+		int_utf8_pad(&unichar);
 		return unichar;
 	}
 
@@ -209,7 +202,7 @@ utf8_char _utf8_fint(uint32_t input){
 	
 	unichar.size = size;
 
-	_int_utf8_pad(&unichar);
+	int_utf8_pad(&unichar);
 
 	return unichar;
 

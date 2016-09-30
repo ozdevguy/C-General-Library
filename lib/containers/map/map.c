@@ -3,25 +3,28 @@
 map* _map_new(standard_library_context*, size_t);
 
 //Delete a map.
-bool _map_delete(map*);
+void _map_delete(map*);
 
 //Resize a map.
 bool _map_resize(map*, size_t);
 
-//Delete a map and all of its data.
-bool _map_delete_all(map*, void (void*));
-
-//Map deallocator.
-void _map_dealloc(void*);
-
 //Map an item.
 bool _map_insert(map*, size_t, void*);
 
-//Remove an item from the map.
-bool _map_remove(map*, size_t, map_entry*);
+//Map an item, and return its map entry pointer.
+map_entry* _map_insert_e(map*, size_t, void*);
+
+//Remove an item from the map, and return its data pointer.
+void* _map_remove(map*, size_t);
+
+//Remove an item from the map, and return a copy of its map entry.
+bool _map_remove_e(map*, size_t, map_entry*);
 
 //Get an item from the map.
-bool _map_lookup(map*, size_t, map_entry*);
+void* _map_lookup(map*, size_t);
+
+//Get an entry from the map.
+map_entry* _map_lookup_e(map*, size_t);
 
 //Reset the map iterator.
 void _map_reset_iterator(map*);
@@ -30,446 +33,436 @@ void _map_reset_iterator(map*);
 bool _map_has_next(map*);
 
 //Pull the next item in the iteration.
-bool _map_get_next(map*, map_entry*);
+void* _map_get_next(map*);
 
+//Pull the next full map entry.
+map_entry* _map_get_next_e(map*);
 
-static void int_map_int_copy(map_entry_int* to, map_entry_int* from){
 
-	to->used = from->used;
-	to->key = from->key;
-	to->data = from->data;
-	to->next = from->next;
-
-}
-
-static void int_map_copy(map_entry_int* ent, map_entry* ext){
-
-	ext->key = ent->key;
-	ext->data = ent->data;
-	ext->ext = ent->ext;
-
-}
-
-static void int_map_int_delete(map* mp){
-
-	size_t i;
-	map_entry_int *entry, *next;
-
-	//Delete the old map.
-	for(i = 0; i < mp->size; i++){
-
-		if(mp->map_table[i].data){
-
-			entry = mp->map_table[i].next;
-
-			while(entry){
-
-				next = entry->next;
-
-				destroy(mp->ctx, entry);
-
-				if(next)
-					entry = next;
-				else
-					break;
-
-			}
-
-		}
-	}
-
-}
-
-bool _map_resize(map* mp, size_t new_size){
-
-	map* new_map;
-	map_entry e;
-	size_t i;
-
-	if(!mp)
-		return false;
-
-	if(new_size){
-
-		new_map = _map_new(mp->ctx, new_size);
-
-		//Insertion into new table.
-		_map_reset_iterator(mp);
-
-		while(_map_has_next(mp)){
-
-			_map_get_next(mp, &e);
-
-			_map_insert(new_map, e.key, e.data, e.type, e.size);
-
-		}
-
-		
-		int_map_int_delete(mp);
-
-		destroy(mp->ctx, mp->map_table);
-
-		//Transfer over data...
-		mp->size = new_map->size;
-		mp->total = new_map->total;
-		mp->map_table = new_map->map_table;
-
-		destroy(mp->ctx, new_map);
-
-	}
-
-	return false;
-
-}
-
-
-void _map_reset_iterator(map* mp){
-
-	if(!mp)
-		return;
-
-	mp->iter_tbl = 0;
-	mp->iter_list = 0;
-
-}
-
-bool _map_has_next(map* mp){
-
-	if(!mp)
-		return;
-
-	if(mp->iter_tbl <= mp->size){
-
-		//This table position has at least one entry, and we are starting from the beginning.
-		if(!mp->iter_list && mp->map_table[mp->iter_tbl].used)
-			mp->iter_list = mp->map_table + mp->iter_tbl++;
-			
-		//We are in the middle of a table entry list.
-		else if(mp->iter_list && mp->iter_list->next)
-			mp->iter_list = mp->iter_list->next;
-
-		//Find the next used table entry...
-		else{
-
-			while(mp->iter_tbl < mp->size){
-
-				if(mp->map_table[mp->iter_tbl].used){
-
-					mp->iter_list = mp->map_table + mp->iter_tbl++;
-					return true;
-
-				}
-
-				mp->iter_tbl++;
-
-			}
-
-			return false;
-
-		}
-
-		return true;
-
-	}
-
-
-	return false;
-
-}
-
-bool _map_get_next(map* mp, map_entry* entry){
-
-	if(!mp || !entry)
-		return false;
-
-	if(mp->iter_list){
-
-		int_map_copy(mp->iter_list, entry);
-		return true;
-
-	}
-
-	return false;
-}
-
+//Create a new map.
 map* _map_new(standard_library_context* ctx, size_t start_size){
 
 	map* mp;
 
-	if(!ctx)
+	if(!ctx || !start_size)
 		return 0;
 
 	mp = allocate(ctx, sizeof(map));
 	mp->ctx = ctx;
 	mp->size = start_size;
 
-	mp->map_table = allocate(ctx, sizeof(map_entry_int) * start_size);
-
+	mp->map_table = allocate(ctx, sizeof(map_entry) * start_size);
 
 	return mp;
 
 }
 
-bool _map_insert(map* mp, size_t key, void* dat){
+void _map_delete(map* mp){
 
-	size_t table_pos;
-	map_entry_int* entry;
-	byte* data;
-
-	if(!mp || !dat)
-		return;
-
-	data = dat;
-
-	//Compute the position of the item within the table.
-	table_pos = key % mp->size;
-	entry = mp->map_table + table_pos;
-
-	//This table position has not been used yet.
-	if(!entry->data){
-
-		if(entry->key == key)
-			return false;
-
-		entry->data = data;
-		entry->key = key;
-		entry->used = true;
-		entry->next = 0;
-
-		mp->total++;
-
-		return true;
-
-	}
-
-	//Find the last item in the list.
-	while(entry){
-
-		if(entry->key == key)
-			return false;
-
-		if(!entry->next){
-
-			//Insert data at the next position.
-			entry->next = allocate(mp->ctx, sizeof(map_entry_int));
-			entry = entry->next;
-			entry->data = data;
-			entry->key = key;
-			entry->used = true;
-			entry->next = 0;
-
-			mp->total++;
-
-			return true;
-
-		}
-
-		entry = entry->next;
-
-	}
-
-
-}
-
-bool _map_remove(map* mp, size_t key, map_entry* ext){
-
-
-	map_entry_int *entry, *tmp, *prev;
-	size_t table_pos;
+	size_t i;
+	map_entry *entry, *tmp;
 
 	if(!mp)
 		return;
 
-	table_pos = key % mp->size;
-	entry = mp->map_table + table_pos;
+	for(i = 0; i < mp->size; i++){
 
-	//Check to see if the first item is the item we're looking for.
-	if(entry->key == key){
+		entry = mp->map_table[i].next;
 
-		*ext = *entry;
-
-		if(entry->next){
+		while(entry){
 
 			tmp = entry->next;
-
-			int_map_int_copy(entry, tmp);
-
-			destroy(mp->ctx, tmp);
+			destroy(mp->ctx, entry);
+			entry = tmp;
 
 		}
-
-		else{
-
-			entry->key = 0;
-			entry->size = 0;
-			entry->type = 0;
-			entry->data = 0;
-			entry->used = false;
-			entry->next = 0;
-			entry->ext = 0;
-
-		}
-
-		return true;
-
 	}
 
-	prev = entry;
-	entry = entry->next;
+	destroy(mp->ctx, mp->map_table);
+	destroy(mp->ctx, mp);
 
-	while(entry){
+}
 
-		if(entry->key == key){
+bool _map_resize(map* mp, size_t new_size){
 
-			*ext = *entry;
+	size_t i;
+	map* new_map;
+	map_entry *entry, *tmp;
+
+	if(!mp || !new_size)
+		return false;
+
+	new_map = _map_new(mp->ctx, new_size);
+
+	_map_reset_iterator(mp);
+
+	while(_map_has_next(mp)){
+
+		entry = _map_get_next_e(mp);
+		_map_insert(new_map, entry->key, entry->data);
+
+	}
+	
+	for(i = 0; i < mp->size; i++){
+
+		entry = mp->map_table[i].next;
+
+		while(entry){
 
 			tmp = entry->next;
+			destroy(mp->ctx, entry);
+			entry = tmp;
 
-			if(tmp){
+		}
+	}
 
-				int_map_int_copy(entry, tmp);
-				destroy(mp->ctx, tmp);
+	destroy(mp->ctx, mp->map_table);
 
-				mp->total--;
+	mp->iter_tbl = 0;
+	mp->iter_list = 0;
+	mp->size = new_map->size;
+	mp->total = new_map->total;
+	mp->map_table = new_map->map_table;
 
-			}
-			else{
+	destroy(mp->ctx, new_map);
+	return true;
 
-				destroy(mp->ctx, entry);
-				prev->next = 0;
+}
 
-			}
+bool _map_insert(map* mp, size_t key, void* data){
 
-			return true;
+	size_t position;
+	map_entry *entry;
+
+	if(!mp)
+		return false;
+
+	position = key % mp->size;
+	entry = mp->map_table + position;
+
+	//Find the position for our new node...
+	while(entry){
+
+		//This node already exists!
+		if(entry->key == key)
+			return false;
+
+		//This is an end node that is no longer in use. Reuse it.
+		else if(!entry->used)
+			break;
+
+		//We need to add a new node.
+		else if(!entry->next){
+
+			entry->next = allocate(mp->ctx, sizeof(map_entry));
+			entry = entry->next;
+			break;
 
 		}
 
-		prev = entry;
 		entry = entry->next;
 
 	}
 
-	return false;
+	mp->total++;
+	entry->used = true;
+	entry->key = key;
+	entry->data = data;
+	return true;
 
 }
 
-bool _map_lookup(map* mp, size_t key, map_entry* ext){
+map_entry* _map_insert_e(map* mp, size_t key, void* data){
 
-	map_entry_int* entry;
+	size_t position;
+	map_entry *entry;
+
+	if(!mp)
+		return 0;
+
+	position = key % mp->size;
+	entry = mp->map_table + position;
+
+	//Find the position for our new node...
+	while(entry){
+
+		//This node already exists!
+		if(entry->key == key)
+			return 0;
+
+		//This is an end node that is no longer in use. Reuse it.
+		else if(!entry->used)
+			break;
+
+		//We need to add a new node.
+		else if(!entry->next){
+
+			entry->next = allocate(mp->ctx, sizeof(map_entry));
+			entry = entry->next;
+			break;
+
+		}
+
+		entry = entry->next;
+
+	}
+
+	mp->total++;
+	entry->used = true;
+	entry->key = key;
+	entry->data = data;
+	return entry;
+
+}
+
+
+void* _map_remove(map* mp, size_t key){
+
+	map_entry *entry, *tmp;
 	size_t table_pos;
+	void* data;
 
-	if(!mp || !ext)
-		return false;
+	if(!mp)
+		return 0;
 
 	table_pos = key % mp->size;
 	entry = mp->map_table + table_pos;
 
-	if(entry->data){
+	while(entry){
 
+		if(entry->key == key && entry->next){
 
-		while(entry){
+			tmp = entry->next;
+			data = entry->data;
+			*entry = *tmp;
+			destroy(mp->ctx, tmp);
+			mp->total--;
+			return data;
 
-			if(entry->key == key){
+		}
+		else if(entry->key == key){
 
-				int_map_copy(entry, ext);
-				return true;
+			entry->used = false;
+			mp->total--;
+			return entry->data;
 
-			}
-
-			entry = entry->next;
 		}
 
-
+		entry = entry->next;
+		
 	}
 
 	return false;
+}
+
+bool _map_remove_e(map* mp, size_t key, map_entry* cpy){
+
+	map_entry *entry, *tmp;
+	size_t table_pos;
+
+	if(!mp || !cpy)
+		return 0;
+
+	table_pos = key % mp->size;
+	entry = mp->map_table + table_pos;
+
+	while(entry){
+
+		if(entry->key == key && entry->next){
+
+			tmp = entry->next;
+			*cpy = *entry;
+			*entry = *tmp;
+			destroy(mp->ctx, tmp);
+			mp->total--;
+			return true;
+
+		}
+		else if(entry->key == key){
+
+			*cpy = *entry;
+			entry->used = false;
+			mp->total--;
+			return true;
+
+		}
+
+		entry = entry->next;
+		
+	}
+
+	return false;
+}
+
+void* _map_lookup(map* mp, size_t key){
+
+	map_entry* entry;
+	size_t table_pos;
+
+	if(!mp)
+		return 0;
+
+	table_pos = key % mp->size;
+	entry = mp->map_table + table_pos;
+
+	while(entry){
+
+		if(entry->key == key)
+			return entry->data;
+
+		entry = entry->next;
+
+	}
+
+	return 0;
+
+}
+
+map_entry* _map_lookup_e(map* mp, size_t key){
+
+	map_entry* entry;
+	size_t table_pos;
+
+	if(!mp)
+		return 0;
+
+	table_pos = key % mp->size;
+	entry = mp->map_table + table_pos;
+
+	while(entry){
+
+		if(entry->key == key)
+			return entry;
+
+		entry = entry->next;
+
+	}
+
+	return 0;
+
 }
 
 bool _map_exists(map* mp, size_t key){
 
-	map_entry_int* entry;
-	size_t table_pos;
-
-	if(!mp)
-		return false;
-
-	table_pos = key % mp->size;
-	entry = mp->map_table + table_pos;
-
-	if(entry->data){
-
-
-		while(entry){
-
-			if(entry->key == key)
-				return true;
-
-		}
-
-
-	}
+	if(_map_lookup(mp, key))
+		return true;
 
 	return false;
 
 }
 
-bool _map_delete(map* mp){
+
+/* ITERATOR */
+void _map_reset_iterator(map* mp){
 
 	size_t i;
-	map_entry_int *entry, *next;
-	
+
 	if(!mp)
-		return false;
+		return;
 
-	int_map_int_delete(mp);
-
-	destroy(mp->ctx, mp->map_table);
-	destroy(mp->ctx, mp);
-
-}
-
-void _map_dealloc(void* mp){
-
-	_map_delete((map*)mp);
-
-}
-
-bool _map_delete_all(map* mp, void (*deallocator)(void*)){
-
-	size_t i;
-	map_entry_int *entry, *next;
-	
-	if(!mp)
-		return false;
-
+	//Find the first table entry.
 	for(i = 0; i < mp->size; i++){
 
-		if(mp->map_table[i].data){
+		if(mp->map_table[i].used){
 
-			deallocator(mp->map_table[i].data);
+			mp->iter_tbl = i;
+			mp->iter_list = mp->map_table + i;
+			break;
 
-			entry = mp->map_table[i].next;
+		}
 
-			while(entry){
+	}
 
-				next = entry->next;
+}
 
-				deallocator(entry->data);
+bool _map_has_next(map* mp){
 
-				destroy(mp->ctx, entry);
+	if(!mp)
+		return false;
 
-				if(next)
-					entry = next;
-				else
-					break;
+	if(mp->iter_tbl < mp->size)
+		return true;
 
-			}
+	return false;
+	
+}
+
+void* _map_get_next(map* mp){
+	
+	void* data = 0;
+
+	if(!mp)
+		return 0;
+
+	if(mp->iter_list){
+
+		if(mp->iter_list->used){
+
+			data = mp->iter_list->data;
+			mp->iter_list = mp->iter_list->next;
 
 		}
 	}
 
-	destroy(mp->ctx, mp->map_table);
-	destroy(mp->ctx, mp);
+	//Load the next item.
+	if(mp->iter_list){
 
-	return true;
+		if(mp->iter_list->used)
+			return data;
+
+	}
+
+	while(++mp->iter_tbl < mp->size){
+
+		if(mp->map_table[mp->iter_tbl].used){
+
+			mp->iter_list = mp->map_table + mp->iter_tbl;
+			return data;
+
+		}
+
+	}
+
+	return data;
+	
+}
+
+map_entry* _map_get_next_e(map* mp){
+
+	map_entry* entry = 0;
+
+	if(!mp)
+		return 0;
+
+	if(mp->iter_list){
+
+		if(mp->iter_list->used){
+
+			entry = mp->iter_list;
+			mp->iter_list = mp->iter_list->next;
+
+		}
+	}
+
+	//Load the next item.
+	if(mp->iter_list){
+
+		if(mp->iter_list->used)
+			return entry;
+
+	}
+
+	while(++mp->iter_tbl < mp->size){
+
+		if(mp->map_table[mp->iter_tbl].used){
+
+			mp->iter_list = mp->map_table + mp->iter_tbl;
+			return entry;
+
+		}
+
+	}
+
+	return entry;
+
 }

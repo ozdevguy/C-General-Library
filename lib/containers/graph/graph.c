@@ -464,7 +464,6 @@ bool _graph_bfs(graph* gr, size_t start, size_t end, graph_path* path){
 	queue* bfs_queue;
 	graph_node *root = 0, *current = 0, *discovery = 0;
 	graph_edge* c_edge;
-	queue_entry entry;
 
 	if(!gr || !path)
 		return false;
@@ -487,13 +486,11 @@ bool _graph_bfs(graph* gr, size_t start, size_t end, graph_path* path){
 	bfs_queue = _queue_new(gr->ctx, 10);
 
 	//Enqueue the root.
-	_queue_enqueue(bfs_queue, root, 0, 0);
+	_queue_enqueue(bfs_queue, root);
 
 	while(bfs_queue->used){
 
-		_queue_dequeue(bfs_queue, &entry);
-		current = (graph_node*)entry.data;
-
+		current = (graph_node*)_queue_dequeue(bfs_queue);
 		c_edge = current->edges;
 
 		while(c_edge){
@@ -515,7 +512,7 @@ bool _graph_bfs(graph* gr, size_t start, size_t end, graph_path* path){
 
 				}
 
-				_queue_enqueue(bfs_queue, discovery, 0, 0);
+				_queue_enqueue(bfs_queue, discovery);
 
 			}
 
@@ -535,7 +532,6 @@ bool _graph_dfs(graph* gr, size_t start, size_t end, graph_path* path){
 	stack* dfs_stack;
 	graph_node *root = 0, *current = 0, *discovery = 0;
 	graph_edge* c_edge;
-	stack_item item;
 
 	if(!gr | !path)
 		return false;
@@ -556,13 +552,11 @@ bool _graph_dfs(graph* gr, size_t start, size_t end, graph_path* path){
 
 	//Set up the stack.
 	dfs_stack = _stack_new(gr->ctx, 10);
-	_stack_push(dfs_stack, root, 0, 0);
+	_stack_push(dfs_stack, root);
 
 	while(dfs_stack->top){
 
-		_stack_peek(dfs_stack, &item);
-		current = (graph_node*)item.data;
-
+		current = (graph_node*)_stack_peek(dfs_stack);
 		c_edge = current->edges;
 
 		while(c_edge){
@@ -583,7 +577,7 @@ bool _graph_dfs(graph* gr, size_t start, size_t end, graph_path* path){
 
 				}
 
-				_stack_push(dfs_stack, discovery, 0, 0);
+				_stack_push(dfs_stack, discovery);
 				break;
 
 			}
@@ -593,7 +587,7 @@ bool _graph_dfs(graph* gr, size_t start, size_t end, graph_path* path){
 		}
 
 		if(!c_edge)
-			_stack_pop(dfs_stack, &item);
+			_stack_pop(dfs_stack);
 
 
 	}

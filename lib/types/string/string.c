@@ -58,12 +58,6 @@ void _string_uppercase(string*); //COMPLETE
 //Get the index of a character.
 long _string_index_of(string*, utf8_char*, size_t); //COMPLETE
 
-//String deallocator.
-void _string_dealloc(void*); //COMPLETE
-
-//String pair deallocator.
-void _string_dealloc_pair(void*); //COMPLETE
-
 //Check to see if two strings are equal.
 bool _string_compare(string*, string*);
 
@@ -152,13 +146,6 @@ void _string_delete_ll(string_list* lst){
 		destroy(ctx, lst);
 		lst = tmp;
 	}
-
-}
-
-//Delete a string (deallocator).
-void _string_dealloc(void* str){
-
-	_string_delete((string*)str);
 
 }
 
@@ -402,7 +389,6 @@ bool _string_replace_fstring(string* str, string* pattern, string* replace, size
 
 	size_t i;
 	long find_pos;
-	byte* data;
 	string *s1 = 0, *s2 = 0;
 
 	if(!str || !pattern || !replace)
@@ -464,7 +450,6 @@ bool _string_replace_all_fstring(string* str, string* pattern, string* replace){
 
 	size_t i;
 	long find_pos;
-	byte* data;
 	string *s1 = 0, *s2 = 0, *tmp;
 
 	if(!str || !pattern || !replace)
