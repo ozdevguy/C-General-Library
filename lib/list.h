@@ -7,9 +7,9 @@
 #endif
 
 //Include list header.
-#ifndef STD_LIBS_CONTAINER_LIST
+#ifndef STD_LIBS_CONTAINERS_LIST
 	
-	#define STD_LIBS_CONTAINER_LIST 1
+	#define STD_LIBS_CONTAINERS_LIST 1
 	#include "containers/list/list.h"
 
 #endif

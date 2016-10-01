@@ -20,4 +20,7 @@ struct vector{
 	//Vector data.
 	byte* data;
 
+	//Extra data.
+	void* ext;
+
 };

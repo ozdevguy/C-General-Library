@@ -12,8 +12,8 @@ Maps -> Complete <MODDED> <CHECKED, FINISHED!>
 Hashmaps -> Complete <MODDED> <CHECKED, FINISHED!>
 Graph -> Complete <MODDED> <CHECKED, FINISHED!>
 Weighted Graph -> Complete <MODDED> <CHECKED, FINISHED!>
-Set
-Object Set
+Set (list) -> Complete <MODDED> <CHECKED, FINISHED!>
+Object Set (vector) -> Complete <MODDED> <CHECKED, FINISHED!>
 AVL Tree
 Red-Black Tree
 Unbalanced Binary Search Tree
@@ -23,6 +23,7 @@ B-Tree
 Merge Sort
 Heap Sort
 Radix Sort
+Matrices
 
 Collection
 

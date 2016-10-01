@@ -42,7 +42,7 @@ vector* _vector_new(standard_library_context* ctx, size_t data_size, size_t star
 }
 
 static void int_vector_resize(vector* vect){
-
+	
 	size_t i;
 	byte* new_data = allocate(vect->ctx, vect->data_size * vect->size * 2);
 

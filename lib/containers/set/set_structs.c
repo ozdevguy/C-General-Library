@@ -1,31 +1,25 @@
-typedef struct set set;
-typedef struct set_item set_item;
+typedef struct vset_int vset_int;
+typedef struct vset_config vset_config;
 
-struct set{
+struct vset_int{
 
-	//Standard library context.
-	standard_library_context* ctx;
+	//Object.
+	void* obj;
 
-	//Size of this set.
-	size_t size;
-
-	//Number of spaces used.
-	size_t used;
-
-	//Set array.
-	set_item* items;
-
-	//Set iterator.
-	size_t iterator;
+	//Value
+	size_t val;
 
 };
 
-struct set_item{
+struct vset_config{
 
-	//Item identifier.
-	size_t identifier;
+	//Data size.
+	size_t data_size;
 
-	//Item pointer.
-	void* ptr;
+	//Value size.
+	size_t v_size;
+
+	//Value offset.
+	size_t v_offset;
 
 };

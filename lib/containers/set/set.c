@@ -1,89 +1,66 @@
-//Create a new set.
-set* _set_new(standard_library_context*, size_t); //COMPLETE
+//Create a new list.
+list* _set_new(standard_library_context*, size_t); //COMPLETE
 
-//Destroy a set.
-void _set_delete(set*); //COMPLETE
+//Delete a list.
+void _set_delete(list*); //COMPLETE
 
-//Insert an item into the set (returns false if null pointer is given, or if the item already exists in the set).
-bool _set_insert(set*, size_t, void*); //COMPLETE
+//Add an item to the list.
+bool _set_add(list*, void*); //COMPLETE
 
-//Check to see if an item is in the set.
-bool _set_has(set*, size_t); //COMPLETE
+//Get an item from the list.
+void* _set_get(list*, size_t); //COMPLETE
 
-//Get an item from the set by index.
-bool _set_get(set*, size_t, set_item*);
-
-//Get an item from the set by identifier.
-void* _set_get_by_id(set*, size_t);
-
-//Remove an item from the set by index.
-void* _set_remove(set*, size_t);
-
-//Remove an item from the set by identifier.
-void* _set_remove_by_id(set*, size_t);
+//Remove an item from the list.
+bool _set_remove(list*, size_t); //COMPLETE
 
 //Reset the iterator.
-void _set_reset_iterator(set*);
+void _set_reset_iterator(list*); //COMPLETE
 
-//Check to see if the set has any other items (iterator).
-bool _set_has_next(set*);
+//See if there are items left to be iterated through.
+bool _set_has_next(list*); //COMPLETE
 
-//Get the next item in the set.
-bool _set_get_next(set*, set_item*);
+//Get the next item in the list.
+void* _set_get_next(list*); //COMPLETE
+
+//Does this set contain the given pointer?
+bool _set_contains(list*, void*);
+
+//Create a union of two sets.
+list* _set_union(list*, list*);
+
+//Get the intersection of two sets.
+list* _set_intersect(list*, list*);
 
 
-static void int_set_resize(set* st, size_t new_size){
+list* _set_new(standard_library_context* ctx, size_t start_size){
 
-	set_item* new_items;
+	return _list_new(ctx, start_size);
+
+}
+
+void _set_delete(list* st){
+
+	_list_delete(st);
+
+}
+
+bool _set_add(list* st, void* ptr){
+
 	size_t i;
 
-	if(!st)
-		return;
+	for(i = 0; i < st->used; i++){
 
-	new_items = allocate(st->ctx, new_size * sizeof(set_item));
+		if(st->data[i] == ptr)
+			return false;
 
-	for(i = 0; i < st->used; i++)
-		new_items[i] = st->items[i];
+	}
 
-	destroy(st->ctx, st->items);
-
-	st->items = new_items;
-	st->size = new_size;
+	_list_add(st, ptr);
+	return true;
 
 }
 
-static void int_set_splice(set* st, size_t split_index){
-
-
-}
-
-set* _set_new(standard_library_context* ctx, size_t start_size){
-
-	set* new_set;
-
-	if(!ctx)
-		return 0;
-
-	new_set = allocate(ctx, sizeof(set));
-	new_set->items = allocate(ctx, start_size * sizeof(set_item));
-	new_set->size = start_size;
-	new_set->ctx = ctx;
-
-	return new_set;
-
-}
-
-void _set_delete(set* st){
-
-	if(!st)
-		return;
-
-	destroy(st->ctx, st->items);
-	destroy(st->ctx, st);
-
-}
-
-bool _set_has(set* st, size_t id){
+bool _set_contains(list* st, void* ptr){
 
 	size_t i;
 
@@ -92,32 +69,91 @@ bool _set_has(set* st, size_t id){
 
 	for(i = 0; i < st->used; i++){
 
-		if(st->items[i].identifier == id)
+		if(st->data[i] == ptr)
 			return true;
 
 	}
 
+	return false;
+
 }
 
-bool _set_insert(set* st, size_t id, void* ptr){
+void* _set_get(list* st, size_t pos){
 
+	return _list_get(st, pos);
+
+}
+
+bool _set_remove(list* st, size_t pos){
+
+	return _list_remove(st, pos);
+
+}
+
+void _set_reset_iterator(list* st){
+
+	_list_reset_iterator(st);
+
+}
+
+bool _set_has_next(list* st){
+
+	return _list_has_next(st);
+
+}
+
+void* _set_get_next(list* st){
+
+	return _list_get_next(st);
+
+}
+
+list* _set_union(list* st1, list* st2){
+
+	list* u_set;
 	size_t i;
 
-	if(!st)
-		return false;
+	if(!st1 || !st2)
+		return 0;
 
-	if(_set_has(st, id))
-		return false;
+	u_set = allocate(st1->ctx, sizeof(list));
+	u_set->data = allocate(st1->ctx, (sizeof(size_t) * st1->used));
+	u_set->size = st1->used;
+	u_set->ctx = st1->ctx;
 
-	if(st->used >= st->size)
-		int_set_resize(st, st->size * 2);
+	for(i = 0; i < st1->used; i++)
+		_list_add(u_set, st1->data[i]);
 
-	st->items[st->used].identifier = id;
-	st->items[st->used++].ptr = ptr;
-	return true;
+	for(i = 0; i < st2->used; i++)
+		_set_add(u_set, st2->data[i]);
+
+	return u_set;
 
 }
 
+list* _set_intersect(list* st1, list* st2){
+
+	list* i_set;
+	size_t i;
+
+	if(!st1 || !st2)
+		return 0;
+
+	i_set = allocate(st1->ctx, sizeof(list));
+	i_set->data = allocate(st1->ctx, (sizeof(size_t) * st1->used));
+	i_set->size = st1->used;
+	i_set->ctx = st1->ctx;
+
+	for(i = 0; i < st1->used; i++){
+
+		if(_set_contains(st2, st1->data[i]))
+			_list_add(i_set, st1->data[i]);
+
+	}
+
+	return i_set;
+
+}
 
 
 

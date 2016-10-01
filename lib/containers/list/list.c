@@ -12,7 +12,7 @@ void _list_add(list*, void*); //COMPLETE
 void* _list_get(list*, size_t); //COMPLETE
 
 //Remove an item from the list.
-void _list_remove(list*, size_t); //COMPLETE
+bool _list_remove(list*, size_t); //COMPLETE
 
 //Reset the iterator.
 void _list_reset_iterator(list*); //COMPLETE
@@ -22,6 +22,9 @@ bool _list_has_next(list*); //COMPLETE
 
 //Get the next item in the list.
 void* _list_get_next(list*); //COMPLETE
+
+//Merge two lists.
+bool _list_merge(list*, list*);
 
 static void int_list_resize(list* lst, size_t new_size){
 
@@ -118,21 +121,23 @@ void* _list_get_next(list* lst){
 
 }
 
-void _list_remove(list* lst, size_t pos){
+bool _list_remove(list* lst, size_t pos){
 
 	size_t i;
 	bool removed;
 
 	if(!lst)
-		return;
+		return false;
 
 	if(pos >= lst->used)
-		return;
+		return false;
 
 	for(i = pos; i < (lst->used - 1); i++)
 		lst->data[i] = lst->data[i + 1];
 
 	lst->used--;
+
+	return true;
 
 }
 
@@ -148,6 +153,20 @@ void* _list_get(list* lst, size_t pos){
 
 
 	return (void*)lst->data[pos];
+
+}
+
+bool _list_merge(list* lst1, list* lst2){
+
+	size_t i;
+
+	if(!lst1 || !lst2)
+		return false;
+
+	for(i = 0; i < lst2->used; i++)
+		_list_add(lst1, lst2->data[i]);
+
+	return true;
 
 }
 
