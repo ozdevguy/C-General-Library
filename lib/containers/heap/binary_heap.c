@@ -5,7 +5,7 @@ binary_heap* _binary_heap_new(standard_library_context*, size_t); //FINISHED
 bool _binary_heap_delete(binary_heap*); //FINISHED
 
 //Insert into a binary heap.
-void _binary_heap_insert(binary_heap*, int32_t, void*); //FINISHED
+void _binary_heap_insert(binary_heap*, long, void*); //FINISHED
 
 //Remove an item from the binary heap at the given index.
 bool _binary_heap_remove(binary_heap*, size_t, binary_heap_entry*); //TO DO
@@ -292,7 +292,7 @@ void _binary_heap_build(binary_heap* heap){
 
 }
 
-void _binary_heap_insert(binary_heap* heap, int32_t key, void* data){
+void _binary_heap_insert(binary_heap* heap, long key, void* data){
 
 	if(!heap)
 		return;

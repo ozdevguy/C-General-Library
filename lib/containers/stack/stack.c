@@ -7,6 +7,9 @@ Written by Bobby Crawford
 //Create a new stack.
 stack* _stack_new(standard_library_context*, size_t);
 
+//Reset this stack.
+void _stack_reset(stack*);
+
 //Delete a stack instance.
 void _stack_delete(stack*);
 
@@ -75,6 +78,17 @@ stack* _stack_new(standard_library_context* ctx, size_t start_size){
 	st->size = start_size;
 
 	return st;
+
+}
+
+void _stack_reset(stack* st){
+
+	if(!st)
+		return;
+
+	destroy(st->ctx, st->entries);
+	st->entries = allocate(st->ctx, (sizeof(size_t) * st->size));
+	st->top = 0;
 
 }
 

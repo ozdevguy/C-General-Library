@@ -6,7 +6,7 @@ enum{BINARY_HEAP_MAX, BINARY_HEAP_MIN};
 struct binary_heap_entry{
 
 	//Value
-	int32_t key;
+	long key;
 
 	//Data
 	void* data;

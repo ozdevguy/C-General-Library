@@ -2,6 +2,7 @@ typedef struct graph graph;
 typedef struct graph_edge graph_edge;
 typedef struct graph_node graph_node;
 typedef struct graph_path graph_path;
+typedef struct graph_walk_config graph_walk_config;
 
 struct graph{
 
@@ -26,12 +27,15 @@ struct graph{
 	//Graph iterator.
 	size_t iterator;
 
+	//Graph walk config.
+	graph_walk_config* walk;
+
 };
 
 struct graph_node{
 
 	//Node key.
-	size_t key;
+	long key;
 
 	//Array of all edges going out of this node.
 	graph_edge* edges;
@@ -62,10 +66,20 @@ struct graph_edge{
 	void* data;
 
 	//The weight of this edge.
-	size_t weight;
+	long weight;
 
 	//The next edge linked to this node.
 	graph_edge* next;
+
+};
+
+struct graph_walk_config{
+
+	//Graph walk queue.
+	queue* bfs_queue;
+
+	//Graph walk stack.
+	stack* dfs_stack;
 
 };
 

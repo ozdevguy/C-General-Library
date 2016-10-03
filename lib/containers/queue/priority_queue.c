@@ -5,7 +5,7 @@ priority_queue* _priority_queue_new(standard_library_context*, size_t); //FINISH
 void _priority_queue_delete(priority_queue*); //FINISHED
 
 //Enqueue a new item.
-void _priority_queue_enqueue(priority_queue*, int32_t, void*); //FINISHED
+void _priority_queue_enqueue(priority_queue*, long, void*); //FINISHED
 
 //Remove the item at the front of the queue.
 void* _priority_queue_dequeue(priority_queue*); //FINISHED
@@ -52,7 +52,7 @@ void _priority_queue_delete(priority_queue* queue){
 
 }
 
-void _priority_queue_enqueue(priority_queue* queue, int32_t priority, void* data){
+void _priority_queue_enqueue(priority_queue* queue, long priority, void* data){
 
 	queue_entry* entry;
 

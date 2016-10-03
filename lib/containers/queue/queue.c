@@ -9,6 +9,9 @@ Written by Bobby Crawford
 //Create a new queue.
 queue* _queue_new(standard_library_context*, size_t);
 
+//Reset the queue.
+void _queue_reset(queue*);
+
 //Delete a queue.
 void _queue_delete(queue*);
 
@@ -74,6 +77,18 @@ queue* _queue_new(standard_library_context* ctx, size_t start_size){
 	q->ctx = ctx;
 
 	return q;
+
+}
+
+void _queue_reset(queue* q){
+
+	
+	destroy(q->ctx, q->entries);
+
+	q->entries = allocate(q->ctx, q->size);
+	q->used = 0;
+	q->front = 0;
+	q->back = 0;
 
 }
 

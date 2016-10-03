@@ -7,31 +7,31 @@ graph* _graph_new(standard_library_context*, size_t); //FINISHED
 bool _graph_delete(graph*); //FINISHED
 
 //Add a node to the graph.
-graph_node* _graph_add_node(graph*, size_t, void*); //FINISHED
+graph_node* _graph_add_node(graph*, long, void*); //FINISHED
 
 //Create an edge (one direction).
-bool _graph_add_edge(graph*, size_t, size_t, graph_edge**); //FINISHED
+bool _graph_add_edge(graph*, long, long, graph_edge**); //FINISHED
 
 //Get a node.
-graph_node* _graph_get_node(graph*, size_t); //FINISHED
+graph_node* _graph_get_node(graph*, long); //FINISHED
 
 //Get an edge.
-graph_edge* _graph_get_edge(graph*, size_t, size_t); //FINISHED
+graph_edge* _graph_get_edge(graph*, long, long); //FINISHED
 
 //Create an edge (bi-directional).
-bool _graph_add_double_edge(graph*, size_t, size_t, graph_edge**, graph_edge**); //FINISHED
+bool _graph_add_double_edge(graph*, long, long, graph_edge**, graph_edge**); //FINISHED
 
 //Remove a node.
-bool _graph_delete_node(graph*, size_t); //FINISHED
+bool _graph_delete_node(graph*, long); //FINISHED
 
 //Remove an edge.
-bool _graph_delete_edge(graph*, size_t, size_t); //FINISHED
+bool _graph_delete_edge(graph*, long, long); //FINISHED
 
 //Bredth first search for a node.
-bool _graph_bfs(graph*, size_t, size_t, graph_path*);
+bool _graph_bfs(graph*, long, long, graph_path*);
 
 //Depth first search for a node.
-bool _graph_dfs(graph*, size_t, size_t, graph_path*);
+bool _graph_dfs(graph*, long, long, graph_path*);
 
 //Clear the graph of levels/parents.
 void _graph_clear_paths(graph*);
@@ -47,6 +47,26 @@ bool _graph_has_next(graph*);
 
 //Get the next node in the graph.
 graph_node* _graph_get_next(graph*);
+
+//WALK THE GRAPH
+
+//Initialize a graph walk.
+void _graph_walk_init(graph*);
+
+//Reset the bfs queue.
+void _graph_walk_bfs_queue_reset(graph*);
+
+//Reset the dfs stack.
+void _graph_walk_dfs_stack_reset(graph*);
+
+//Breadth first graph walk.
+graph_node* _graph_walk_bfs_next(graph*);
+
+//Depth first graph walk.
+graph_node* _graph_walk_dfs_next(graph*);
+
+//End a graph walk.
+void _graph_walk_end(graph*);
 
 
 //Increase the size of the node array.
@@ -93,7 +113,7 @@ static void int_graph_node_delete_edges(graph* gr, graph_node* node){
 	}
 }
 
-static bool int_graph_node_remove_edge(graph* gr, graph_node* node, size_t key){
+static bool int_graph_node_remove_edge(graph* gr, graph_node* node, long key){
 
 	graph_edge *next, *tmp;
 	bool success = false;
@@ -194,6 +214,15 @@ bool _graph_delete(graph* gr){
 	for(i = 0; i < gr->size; i++)
 		int_graph_node_delete_edges(gr, gr->nodes + i);
 
+	//Check to see if a graph walk object still exists.
+	if(gr->walk){
+
+		_queue_delete(gr->walk->bfs_queue);
+		_stack_delete(gr->walk->dfs_stack);
+		destroy(gr->ctx, gr->walk);
+
+	}
+
 	destroy(gr->ctx, gr->nodes);
 	destroy(gr->ctx, gr);
 
@@ -207,7 +236,7 @@ void _graph_delete_path(graph_path path){
 	
 }
 
-graph_node* _graph_get_node(graph* gr, size_t key){
+graph_node* _graph_get_node(graph* gr, long key){
 
 	size_t i;
 
@@ -225,7 +254,7 @@ graph_node* _graph_get_node(graph* gr, size_t key){
 
 }
 
-graph_edge* _graph_get_edge(graph* gr, size_t from, size_t to){
+graph_edge* _graph_get_edge(graph* gr, long from, long to){
 
 	size_t i;
 	graph_node *from_node = 0, *to_node = 0;
@@ -264,7 +293,7 @@ graph_edge* _graph_get_edge(graph* gr, size_t from, size_t to){
 	return 0;
 }
 
-graph_node* _graph_add_node(graph* gr, size_t key, void* ptr){
+graph_node* _graph_add_node(graph* gr, long key, void* ptr){
 
 	size_t i;
 	graph_node *c_node;
@@ -284,7 +313,7 @@ graph_node* _graph_add_node(graph* gr, size_t key, void* ptr){
 
 }
 
-bool _graph_add_edge(graph* gr, size_t from, size_t to, graph_edge** to_edge){
+bool _graph_add_edge(graph* gr, long from, long to, graph_edge** to_edge){
 
 	size_t i;
 	graph_node *n1 = 0, *n2 = 0;
@@ -328,7 +357,7 @@ bool _graph_add_edge(graph* gr, size_t from, size_t to, graph_edge** to_edge){
 
 }
 
-bool _graph_add_double_edge(graph* gr, size_t from, size_t to, graph_edge** edge_to, graph_edge** edge_back){
+bool _graph_add_double_edge(graph* gr, long from, long to, graph_edge** edge_to, graph_edge** edge_back){
 
 	size_t i;
 	graph_node *n1 = 0, *n2 = 0;
@@ -381,7 +410,7 @@ bool _graph_add_double_edge(graph* gr, size_t from, size_t to, graph_edge** edge
 
 }
 
-bool _graph_delete_node(graph* gr, size_t key){
+bool _graph_delete_node(graph* gr, long key){
 
 	size_t i, j;
 	graph_edge **c, *next, *tmp;
@@ -422,7 +451,7 @@ bool _graph_delete_node(graph* gr, size_t key){
 
 }
 
-bool _graph_delete_edge(graph* gr, size_t from, size_t to){
+bool _graph_delete_edge(graph* gr, long from, long to){
 
 	size_t i;
 	graph_node* n;
@@ -458,7 +487,7 @@ void _graph_clear_paths(graph* gr){
 	}
 }
 
-bool _graph_bfs(graph* gr, size_t start, size_t end, graph_path* path){
+bool _graph_bfs(graph* gr, long start, long end, graph_path* path){
 
 	size_t i;
 	queue* bfs_queue;
@@ -526,7 +555,7 @@ bool _graph_bfs(graph* gr, size_t start, size_t end, graph_path* path){
 
 }
 
-bool _graph_dfs(graph* gr, size_t start, size_t end, graph_path* path){
+bool _graph_dfs(graph* gr, long start, long end, graph_path* path){
 
 	size_t i;
 	stack* dfs_stack;
@@ -627,6 +656,66 @@ graph_node* _graph_get_next(graph* gr){
 		return 0;
 
 	return gr->nodes + gr->iterator++;
+
+}
+
+void _graph_walk_init(graph* gr){
+
+	graph_walk_config* config;
+
+	if(!gr)
+		return;
+
+	if(gr->walk){
+
+		_queue_reset(gr->walk->bfs_queue);
+		_stack_reset(gr->walk->dfs_stack);
+		return;
+
+	}
+
+	config = allocate(gr->ctx, sizeof(graph_walk_config));
+	config->bfs_queue = _queue_new(gr->ctx, 10);
+	config->dfs_stack = _stack_new(gr->ctx, 10);
+	gr->walk = config;
+
+}
+
+void _graph_walk_bfs_queue_reset(graph* gr){
+
+	if(!gr)
+		return;
+
+	if(!gr->walk)
+		return;
+
+	_queue_reset(gr->walk->bfs_queue);
+
+}
+
+void _graph_walk_dfs_stack_reset(graph* gr){
+
+	if(!gr)
+		return;
+
+	if(!gr->walk)
+		return;
+
+	_stack_reset(gr->walk->dfs_stack);
+	
+}
+
+void _graph_walk_end(graph* gr){
+
+	if(!gr)
+		return;
+
+	if(!gr->walk)
+		return;
+
+	_queue_delete(gr->walk->bfs_queue);
+	_stack_delete(gr->walk->dfs_stack);
+	destroy(gr->ctx, gr->walk);
 
 }
 

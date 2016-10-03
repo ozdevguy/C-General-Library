@@ -14,21 +14,29 @@ Graph -> Complete <MODDED> <CHECKED, FINISHED!>
 Weighted Graph -> Complete <MODDED> <CHECKED, FINISHED!>
 Set (list) -> Complete <MODDED> <CHECKED, FINISHED!>
 Object Set (vector) -> Complete <MODDED> <CHECKED, FINISHED!>
+
+Binary Search Tree
+Ternary Search Tree
 AVL Tree
 Red-Black Tree
-Unbalanced Binary Search Tree
-Trie
-Ternary Search Tree
+VEB Tree
 B-Tree
+Trie
+Fibonacci Heaps
+
 Merge Sort
 Heap Sort
+Quick Sort
+Bucket Sort
 Radix Sort
+
 Matrices
 
 Collection
 
 Algorithm
 -------------------
+Probability
 Dynamic Programming Template
 Serialization
 

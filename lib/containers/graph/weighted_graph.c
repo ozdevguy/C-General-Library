@@ -7,28 +7,32 @@ graph* _weighted_graph_new(standard_library_context*, size_t); //FINISHED
 bool _weighted_graph_delete(graph*); //FINISHED
 
 //Add a new node to the graph.
-graph_node* _weighted_graph_add_node(graph*, size_t, void*); //FINISHED
+graph_node* _weighted_graph_add_node(graph*, long, void*); //FINISHED
 
 //Create an edge (graph, from, to, weight).
-bool _weighted_graph_add_edge(graph*, size_t, size_t, size_t, graph_edge**); //FINISHED
+bool _weighted_graph_add_edge(graph*, long, long, long, graph_edge**); //FINISHED
 
 //Create an edge with a mask (graph, from, to, weight, mask, edge).
-bool _weighted_graph_add_masked_edge(graph*, size_t, size_t, size_t, size_t, graph_edge**); //FINISHED
+bool _weighted_graph_add_masked_edge(graph*, long, long, long, size_t, graph_edge**); //FINISHED
 
 //Remove a node.
-bool _weighted_graph_delete_node(graph*, size_t); //FINISHED
+bool _weighted_graph_delete_node(graph*, long); //FINISHED
 
 //Remove an edge.
-bool _weighted_graph_delete_edge(graph*, size_t, size_t); //FINISHED
+bool _weighted_graph_delete_edge(graph*, long, long); //FINISHED
 
 //Clear the graph of levels/parents.
 void _weighted_graph_clear_paths(graph*); //FINISHED
 
 //Get the shortest path from one node to another.
-bool _weighted_graph_spath(graph*, size_t, size_t, graph_path*);
+bool _weighted_graph_spath(graph*, long, long, graph_path*);
 
 //Get the shortest path from one node to another, while avoiding edges with a certain mask.
-bool _weighted_graph_spath_amask(graph*, size_t, size_t, size_t, graph_path*);
+bool _weighted_graph_spath_amask(graph*, long, long, size_t, graph_path*);
+
+//Minimum spanning tree.
+//bool _weighted_graph_min_spanning();
+
 
 
 
@@ -49,13 +53,13 @@ bool _weighted_graph_delete(graph* gr){
 
 }
 
-graph_node* _weighted_graph_add_node(graph* gr, size_t key, void* data){
+graph_node* _weighted_graph_add_node(graph* gr, long key, void* data){
 
 	return _graph_add_node(gr, key, data);
 
 }
 
-bool _weighted_graph_add_edge(graph* gr, size_t from, size_t to, size_t weight, graph_edge** edge_to){
+bool _weighted_graph_add_edge(graph* gr, long from, long to, long weight, graph_edge** edge_to){
 
 	bool success = false;
 
@@ -71,7 +75,7 @@ bool _weighted_graph_add_edge(graph* gr, size_t from, size_t to, size_t weight, 
 
 }
 
-bool _weighted_graph_add_double_edge(graph* gr, size_t from, size_t to, size_t weight, graph_edge** edge_to, graph_edge** edge_back){
+bool _weighted_graph_add_double_edge(graph* gr, long from, long to, long weight, graph_edge** edge_to, graph_edge** edge_back){
 
 	bool success = false;
 
@@ -91,7 +95,7 @@ bool _weighted_graph_add_double_edge(graph* gr, size_t from, size_t to, size_t w
 
 }
 
-bool _weighted_graph_add_masked_edge(graph* gr, size_t from, size_t to, size_t weight, size_t mask, graph_edge** to_edge){
+bool _weighted_graph_add_masked_edge(graph* gr, long from, long to, long weight, size_t mask, graph_edge** to_edge){
 
 	bool success = false;
 
@@ -111,13 +115,13 @@ bool _weighted_graph_add_masked_edge(graph* gr, size_t from, size_t to, size_t w
 
 }
 
-bool _weighed_graph_delete_node(graph* gr, size_t key){
+bool _weighed_graph_delete_node(graph* gr, long key){
 
 	return _graph_delete_node(gr, key);
 
 }
 
-bool _weighted_graph_delete_edge(graph* gr, size_t from, size_t to){
+bool _weighted_graph_delete_edge(graph* gr, long from, long to){
 
 	return _graph_delete_edge(gr, from, to);
 
@@ -130,9 +134,10 @@ void _weighted_graph_clear_paths(graph* gr){
 }
 
 //Dijkstra
-bool _weighted_graph_spath(graph* gr, size_t start, size_t end, graph_path* path){
+bool _weighted_graph_spath(graph* gr, long start, long end, graph_path* path){
 
-	size_t i, length;
+	size_t i;
+	long length;
 	queue* bfs_queue;
 	graph_node *root = 0, *destination = 0, *current = 0, *discovery = 0;
 	graph_edge* c_edge;
@@ -210,9 +215,10 @@ bool _weighted_graph_spath(graph* gr, size_t start, size_t end, graph_path* path
 
 
 //Dijkstra, with edge masks!
-bool _weighted_graph_spath_amask(graph* gr, size_t start, size_t end, size_t mask, graph_path* path){
+bool _weighted_graph_spath_amask(graph* gr, long start, long end, size_t mask, graph_path* path){
 
-	size_t i, length;
+	size_t i;
+	long length;
 	queue* bfs_queue;
 	graph_node *root = 0, *destination = 0, *current = 0, *discovery = 0;
 	graph_edge* c_edge;
