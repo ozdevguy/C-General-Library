@@ -27,6 +27,6 @@ void _log_panic(standard_library_context* ctx, byte* data, size_t length){
 
 void _log_info(standard_library_context* ctx, byte* data, size_t length){
 
-	ctx->logger(data, length, LOG_PANIC, ctx->instance_id);
+	ctx->logger(data, length, LOG_INFO, ctx->instance_id);
 
 }

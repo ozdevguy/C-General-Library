@@ -6,6 +6,7 @@
 	#ifdef __linux__
 
 		#include "sys_include.h"
+		#include "posix_thread_wrapper.h"
 
 	#elif _WIN32
 		
@@ -23,7 +24,8 @@
 	
 	#elif __APPLE__
 		
-		//TO DO (Mac OS)
+		#include "sys_include.h"
+		#include "posix_thread_wrapper.h"
 
 	#elif __DITTO_COMPILER_DIRECT__
 		
