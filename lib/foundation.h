@@ -57,11 +57,6 @@
 
 #endif
 
-/* OVERRIDES */
-#define malloc allocate
-#define calloc allocate
-#define free destroy
-
 //Include memory managment header.
 #ifndef STD_LIBS_MEMORY
 	
