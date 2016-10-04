@@ -48,10 +48,10 @@ bool _graph_has_next(graph*);
 //Get the next node in the graph.
 graph_node* _graph_get_next(graph*);
 
-//WALK THE GRAPH
+/* WALK THE GRAPH */
 
 //Initialize a graph walk.
-void _graph_walk_init(graph*);
+bool _graph_walk_init(graph*, long root);
 
 //Reset the bfs queue.
 void _graph_walk_bfs_queue_reset(graph*);
@@ -115,7 +115,7 @@ static void int_graph_node_delete_edges(graph* gr, graph_node* node){
 
 static bool int_graph_node_remove_edge(graph* gr, graph_node* node, long key){
 
-	graph_edge *next, *tmp;
+	graph_edge *next, *prev = 0, *tmp;
 	bool success = false;
 
 	if(!gr || !node)
@@ -131,13 +131,23 @@ static bool int_graph_node_remove_edge(graph* gr, graph_node* node, long key){
 
 			tmp = next->next;
 
-			if(tmp)
-				*next = *tmp;
+			if(tmp){
 
-			destroy(gr->ctx, tmp);
+				*next = *tmp;
+				destroy(gr->ctx, tmp);
+
+			}
+			else{
+
+				node->last_edge = prev;
+				prev->next = 0;
+				destroy(gr->ctx, next);
+
+			}
 
 		}
-		
+
+		prev = next;
 		next = next->next;
 
 	}
@@ -327,7 +337,7 @@ bool _graph_add_edge(graph* gr, long from, long to, graph_edge** to_edge){
 		if(gr->nodes[i].key == from)
 			n1 = gr->nodes + i;
 
-		else if(gr->nodes[i].key == to)
+		if(gr->nodes[i].key == to)
 			n2 = gr->nodes + i;
 
 		if(n1 && n2)
@@ -343,15 +353,19 @@ bool _graph_add_edge(graph* gr, long from, long to, graph_edge** to_edge){
 	}
 
 	//Add the edge...
-	e = &n1->edges;
+	e = &n1->last_edge;
 
-	while(*e)		
+	if(!(*e))
+		e = &n1->edges;
+	
+	else
 		e = &((*e)->next);
 	
 
 	*e = allocate(gr->ctx, sizeof(graph_edge));
 	(*e)->to = n2;
 	*to_edge = *e;
+	n1->last_edge = *e;
 
 	return true;
 
@@ -371,7 +385,7 @@ bool _graph_add_double_edge(graph* gr, long from, long to, graph_edge** edge_to,
 		if(gr->nodes[i].key == from)
 			n1 = gr->nodes + i;
 
-		else if(gr->nodes[i].key == to)
+		if(gr->nodes[i].key == to)
 			n2 = gr->nodes + i;
 
 		if(n1 && n2)
@@ -387,24 +401,30 @@ bool _graph_add_double_edge(graph* gr, long from, long to, graph_edge** edge_to,
 	}
 
 	//Add the "to" edge...
-	e = &n1->edges;
+	e = &n1->last_edge;
 
-	while(*e)
+	if(!(*e))
+		e = &n1->edges;
+	else
 		e = &((*e)->next);
 	
 	*e = allocate(gr->ctx, sizeof(graph_edge));
 	(*e)->to = n2;
 	*edge_to = *e;
+	n1->last_edge = *e;
 
 	//Add the "from" edge...
-	e = &n2->edges;
+	e = &n2->last_edge;
 
-	while(*e)
+	if(!(*e))
+		e = &n2->edges;
+	else
 		e = &((*e)->next);
 	
 	*e = allocate(gr->ctx, sizeof(graph_edge));
 	(*e)->to = n1;
 	*edge_back = *e;
+	n2->last_edge = *e;
 
 	return true;
 
@@ -659,25 +679,42 @@ graph_node* _graph_get_next(graph* gr){
 
 }
 
-void _graph_walk_init(graph* gr){
+bool _graph_walk_init(graph* gr, long root){
 
 	graph_walk_config* config;
+	size_t i;
 
 	if(!gr)
-		return;
+		return false;
+
+	_graph_clear_paths(gr);
 
 	if(gr->walk){
 
 		_queue_reset(gr->walk->bfs_queue);
 		_stack_reset(gr->walk->dfs_stack);
-		return;
+		return false;
 
 	}
 
-	config = allocate(gr->ctx, sizeof(graph_walk_config));
-	config->bfs_queue = _queue_new(gr->ctx, 10);
-	config->dfs_stack = _stack_new(gr->ctx, 10);
-	gr->walk = config;
+	for(i = 0; i < gr->used; i++){
+
+		if(gr->nodes[i].key == root){
+
+			gr->nodes[i].level = 1;
+			config = allocate(gr->ctx, sizeof(graph_walk_config));
+			config->bfs_queue = _queue_new(gr->ctx, 10);
+			config->dfs_stack = _stack_new(gr->ctx, 10);
+			_queue_enqueue(config->bfs_queue, gr->nodes + i);
+			_stack_push(config->dfs_stack, gr->nodes + i);
+			gr->walk = config;
+
+			return true;
+
+		}
+	}
+
+	return false;
 
 }
 
@@ -701,8 +738,104 @@ void _graph_walk_dfs_stack_reset(graph* gr){
 	if(!gr->walk)
 		return;
 
+	gr->walk->dfs_root_ret = false;
 	_stack_reset(gr->walk->dfs_stack);
 	
+}
+
+graph_node* _graph_walk_dfs_next(graph* gr){
+
+	stack* dfs_stack;
+	graph_node *c_node, *discovered;
+	graph_edge* c_edge;
+
+	if(!gr)
+		return 0;
+
+	if(!gr->walk)
+		return 0;
+
+	dfs_stack = gr->walk->dfs_stack;
+
+	if(!gr->walk->dfs_root_ret){
+
+		gr->walk->dfs_root_ret = true;
+		return (graph_node*)_stack_peek(dfs_stack);
+
+	}
+
+	while(dfs_stack->top){
+
+		c_node = (graph_node*)_stack_peek(dfs_stack);
+		c_edge = c_node->edges;
+
+		while(c_edge){
+
+			discovered = c_edge->to;
+
+			//Discovered a new node!
+			if(!discovered->level){
+
+				discovered->level = c_node->level + 1;
+				discovered->parent = c_node;
+				_stack_push(dfs_stack, discovered);
+
+				return discovered;
+
+			}
+
+			c_edge = c_edge->next;
+
+		}
+
+		_stack_pop(dfs_stack);
+
+	}
+
+	return 0;
+
+}
+
+graph_node* _graph_walk_bfs_next(graph* gr){
+
+	queue* bfs_queue;
+	graph_node *c_node, *discovered;
+	graph_edge* c_edge;
+
+	if(!gr)
+		return 0;
+
+	if(!gr->walk)
+		return 0;
+
+	bfs_queue = gr->walk->bfs_queue;
+
+	while(bfs_queue->used){
+
+		c_node = (graph_node*)_queue_dequeue(bfs_queue);
+		c_edge = c_node->edges;
+
+		while(c_edge){
+
+			discovered = c_edge->to;
+
+			if(!discovered->level){
+
+				discovered->level = c_node->level + 1;
+				discovered->parent = c_node;
+				_queue_enqueue(bfs_queue, discovered);
+
+			}
+
+			c_edge = c_edge->next;
+
+		}
+
+		return c_node;
+
+	}
+
+	return 0;
 }
 
 void _graph_walk_end(graph* gr){

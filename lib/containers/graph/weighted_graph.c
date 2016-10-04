@@ -30,8 +30,11 @@ bool _weighted_graph_spath(graph*, long, long, graph_path*);
 //Get the shortest path from one node to another, while avoiding edges with a certain mask.
 bool _weighted_graph_spath_amask(graph*, long, long, size_t, graph_path*);
 
+//Sort the edges of each node by weight.
+bool _weighted_graph_edge_sort(graph*);
+
 //Minimum spanning tree.
-//bool _weighted_graph_min_spanning();
+//bool _weighted_graph_min_spanning(graph*, long, long);
 
 
 

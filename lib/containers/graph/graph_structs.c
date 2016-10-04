@@ -40,6 +40,9 @@ struct graph_node{
 	//Array of all edges going out of this node.
 	graph_edge* edges;
 
+	//Last edge of the node.
+	graph_edge* last_edge;
+
 	//Total number of edges.
 	size_t edge_total;
 
@@ -75,6 +78,9 @@ struct graph_edge{
 
 struct graph_walk_config{
 
+	//DFS Helper
+	bool dfs_root_ret;
+
 	//Graph walk queue.
 	queue* bfs_queue;
 
@@ -93,6 +99,9 @@ struct graph_path{
 
 	//List of nodes.
 	graph_node** list;
+
+	//List of edges.
+	graph_edge** edges;
 
 };
 
