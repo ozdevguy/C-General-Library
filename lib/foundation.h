@@ -29,7 +29,7 @@
 
 	#elif __DITTO_COMPILER_DIRECT__
 		
-		//Compile for the Ditto Virtual Machine.
+		//Compile for the Ditto Virtual Machine (in progress).
 		#include "spec/dvmetal_sys_include.h"
 
 	#elif __MAESTRO__
