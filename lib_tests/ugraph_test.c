@@ -217,6 +217,7 @@ void main(){
 	fflush(stdout);
 	printf("\n\n===SHORTEST PATH===\n");
 
+	/*
 	if(_weighted_graph_spath(weightedGraph, 31, dest, &path)){
 
 		printf("Hops: %ld from 31 to %d\n", path.hops, dest);
@@ -232,7 +233,7 @@ void main(){
 		_graph_delete_path(path);
 
 	}
-
+	*/
 	
 
 	_weighted_graph_delete(weightedGraph);

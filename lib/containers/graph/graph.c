@@ -69,6 +69,12 @@ graph_node* _graph_walk_dfs_next(graph*);
 void _graph_walk_end(graph*);
 
 
+/* HELPER MAP */
+void _graph_enable_helper_map(graph*);
+
+void _graph_disable_helper_map(graph*);
+
+
 //Increase the size of the node array.
 static void int_graph_resize(graph* gr, size_t new_size){
 
