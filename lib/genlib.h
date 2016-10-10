@@ -15,34 +15,23 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 
-set_structs.c
+genlib.h
 ========================================================================
 
 
 */
 
-typedef struct vset_int vset_int;
-typedef struct vset_config vset_config;
-
-struct vset_int{
-
-	//Object.
-	void* obj;
-
-	//Value
-	size_t val;
-
-};
-
-struct vset_config{
-
-	//Data size.
-	size_t data_size;
-
-	//Value size.
-	size_t v_size;
-
-	//Value offset.
-	size_t v_offset;
-
-};
+#include "foundation.h"
+#include "hashmap.h"
+#include "queue.h"
+#include "stack.h"
+#include "string.h"
+#include "vector.h"
+#include "list.h"
+#include "utf8.h"
+#include "binary_heap.h"
+#include "priority_queue.h"
+#include "graph.h"
+#include "weighted_graph.h"
+#include "set.h"
+#include "avl_tree.h"

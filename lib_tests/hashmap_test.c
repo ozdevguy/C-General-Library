@@ -15,7 +15,7 @@ void main(){
 	map* myHashmap = _hashmap_new(&ctx, 10);
 	string* str_test = _string_new_fbytes(&ctx, "blah");
 
-	_hashmap_insert_fbytes(myHashmap, "WTF", &test1);
+	_hashmap_insert_fbytes(myHashmap, "Hi", &test1);
 	_hashmap_insert_fbytes(myHashmap, "Bobbai", &test2);
 	_hashmap_insert(myHashmap, str_test, &test3);
 

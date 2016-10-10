@@ -1,4 +1,4 @@
-#include "../lib/ile_stdlib.h"
+#include "../lib/genlib.h"
 
 typedef struct blah blah;
 

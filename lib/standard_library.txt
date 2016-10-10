@@ -15,13 +15,13 @@ Weighted Graph -> Complete <MODDED> <CHECKED, FINISHED!>
 Set (list) -> Complete <MODDED> <CHECKED, FINISHED!>
 Object Set (vector) -> Complete <MODDED> <CHECKED, FINISHED!>
 
-Binary Search Tree
-Ternary Search Tree
+Binary Search Tree -> Complete <MODDED> <CHECKED, FINISHED!>
 AVL Tree
 Red-Black Tree
 VEB Tree
 B-Tree
 Trie
+Ternary Search Tree
 Fibonacci Heaps
 
 Merge Sort

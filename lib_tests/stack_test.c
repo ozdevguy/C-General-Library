@@ -1,4 +1,4 @@
-#include "../lib/stack.h"
+#include "../lib/genlib.h"
 
 void main(){
 
