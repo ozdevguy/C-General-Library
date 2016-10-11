@@ -63,3 +63,70 @@ void _avl_tree_delete(binary_search_tree* tree){
 	_binary_search_tree_delete(tree);
 	
 }
+
+static void int_avl_right_rotate_check(binary_search_tree* tree, binary_search_tree_node* grandparent){
+
+	size_t diff;
+
+	if(!tree || !grandparent)
+		return;
+
+	if(grandparent->right){
+
+		diff = grandparent->w - grandparent->right->w;
+
+		//Not imbalanced...
+		if(diff < 2)
+			return;
+
+	}
+
+	//Imbalanced.
+
+}
+
+binary_search_tree_node* _avl_tree_insert_e(binary_search_tree* tree, long key, void* data){
+
+	binary_search_tree_node *node, *parent, *grandparent;
+	size_t diff;
+
+	node = _binary_search_tree_insert_e(tree, key, data);
+
+	if(!node)
+		return 0;
+
+	//Set the weight of the new node.
+	node->w = 1;
+
+	while(node){
+
+		parent = node->parent;
+
+		if(!parent)
+			break;
+
+		grandparent = parent->parent;
+
+		if(!grandparent)
+			break;
+
+		if(parent->left == node && grandparent->left == parent)
+			int_avl_right_rotate_check(tree, grandparent);
+
+		else if(parent->left == node && grandparent->right == parent)
+			int_avl_right_left_rotate_check(tree, grandparent);
+
+		else if(parent->right == node && grandparent->right == parent)
+			int_avl_left_rotate_check(tree, grandparent);
+
+		else
+			int_avl_left_right_rotate_check(tree, grandparent);
+
+		
+		node = node->parent;
+		node->w++;
+
+	}
+
+	
+}
