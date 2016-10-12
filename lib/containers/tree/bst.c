@@ -167,18 +167,13 @@ binary_search_tree_node* _binary_search_tree_lookup_e(binary_search_tree* tree, 
 		if(node->key == key)
 			return node;
 
-		else if(key < node->key){
-
-			printf("Left at: %ld\n", node->key);
+		else if(key < node->key)			
 			node = node->left;
-		}
-
-		else{
-
-			printf("Right at: %ld\n", node->key);
+		
+		else
 			node = node->right;
 
-		}
+		
 
 	}
 

@@ -64,67 +64,317 @@ void _avl_tree_delete(binary_search_tree* tree){
 	
 }
 
-static void int_avl_right_rotate_check(binary_search_tree* tree, binary_search_tree_node* grandparent){
+//Check to see if this is a straight left imbalance.
+static bool int_avl_left_case_check(binary_search_tree_node* node){
+
+	if(!node->left)
+		return false;
+
+	if(!node->left->left)
+		return false;
+
+	if(node->left->w == (node->w - 1) && node->left->left->w == (node->w - 2)){
+
+		if(!node->right)
+			return true;
+
+		if(node->right->w < (node->w - 2))
+			return true;
+
+	}
+
+	return false;
+
+}
+
+//Check to see if this is a straight right imbalance.
+static bool int_avl_right_case_check(binary_search_tree_node* node){
+
+	if(!node->right)
+		return false;
+
+	if(!node->right->right)
+		return false;
+
+	if(node->right->w == (node->w - 1) && node->right->right->w == (node->w - 2)){
+
+		if(!node->left)
+			return true;
+
+		if(node->left->w < (node->w - 2))
+			return true;
+
+	}
+
+	return false;
+
+}
+
+//Check to see if this is a left-right imbalance.
+static bool int_avl_left_right_case_check(binary_search_tree_node* node){
+
+	if(!node->left)
+		return false;
+
+	if(!node->left->right)
+		return false;
+
+	if(node->left->w == (node->w - 1) && node->left->right->w == (node->w - 2)){
+
+		if(!node->right)
+			return true;
+
+		if(node->right->w < (node->w - 2))
+			return true;
+
+	}
+
+	return false;
+}
+
+//Check to see if this is a right-left imbalance.
+static bool int_avl_right_left_case_check(binary_search_tree_node* node){
+
+	if(!node->right)
+		return false;
+
+	if(!node->right->left)
+		return false;
+
+	if(node->right->w == (node->w - 1) && node->right->left->w == (node->w - 2)){
+
+		if(!node->left)
+			return true;
+
+		if(node->left->w < (node->w - 2))
+			return true;
+
+	}
+
+	return false;
+}
+
+//Right rotation.
+static void int_avl_right_rotate(binary_search_tree* tree, binary_search_tree_node* grandparent){
+
+	binary_search_tree_node *top, *middle, *subtree_a;
 
 	size_t diff;
 
 	if(!tree || !grandparent)
 		return;
 
-	if(grandparent->right){
+	//This tree is imbalanced, get the pointers to our nodes...
+	top = grandparent;
+	middle = grandparent->left;
+	subtree_a = middle->right;
 
-		diff = grandparent->w - grandparent->right->w;
+	if(subtree_a)
+		subtree_a->parent = top;
 
-		//Not imbalanced...
-		if(diff < 2)
-			return;
+	//Reconfigure the nodes.
+	middle->parent = top->parent;
+	top->left = middle->right;
+	middle->right = top;
 
-	}
+	top->parent = middle;
+	top->w -= 2;
 
-	//Imbalanced.
+	//Readjust the pointer to this tree.
+	if(tree->root == top)
+		tree->root = middle;
+
+	else if(middle->parent->left == top)
+		middle->parent->left = middle;
+
+	else
+		middle->parent->right = middle;
+
+}
+
+//Left rotation.
+static void int_avl_left_rotate(binary_search_tree* tree, binary_search_tree_node* grandparent){
+
+	binary_search_tree_node *top, *middle, *subtree_a;
+
+	size_t diff;
+
+	if(!tree || !grandparent)
+		return;
+
+	//This tree is imbalanced, get the pointers to our nodes...
+	top = grandparent;
+	middle = grandparent->right;
+	subtree_a = middle->left;
+
+	if(subtree_a)
+		subtree_a->parent = top;
+
+	//Reconfigure the nodes.
+	middle->parent = top->parent;
+	top->right = subtree_a;
+	middle->left = top;
+
+	top->parent = middle;
+	top->w -= 2;
+
+	//Readjust the pointer to this tree.
+	if(tree->root == top)
+		tree->root = middle;
+
+	else if(middle->parent->left == top)
+		middle->parent->left = middle;
+
+	else
+		middle->parent->right = middle;
+
+}
+
+//Right-left rotation.
+static void int_avl_right_left_rotate(binary_search_tree* tree, binary_search_tree_node* grandparent){
+
+	binary_search_tree_node *top, *middle, *bottom, *subtree_a, *subtree_b;
+
+	if(!tree || !grandparent)
+		return;
+
+	top = grandparent;
+	middle = grandparent->right;
+	bottom = middle->left;
+	subtree_a = bottom->left;
+	subtree_b = bottom->right;
+
+	if(subtree_a)
+		subtree_a->parent = top;
+
+	if(subtree_b)
+		subtree_b->parent = middle;
+
+	//Reconfigure the pointers.
+	middle->left = subtree_b;
+	top->right = subtree_a;
+	bottom->right = middle;
+	bottom->left = top;
+
+	bottom->parent = top->parent;
+	middle->parent = bottom;
+	top->parent = bottom;
+
+	//Adjust the weights.
+	bottom->w++;
+	middle->w--;
+	top->w -= 2;
+
+	//Readjust the pointer to this tree.
+	if(tree->root == top)
+		tree->root = bottom;
+
+	else if(bottom->parent->left == top)
+		bottom->parent->left = bottom;
+
+	else
+		bottom->parent->right = bottom;
+
+}
+
+//Left-right rotation.
+static void int_avl_left_right_rotate(binary_search_tree* tree, binary_search_tree_node* grandparent){
+
+	binary_search_tree_node *top, *middle, *bottom, *subtree_a, *subtree_b;
+
+	if(!tree || !grandparent)
+		return;
+
+	top = grandparent;
+	middle = grandparent->left;
+	bottom = middle->right;
+	subtree_a = bottom->left;
+	subtree_b = bottom->right;
+
+	if(subtree_a)
+		subtree_a->parent = middle;
+
+	if(subtree_b)
+		subtree_b->parent = top;
+
+	//Reconfigure the pointers.
+	middle->right = subtree_a;
+	top->left = subtree_b;
+	bottom->left = middle;
+	bottom->right = top;
+
+	bottom->parent = top->parent;
+	middle->parent = bottom;
+	top->parent = bottom;
+
+	//Adjust the weights.
+	bottom->w++;
+	middle->w--;
+	top->w -= 2;
+
+	//Readjust the pointer to this tree.
+	if(tree->root == top)
+		tree->root = bottom;
+
+	else if(bottom->parent->left == top)
+		bottom->parent->left = bottom;
+
+	else
+		bottom->parent->right = bottom;
+
 
 }
 
 binary_search_tree_node* _avl_tree_insert_e(binary_search_tree* tree, long key, void* data){
 
 	binary_search_tree_node *node, *parent, *grandparent;
-	size_t diff;
+	long diff1, diff2, i = 1;
 
 	node = _binary_search_tree_insert_e(tree, key, data);
 
 	if(!node)
 		return 0;
 
-	//Set the weight of the new node.
-	node->w = 1;
-
 	while(node){
 
-		parent = node->parent;
-
-		if(!parent)
+		if(node->w == i)
 			break;
 
-		grandparent = parent->parent;
+		node->w = i++;
 
-		if(!grandparent)
-			break;
+		//We might have an imbalance...
+		if(i > 2){
 
-		if(parent->left == node && grandparent->left == parent)
-			int_avl_right_rotate_check(tree, grandparent);
+			if(int_avl_left_case_check(node)){
 
-		else if(parent->left == node && grandparent->right == parent)
-			int_avl_right_left_rotate_check(tree, grandparent);
+				int_avl_right_rotate(tree, node);
+				break;
 
-		else if(parent->right == node && grandparent->right == parent)
-			int_avl_left_rotate_check(tree, grandparent);
+			}
+			else if(int_avl_right_case_check(node)){
 
-		else
-			int_avl_left_right_rotate_check(tree, grandparent);
+				int_avl_left_rotate(tree, node);
+				break;
 
-		
+			}
+			else if(int_avl_left_right_case_check(node)){
+
+				int_avl_left_right_rotate(tree, node);
+				break;
+
+			}
+			else if(int_avl_right_left_case_check(node)){
+
+				int_avl_right_left_rotate(tree, node);
+				break;
+
+			}
+			
+
+
+		}
+
 		node = node->parent;
-		node->w++;
 
 	}
 
