@@ -16,9 +16,9 @@ Set (list) -> Complete <MODDED> <CHECKED, FINISHED!>
 Object Set (vector) -> Complete <MODDED> <CHECKED, FINISHED!>
 
 Binary Search Tree -> Complete <MODDED> <CHECKED, FINISHED!>
-AVL Tree
-Red-Black Tree
-VEB Tree
+AVL Tree -> Complete <MODDED> <CHECKED, FINISHED>
+Red-Black Tree -> <SKIP>
+VEB Tree -> <SKIP>
 B-Tree
 Trie
 Ternary Search Tree

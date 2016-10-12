@@ -28,10 +28,12 @@ binary_search_tree* _avl_tree_new(standard_library_context*); //FINISHED
 void _avl_tree_delete(binary_search_tree*); //FINISHED
 
 //Insert an item into the binary search tree.
-void _avl_tree_insert(binary_search_tree*, long, void*); //FINISHED
+bool _avl_tree_insert(binary_search_tree*, long, void*); //FINISHED
+
+binary_search_tree_node* _avl_tree_insert_e(binary_search_tree*, long, void*);
 
 //Insert an item into the binary search tree, then return the newly created node.
-binary_search_tree_node* _avl_insert_e(binary_search_tree*, long, void*); //FINISHED
+bool _avl_tree_insert(binary_search_tree*, long, void*); //FINISHED
 
 //Remove a node from the binary search tree.
 void* _avl_tree_remove(binary_search_tree*, long);
@@ -159,8 +161,6 @@ static void int_avl_right_rotate(binary_search_tree* tree, binary_search_tree_no
 
 	binary_search_tree_node *top, *middle, *subtree_a;
 
-	size_t diff;
-
 	if(!tree || !grandparent)
 		return;
 
@@ -196,8 +196,6 @@ static void int_avl_right_rotate(binary_search_tree* tree, binary_search_tree_no
 static void int_avl_left_rotate(binary_search_tree* tree, binary_search_tree_node* grandparent){
 
 	binary_search_tree_node *top, *middle, *subtree_a;
-
-	size_t diff;
 
 	if(!tree || !grandparent)
 		return;
@@ -325,6 +323,37 @@ static void int_avl_left_right_rotate(binary_search_tree* tree, binary_search_tr
 
 }
 
+static bool int_avl_perform_needed_rotations(binary_search_tree* tree, binary_search_tree_node* node){
+
+	if(int_avl_left_right_case_check(node)){
+
+		int_avl_left_right_rotate(tree, node);
+		return true;
+
+	}
+	else if(int_avl_right_left_case_check(node)){
+
+		int_avl_right_left_rotate(tree, node);
+		return true;
+
+	}
+	else if(int_avl_left_case_check(node)){
+
+		int_avl_right_rotate(tree, node);
+		return true;
+
+	}
+	else if(int_avl_right_case_check(node)){
+
+		int_avl_left_rotate(tree, node);
+		return true;
+
+	}
+
+	return false;
+
+}
+
 binary_search_tree_node* _avl_tree_insert_e(binary_search_tree* tree, long key, void* data){
 
 	binary_search_tree_node *node, *parent, *grandparent;
@@ -345,32 +374,8 @@ binary_search_tree_node* _avl_tree_insert_e(binary_search_tree* tree, long key, 
 		//We might have an imbalance...
 		if(i > 2){
 
-			if(int_avl_left_case_check(node)){
-
-				int_avl_right_rotate(tree, node);
+			if(int_avl_perform_needed_rotations(tree, node))
 				break;
-
-			}
-			else if(int_avl_right_case_check(node)){
-
-				int_avl_left_rotate(tree, node);
-				break;
-
-			}
-			else if(int_avl_left_right_case_check(node)){
-
-				int_avl_left_right_rotate(tree, node);
-				break;
-
-			}
-			else if(int_avl_right_left_case_check(node)){
-
-				int_avl_right_left_rotate(tree, node);
-				break;
-
-			}
-			
-
 
 		}
 
@@ -379,4 +384,140 @@ binary_search_tree_node* _avl_tree_insert_e(binary_search_tree* tree, long key, 
 	}
 
 	
+}
+
+bool _avl_tree_insert(binary_search_tree* tree, long key, void* data){
+
+	if(_avl_tree_insert_e(tree, key, data))
+		return true;
+
+	return false;
+
+}
+
+void* _avl_tree_remove(binary_search_tree* tree, long key){
+
+	binary_search_tree_node nd;
+
+	if(_avl_tree_remove_e(tree, key, &nd))
+		return nd.data;
+
+	return 0;
+
+}
+
+bool _avl_tree_remove_e(binary_search_tree* tree, long key, binary_search_tree_node* ext){
+
+	binary_search_tree_node *del, *greatest;
+
+	if(!tree || !ext)
+		return false;
+
+	//First, find the node that we need to remove.
+	del = _binary_search_tree_lookup_e(tree, key);
+
+	if(!del)
+		return false;
+
+	//Copy the node.
+	*ext = *del;
+
+	//No children.
+	if(!del->left && !del->right){
+
+		if(del->parent){
+
+			if(del->parent->left == del)
+				del->parent->left = 0;
+			else
+				del->parent->right = 0;
+
+			//Rebalance the tree (if needed).
+			int_avl_perform_needed_rotations(tree, del->parent);
+
+		}
+		else
+			tree->root = 0;
+
+		destroy(tree->ctx, del);
+		return true;
+
+	}
+
+	//Has a left child.
+	else if(del->left){
+
+		printf("WTF?\n");
+
+		greatest = _binary_search_tree_greatest_s(del->left);
+
+		if(greatest->parent->right == greatest)
+			greatest->parent->right = greatest->left;
+		else
+			greatest->parent->left = greatest->left;
+
+		//Copy the values from the greatest subnode to the "deleted" node.
+		del->key = greatest->key;
+		del->data = greatest->data;
+
+		printf("To rotate: %ld %ld %p\n", greatest->parent->key, greatest->parent->w, greatest->parent->right);
+
+		//Rebalance the tree (if needed).
+		if(int_avl_perform_needed_rotations(tree, greatest->parent))
+			printf("Rotated!\n");
+
+		destroy(tree->ctx, greatest);
+		return true;
+
+	}
+
+	//Has right child only.
+	else{
+
+		del->right->parent = del->parent;
+
+		if(del->parent){
+
+			if(del->parent->right == del)
+				del->parent->right = del->right;
+
+			else
+				del->parent->left = del->right;
+
+			//Rebalance the tree (if needed).
+			int_avl_perform_needed_rotations(tree, del->parent);
+
+		}
+		else
+			tree->root = del->right;
+
+		destroy(tree->ctx, del);
+		return true;
+
+	}
+
+}
+
+void* _avl_tree_lookup(binary_search_tree* tree, long key){
+
+	return _binary_search_tree_lookup(tree, key);
+
+}
+
+binary_search_tree_node* _avl_tree_lookup_e(binary_search_tree* tree, long key){
+
+	return _binary_search_tree_lookup_e(tree, key);
+
+}
+
+binary_search_tree_node* _avl_tree_greatest(binary_search_tree* tree){
+
+	return _binary_search_tree_greatest(tree);
+
+}
+
+binary_search_tree_node* _avl_tree_greatest_s(binary_search_tree_node* node){
+
+	return _binary_search_tree_greatest_s(node);
+
 }

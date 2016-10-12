@@ -148,11 +148,37 @@ void main(){
 	_binary_search_tree_lookup_e(avl, 43);
 	printf("\n\n");
 
-	printf("Insert 42\n");
-	_avl_tree_insert_e(avl, 42, &test);
-	_binary_search_tree_lookup_e(avl, 42);
+
+	_binary_search_tree_lookup_e(avl, 48);
+
+	
+	printf("Delete 45\n");
+
+	printf("===IGNORE====\n");
+	_avl_tree_remove(avl, 45);
+	printf("===IGNORE=====\n");
+
+	printf("\n\n\n");
+	_binary_search_tree_lookup_e(avl, 25);
 	printf("\n\n");
 
+	printf("===IGNORE====\n");
+	_avl_tree_remove(avl, 42);
+	printf("===IGNORE=====\n");
+
+	printf("\n\n\n");
+	_binary_search_tree_lookup_e(avl, 46);
+	printf("\n\n");
+
+	printf("===IGNORE====\n");
+	_avl_tree_remove(avl, 50);
+	printf("===IGNORE=====\n");
+
+	printf("\n\n\n");
+	_binary_search_tree_lookup_e(avl, 47);
+	printf("\n\n");
+
+	
 	_avl_tree_delete(avl);
 
 }

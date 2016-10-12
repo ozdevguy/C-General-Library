@@ -28,7 +28,7 @@ binary_search_tree* _binary_search_tree_new(standard_library_context*); //FINISH
 void _binary_search_tree_delete(binary_search_tree*); //FINISHED
 
 //Insert an item into the binary search tree.
-void _binary_search_tree_insert(binary_search_tree*, long, void*); //FINISHED
+bool _binary_search_tree_insert(binary_search_tree*, long, void*); //FINISHED
 
 //Insert an item into the binary search tree, then return the newly created node.
 binary_search_tree_node* _binary_search_tree_insert_e(binary_search_tree*, long, void*); //FINISHED
@@ -38,6 +38,9 @@ void* _binary_search_tree_remove(binary_search_tree*, long);
 
 //Remove a node from the binary search tree, and get a copy of the removed node.
 bool _binary_search_tree_remove_e(binary_search_tree*, long, binary_search_tree_node*);
+
+//Remove a node from the binary search tree, get a copy, and get the pointer to the former parent.
+bool _binary_search_tree_remove_ep(binary_search_tree*, long, binary_search_tree_node*, binary_search_tree_node**);
 
 //Get an item from the binary search tree.
 void* _binary_search_tree_lookup(binary_search_tree*, long);
@@ -104,7 +107,10 @@ binary_search_tree_node* _binary_search_tree_insert_e(binary_search_tree* tree, 
 
 		parent = *current;
 
-		if(key >= (*current)->key)
+		if(key == (*current)->key)
+			return 0;
+
+		else if(key >= (*current)->key)
 			current = &((*current)->right);
 
 		else
@@ -121,9 +127,12 @@ binary_search_tree_node* _binary_search_tree_insert_e(binary_search_tree* tree, 
 
 }
 
-void _binary_search_tree_insert(binary_search_tree* tree, long key, void* data){
+bool _binary_search_tree_insert(binary_search_tree* tree, long key, void* data){
 
-	_binary_search_tree_insert_e(tree, key, data);
+	if(_binary_search_tree_insert_e(tree, key, data))
+		return true;
+
+	return false;
 
 }
 
@@ -167,12 +176,11 @@ binary_search_tree_node* _binary_search_tree_lookup_e(binary_search_tree* tree, 
 		if(node->key == key)
 			return node;
 
-		else if(key < node->key)			
+		else if(key < node->key)
 			node = node->left;
 		
 		else
 			node = node->right;
-
 		
 
 	}
@@ -194,175 +202,92 @@ void* _binary_search_tree_lookup(binary_search_tree* tree, long key){
 
 void* _binary_search_tree_remove(binary_search_tree* tree, long key){
 
-	binary_search_tree_node *node, *replacement;
-	void* data;
+	binary_search_tree_node node;
 
-	if(!tree)
-		return 0;
+	if(_binary_search_tree_remove_e(tree, key, &node))
+		return node.data;
 
-	node = tree->root;
-
-	while(node){
-
-		if(node->key == key)
-			break;
-
-		else if(key > node->key)
-			node = node->right;
-
-		else
-			node = node->left;
-
-	}
-
-	if(!node)
-		return 0;
-
-	data = node->data;
-	tree->total--;
-
-	if(node->left && node->right){
-
-		replacement = _binary_search_tree_greatest_s(node->left);
-
-		//Copy the greatest subnode to the "removed" node.
-		node->key = replacement->key;
-		node->data = replacement->data;
-		node->w = replacement->w;
-
-		//Remove the former container of the replacement.
-		replacement->parent->right = replacement->left;
-
-		destroy(tree->ctx, replacement);
-
-	}
-
-	else{
-
-		if(node->left)
-			replacement = node->left;
-
-		else if(node->right)
-			replacement = node->right;
-
-		else if(node->parent){
-
-			if(node->parent->left == node)
-				node->parent->left = 0;
-			else
-				node->parent->right = 0;
-
-			destroy(tree->ctx, node);
-
-			return data;
-
-		}
-		else{
-
-			destroy(tree->ctx, node);
-			tree->root = 0;
-
-			return data;
-
-		}	
-
-		node->key = replacement->key;
-		node->data = replacement->data;
-		node->w = replacement->w;
-		node->left = replacement->left;
-		node->right = replacement->right;
-
-		destroy(tree->ctx, replacement);
-
-	}
-
-	return data;
+	return 0;
 
 }
 
 bool _binary_search_tree_remove_e(binary_search_tree* tree, long key, binary_search_tree_node* ext){
 
-	binary_search_tree_node *node, *replacement;
-	void* data;
+	binary_search_tree_node *del, *greatest;
 
 	if(!tree || !ext)
 		return false;
 
-	node = tree->root;
+	//First, find the node that we want to remove.
+	del = _binary_search_tree_lookup_e(tree, key);
 
-	while(node){
-
-		if(node->key == key)
-			break;
-
-		else if(key > node->key)
-			node = node->right;
-
-		else
-			node = node->left;
-
-	}
-
-	if(!node)
+	if(!del)
 		return false;
 
-	*ext = *node;
-	tree->total--;
+	//Copy the node.
+	*ext = *del;
 
-	if(node->left && node->right){
+	//No children...
+	if(!del->left && !del->right){
 
-		replacement = _binary_search_tree_greatest_s(node->right);
+		if(del->parent){
 
-		//Copy the greatest subnode to the "removed" node.
-		node->key = replacement->key;
-		node->data = replacement->data;
-		node->w = replacement->w;
-
-		//Remove the former container of the replacement.
-		replacement->parent->right = replacement->left;
-
-		destroy(tree->ctx, replacement);
-
-	}
-
-	else{
-
-		if(node->left)
-			replacement = node->left;
-
-		else if(node->right)
-			replacement = node->right;
-
-		else if(node->parent){
-
-			if(node->parent->left == node)
-				node->parent->left = 0;
+			if(del->parent->left == del)
+				del->parent->left = 0;
 			else
-				node->parent->right = 0;
-
-			destroy(tree->ctx, node);
-
-			return true;
+				del->parent->right = 0;
 
 		}
-		else{
-
-			destroy(tree->ctx, node);
+		else
 			tree->root = 0;
 
-			return true;
-
-		}	
-
-		node->key = replacement->key;
-		node->data = replacement->data;
-		node->w = replacement->w;
-		node->left = replacement->left;
-		node->right = replacement->right;
-
-		destroy(tree->ctx, replacement);
+		destroy(tree->ctx, del);
+		return true;
 
 	}
 
-	return true;
+	//Has left child.
+	else if(del->left){
+
+		greatest = _binary_search_tree_greatest_s(del->left);
+
+		if(greatest->parent->right == greatest)
+			greatest->parent->right = greatest->left;
+
+		else
+			greatest->parent->left = greatest->left;
+
+		//Copy the values from the greatest subnode to the "deleted" node.
+		del->key = greatest->key;
+		del->data = greatest->data;
+
+		destroy(tree->ctx, greatest);
+		return true;
+
+	}
+
+	//Has right child only.
+	else{
+
+		del->right->parent = del->parent;
+
+		if(del->parent){
+
+			if(del->parent->right == del)
+				del->parent->right = del->right;
+
+			else
+				del->parent->left = del->right;
+
+		}
+		else
+			tree->root = del->right;
+
+		destroy(tree->ctx, del);
+		return true;
+
+	}
+
+	return false;
+
 }
