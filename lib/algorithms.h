@@ -15,7 +15,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 
-vector.h
+list.h
 ========================================================================
 
 
@@ -29,10 +29,42 @@ vector.h
 
 #endif
 
+//Include list header.
+#ifndef STD_LIBS_CONTAINERS_LIST
+	
+	#define STD_LIBS_CONTAINERS_LIST 1
+	#include "containers/list/list.h"
+
+#endif
+
 //Include vector header.
 #ifndef STD_LIBS_CONTAINERS_VECTOR
-	
+
 	#define STD_LIBS_CONTAINERS_VECTOR 1
 	#include "containers/list/vector.h"
+
+#endif
+
+//Include binary heap header.
+#ifndef STD_LIBS_CONTAINERS_BINARY_HEAP
+	
+	#define STD_LIBS_CONTAINERS_BINARY_HEAP 1
+	#include "containers/heap/binary_heap.h"
+
+#endif
+
+//Include set header.
+#ifndef STD_LIBS_CONTAINERS_SET
+	
+	#define STD_LIBS_CONTAINERS_SET 1
+	#include "containers/set/set.h"
+
+#endif
+
+//And, finally, include the algorithms header.
+#ifndef STD_LIBS_ST_ALGORITHMS
+	
+	#define STD_LIBS_ST_ALGORITHMS 1
+	#include "algorithms/algorithms.h"
 
 #endif

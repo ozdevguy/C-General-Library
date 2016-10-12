@@ -35,3 +35,4 @@ genlib.h
 #include "weighted_graph.h"
 #include "set.h"
 #include "avl_tree.h"
+#include "algorithms.h"

@@ -15,24 +15,8 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 
-vector.h
+avl_tree.c
 ========================================================================
 
 
 */
-
-//Include foundation header.
-#ifndef STD_LIBS_FOUNDATION
-	
-	#define STD_LIBS_FOUNDATION 1
-	#include "foundation.h"
-
-#endif
-
-//Include vector header.
-#ifndef STD_LIBS_CONTAINERS_VECTOR
-	
-	#define STD_LIBS_CONTAINERS_VECTOR 1
-	#include "containers/list/vector.h"
-
-#endif

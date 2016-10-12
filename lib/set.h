@@ -38,7 +38,7 @@ set.h
 #endif
 
 //Include the vector header.
-#ifndef STD_LIBS_CONTAINERS_LIST
+#ifndef STD_LIBS_CONTAINERS_VECTOR
 	
 	#define STD_LIBS_CONTAINERS_VECTOR
 	#include "containers/list/vector.h"
@@ -48,7 +48,7 @@ set.h
 //Include object set header.
 #ifndef STD_LIBS_CONTAINERS_SET
 	
-	#define STD_LIBS_CONTAINERS_OBJECT_SET 1
+	#define STD_LIBS_CONTAINERS_SET 1
 	#include "containers/set/set.h"
 
 #endif
