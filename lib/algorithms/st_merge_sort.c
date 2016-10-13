@@ -39,4 +39,3 @@ bool _merge_sort_arr_asc(void*, uint8_t);
 //Sort a normal integer array in descending order.
 bool _merge_sort_arr_desc(void*, uint8_t);
 
-

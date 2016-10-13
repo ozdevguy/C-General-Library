@@ -447,8 +447,6 @@ bool _avl_tree_remove_e(binary_search_tree* tree, long key, binary_search_tree_n
 	//Has a left child.
 	else if(del->left){
 
-		printf("WTF?\n");
-
 		greatest = _binary_search_tree_greatest_s(del->left);
 
 		if(greatest->parent->right == greatest)
@@ -460,11 +458,8 @@ bool _avl_tree_remove_e(binary_search_tree* tree, long key, binary_search_tree_n
 		del->key = greatest->key;
 		del->data = greatest->data;
 
-		printf("To rotate: %ld %ld %p\n", greatest->parent->key, greatest->parent->w, greatest->parent->right);
-
 		//Rebalance the tree (if needed).
-		if(int_avl_perform_needed_rotations(tree, greatest->parent))
-			printf("Rotated!\n");
+		int_avl_perform_needed_rotations(tree, greatest->parent);
 
 		destroy(tree->ctx, greatest);
 		return true;
