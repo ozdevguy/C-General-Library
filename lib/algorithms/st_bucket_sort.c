@@ -15,28 +15,8 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 
-st_merge_sort.c
+st_bucket_sort.c
 ========================================================================
 
 
 */
-
-//Sort a list in ascending order.
-bool _merge_sort_list_asc(list*, size_t, uint8_t);
-
-//Sort a list in descending order.
-bool _merge_sort_list_desc(list*, size_t, uint8_t);
-
-//Sort a vector in ascending order.
-bool _merge_sort_vector_asc(vector*, size_t, uint8_t);
-
-//Sort a vector in descending order.
-bool _merge_sort_vector_desc(vector*, size_t, uint8_t);
-
-//Sort a normal integer array in ascending order.
-bool _merge_sort_arr_asc(void*, uint8_t);
-
-//Sort a normal integer array in descending order.
-bool _merge_sort_arr_desc(void*, uint8_t);
-
-

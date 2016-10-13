@@ -25,7 +25,7 @@ foundation.h
 #ifndef SYS_LIBS
 	
 	#define SYS_LIBS 1
-
+	
 	#ifdef __linux__
 
 		#include "sys_include.h"
@@ -60,6 +60,12 @@ foundation.h
 		//Compile for the Maestro virtual operating system.
 		#include "sys_include.h"
 
+	#elif __ARDUINO__ || __EMBEDDED__
+	
+		//Compile for embedded systems.
+		#include "embedded_threads.h"
+		#include "embedded.h"
+	
 	#endif
 
 #endif
