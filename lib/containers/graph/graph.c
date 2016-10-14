@@ -187,7 +187,7 @@ static bool int_graph_node_remove_edge(graph* gr, graph_node* node, long key){
 static void int_graph_build_path(graph* gr, graph_node* node, graph_path* path){
 
 	graph_node* next;
-	size_t hops = 0, data_size = 0, i;
+	long hops = 0, data_size = 0, i;
 
 	if(!gr || !node || !path)
 		return;

@@ -68,8 +68,12 @@ size_t int_hashmap_hash(byte* input){
 
 	size_t i = 0, res = 0;
 
-	while(input[i] && i < 1000000)
-		res += (input[i++] * i);
+	while(input[i] && i < 1000000){
+
+		res += (input[i] * i);
+		i++;
+		
+	}
 
 	return res;
 

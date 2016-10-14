@@ -34,42 +34,42 @@ void _string_append_fstring(string*, string*); //COMPLETE
 void _string_append_fchar(string*, utf8_char*); //COMPLETE
 
 //Insert substring at position.
-void _string_insert(string*, string*, size_t); //COMPLETE
+void _string_insert(string*, string*, long); //COMPLETE
 
 //Find the position of a substring within the parent string.
-long _string_position_fbytes(string*, byte*, size_t); //COMPLETE
-long _string_position_fstring(string*, string*, size_t); //COMPLETE
+long _string_position_fbytes(string*, byte*, long); //COMPLETE
+long _string_position_fstring(string*, string*, long); //COMPLETE
 
 //Get pure byte array.
-byte* _string_pull(string*, size_t*); //COMPLETE
+byte* _string_pull(string*, long*); //COMPLETE
 
 //Get utf8_char array.
-utf8_char* _string_pull_carr(string*, size_t*); //COMPLETE
+utf8_char* _string_pull_carr(string*, long*); //COMPLETE
 
 //Replace a matching substring within the string..
 bool _string_replace_all_fbytes(string*, byte*, byte*);	//COMPLETE
 bool _string_replace_all_fstring(string*, string*, string*); //COMPLETE
 
-bool _string_replace_fbytes(string*, byte*, byte*, size_t); //COMPLETE
-bool _string_replace_fstring(string*, string*, string*, size_t); //COMPLETE
+bool _string_replace_fbytes(string*, byte*, byte*, long); //COMPLETE
+bool _string_replace_fstring(string*, string*, string*, long); //COMPLETE
 
 //Get a character at a position.
-bool _string_char_at(string*, size_t, utf8_char*); //COMPLETE
+bool _string_char_at(string*, long, utf8_char*); //COMPLETE
 
 //Get a substring.
-string* _string_substr(string*, size_t, size_t); //COMPLETE
+string* _string_substr(string*, long, long); //COMPLETE
 
 //Get a section of a string up to a specific character.
-string_list* _string_split(string*, size_t); //COMPLETE
+string_list* _string_split(string*, long); //COMPLETE
 
-string_list* _string_split_delim(string*, utf8_char, size_t); //COMPLETE
+string_list* _string_split_delim(string*, utf8_char, long); //COMPLETE
 
 //Trim spaces from beginning and end of a string.
 void _string_trim(string* str); //COMPLETE
 
 //Get a section of a string up to a specific substring.
-string_list* _string_split_fbytes(string*, byte*, size_t); //COMPLETE
-string_list* _string_split_fstring(string*, string*, size_t); //COMPLETE
+string_list* _string_split_fbytes(string*, byte*, long); //COMPLETE
+string_list* _string_split_fstring(string*, string*, long); //COMPLETE
 
 //Convert a string to all lowercase.
 void _string_lowercase(string*); //COMPLETE
@@ -78,7 +78,7 @@ void _string_lowercase(string*); //COMPLETE
 void _string_uppercase(string*); //COMPLETE
 
 //Get the index of a character.
-long _string_index_of(string*, utf8_char*, size_t); //COMPLETE
+long _string_index_of(string*, utf8_char*, long); //COMPLETE
 
 //Check to see if two strings are equal.
 bool _string_compare(string*, string*);
@@ -89,7 +89,7 @@ bool _string_compare(string*, string*);
 //Create a new string from scratch.
 string* _string_new(standard_library_context* ctx){
 
-	size_t total_bytes = 0;
+	long total_bytes = 0;
 
 	if(!ctx)
 		return 0;
@@ -109,7 +109,7 @@ string* _string_new(standard_library_context* ctx){
 //Create a new string from an existing byte array.
 string* _string_new_fbytes(standard_library_context* ctx, byte* data){
 
-	size_t i = 0, j = 0, length = 0, size = 0;
+	long i = 0, j = 0, length = 0, size = 0;
 	string* str;
 
 	if(!data)
@@ -172,9 +172,9 @@ void _string_delete_ll(string_list* lst){
 }
 
 //Return a string as a byte array.
-byte* _string_pull(string* str, size_t* length){
+byte* _string_pull(string* str, long* length){
 
-	size_t i, j = 0, k = 0, total = 0;
+	long i, j = 0, k = 0, total = 0;
 	byte* data;
 
 	if(!str || !length)
@@ -203,7 +203,7 @@ byte* _string_pull(string* str, size_t* length){
 }
 
 //Return a pointer to the character array.
-utf8_char* _string_pull_carr(string* str, size_t* length){
+utf8_char* _string_pull_carr(string* str, long* length){
 
 	if(!str)
 		return 0;
@@ -246,7 +246,7 @@ void _string_append_fbytes(string* str, byte* append){
 
 void _string_append_fstring(string* str, string* append){
 
-	size_t i, combined_size, new_size, new_byte_size;
+	long i, combined_size, new_size, new_byte_size;
 	utf8_char* data;
 
 	if(!str || !append)
@@ -299,12 +299,12 @@ void _string_append_fchar(string* str, utf8_char* append){
 }
 
 //Insert substring at the given position.
-void _string_insert(string* str, string* insert, size_t pos){
+void _string_insert(string* str, string* insert, long pos){
 
-	size_t i, new_size, new_byte_size;
+	long i, new_size, new_byte_size;
 	utf8_char* data;
 
-	if(!str || !insert)
+	if(!str || !insert || pos < 0)
 		return;
 
 	if(pos > str->length){
@@ -340,11 +340,11 @@ void _string_insert(string* str, string* insert, size_t pos){
 }
 
 //Find the position of a substring within the parent string.
-long _string_position_fbytes(string* str, byte* find, size_t s_pos){
+long _string_position_fbytes(string* str, byte* find, long s_pos){
 
 	long result;
 
-	if(!str || !find)
+	if(!str || !find || s_pos < 0)
 		return -1;
 
 	string* new_string = _string_new_fbytes(str->ctx, find);
@@ -358,14 +358,14 @@ long _string_position_fbytes(string* str, byte* find, size_t s_pos){
 }
 
 //Find the position of a substring within the parent string.
-long _string_position_fstring(string* str, string* find, size_t s_pos){
+long _string_position_fstring(string* str, string* find, long s_pos){
 
-	size_t i, j;
+	long i, j;
 
-	if(!str || !find)
+	if(!str || !find || s_pos < 0)
 		return 0;
 
-	if(s_pos < 0 || s_pos >= str->length)
+	if(s_pos >= str->length)
 		return 0;
 
 	for(i = s_pos; i < str->length; i++){
@@ -388,11 +388,11 @@ long _string_position_fstring(string* str, string* find, size_t s_pos){
 
 
 //Replace the first instance of a matching substring within a string.
-bool _string_replace_fbytes(string* str, byte* pattern, byte* replace, size_t s_pos){
+bool _string_replace_fbytes(string* str, byte* pattern, byte* replace, long s_pos){
 
 	bool result;
 
-	if(!str || !pattern || !replace)
+	if(!str || !pattern || !replace || s_pos < 0)
 		return false;
 
 	string* pattern_string = _string_new_fbytes(str->ctx, pattern);
@@ -407,16 +407,16 @@ bool _string_replace_fbytes(string* str, byte* pattern, byte* replace, size_t s_
 
 }
 
-bool _string_replace_fstring(string* str, string* pattern, string* replace, size_t s_pos){
+bool _string_replace_fstring(string* str, string* pattern, string* replace, long s_pos){
 
-	size_t i;
+	long i;
 	long find_pos;
 	string *s1 = 0, *s2 = 0;
 
-	if(!str || !pattern || !replace)
+	if(!str || !pattern || !replace || s_pos < 0)
 		return false;
 
-	if(s_pos < 0 || s_pos >= str->length)
+	if(s_pos >= str->length)
 		return false;
 
 	//Find the first occurance of the pattern.
@@ -457,20 +457,24 @@ bool _string_replace_fstring(string* str, string* pattern, string* replace, size
 //Replace all instances of a matching substring within a string.
 bool _string_replace_all_fbytes(string* str, byte* pattern, byte* replace){
 
+	bool result;
+
 	string* pattern_string = _string_new_fbytes(str->ctx, pattern);
 	string* replacement_string = _string_new_fbytes(str->ctx, replace);
 
-	_string_replace_all_fstring(str, pattern_string, replacement_string);
+	result = _string_replace_all_fstring(str, pattern_string, replacement_string);
 
 	_string_delete(pattern_string);
 	_string_delete(replacement_string);
+
+	return result;
 
 }
 
 
 bool _string_replace_all_fstring(string* str, string* pattern, string* replace){
 
-	size_t i;
+	long i;
 	long find_pos;
 	string *s1 = 0, *s2 = 0, *tmp;
 
@@ -534,15 +538,15 @@ bool _string_replace_all_fstring(string* str, string* pattern, string* replace){
 }
 
 //Get the position of a specific character.
-long _string_index_of(string* str, utf8_char* unichar, size_t pos){
+long _string_index_of(string* str, utf8_char* unichar, long pos){
 
-	size_t i;
+	long i;
 	utf8_char* data;
 
-	if(!str || !unichar)
+	if(!str || !unichar || pos < 0)
 		return -1;
 
-	if(pos < 0 || pos >= str->length)
+	if(pos >= str->length)
 		return 1;
 
 	for(i = pos; i < str->length; i++){
@@ -557,9 +561,9 @@ long _string_index_of(string* str, utf8_char* unichar, size_t pos){
 }
 
 //Get a character at a position.
-bool _string_char_at(string* str, size_t pos, utf8_char* unichar){
+bool _string_char_at(string* str, long pos, utf8_char* unichar){
 
-	if(!str || !unichar || pos < 0)
+	if(!str || !unichar)
 		return false;
 
 	if(pos >= str->length)
@@ -571,13 +575,13 @@ bool _string_char_at(string* str, size_t pos, utf8_char* unichar){
 }
 
 //Get a substring.
-string* _string_substr(string* str, size_t s_pos, size_t e_pos){
+string* _string_substr(string* str, long s_pos, long e_pos){
 
-	size_t i, new_byte_size, new_size;
+	long i, new_byte_size, new_size;
 	utf8_char* data;
 	string* new_string;
 
-	if(!str)
+	if(!str || e_pos < 0)
 		return 0;
 
 	if(s_pos >= str->length || e_pos < s_pos || e_pos >= str->length)
@@ -606,13 +610,13 @@ string* _string_substr(string* str, size_t s_pos, size_t e_pos){
 }
 
 //Split a string at the given index.
-string_list* _string_split(string* str, size_t pos){
+string_list* _string_split(string* str, long pos){
 
-	size_t s1_size, s2_size;
+	long s1_size, s2_size;
 	string_list* lst;
 	byte* data;
 
-	if(!str)
+	if(!str || pos < 0)
 		return 0;
 
 	if(pos <= 0 || pos >= str->length)
@@ -630,12 +634,12 @@ string_list* _string_split(string* str, size_t pos){
 
 
 //Get a section of a string up to a specific character.
-string_list* _string_split_delim(string* str, utf8_char delim, size_t s_pos){
+string_list* _string_split_delim(string* str, utf8_char delim, long s_pos){
 
 	string_list* lst;
 	long pos;
 
-	if(!str)
+	if(!str || s_pos < 0)
 		return 0;
 
 	pos = _string_index_of(str, &delim, s_pos);
@@ -656,7 +660,7 @@ string_list* _string_split_delim(string* str, utf8_char delim, size_t s_pos){
 //Trim spaces of beginning and end of string.
 void _string_trim(string* str){
 
-	size_t i, s_pos = 0, e_pos = 0;
+	long i, s_pos = 0, e_pos = 0;
 	string* trimmed;
 
 	if(!str)
@@ -706,12 +710,12 @@ void _string_trim(string* str){
 }
 
 //Get a section of a string up to a specific substring.
-string_list* _string_split_fbytes(string* str, byte* delim, size_t s_pos){
+string_list* _string_split_fbytes(string* str, byte* delim, long s_pos){
 
 	string* delim_string;
 	string_list* lst;
 
-	if(!str || !delim)
+	if(!str || !delim || s_pos < 0)
 		return 0;
 
 	delim_string = _string_new_fbytes(str->ctx, delim);
@@ -725,12 +729,12 @@ string_list* _string_split_fbytes(string* str, byte* delim, size_t s_pos){
 
 }
 
-string_list* _string_split_fstring(string* str, string* delim, size_t s_pos){
+string_list* _string_split_fstring(string* str, string* delim, long s_pos){
 
 	string_list* lst;
 	long pos;
 
-	if(!str || !delim)
+	if(!str || !delim || s_pos < 0)
 		return 0;
 
 	pos = _string_position_fstring(str, delim, s_pos);
@@ -751,7 +755,7 @@ string_list* _string_split_fstring(string* str, string* delim, size_t s_pos){
 //Convert a string to all lowercase.
 void _string_lowercase(string* str){
 
-	size_t i;
+	long i;
 	utf8_char* data;
 
 	if(!str)
@@ -766,7 +770,7 @@ void _string_lowercase(string* str){
 //Convert a string to all uppercase.
 void _string_uppercase(string* str){
 
-	size_t i;
+	long i;
 
 	if(!str)
 		return;
@@ -779,7 +783,7 @@ void _string_uppercase(string* str){
 //Check to see if two strings are equal.
 bool _string_compare(string* str1, string* str2){
 
-	size_t i;
+	long i;
 
 	if(!str1 || !str2)
 		return false;

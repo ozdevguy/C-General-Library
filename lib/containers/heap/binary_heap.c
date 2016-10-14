@@ -280,14 +280,19 @@ void _binary_heap_ordering(binary_heap* heap, uint8_t ordering){
 
 	if(ordering == BINARY_HEAP_MAX){
 
-		for(i = heap->used / 2; i >= 0; i--)
+		for(i = heap->used / 2; i > 0; i--)
 			int_binary_heap_max_reverse_heapify(heap, i);
+
+		int_binary_heap_max_reverse_heapify(heap, i);
 
 	}
 	else{
 
-		for(i = heap->used / 2; i >= 0; i--)
+		for(i = heap->used / 2; i > 0; i--)
 			int_binary_heap_min_reverse_heapify(heap, i);
+
+		int_binary_heap_min_reverse_heapify(heap, i);
+
 	}
 
 
@@ -302,14 +307,18 @@ void _binary_heap_build(binary_heap* heap){
 
 	if(heap->ordering == BINARY_HEAP_MAX){
 
-		for(i = heap->used / 2; i >= 0; i--)
+		for(i = heap->used / 2; i > 0; i--)
 			int_binary_heap_max_reverse_heapify(heap, i);
+
+		int_binary_heap_max_reverse_heapify(heap, i);
 
 	}
 	else{
 
-		for(i = heap->used / 2; i >= 0; i--)
+		for(i = heap->used / 2; i > 0; i--)
 			int_binary_heap_min_reverse_heapify(heap, i);
+
+		int_binary_heap_min_reverse_heapify(heap, i);
 		
 	}
 

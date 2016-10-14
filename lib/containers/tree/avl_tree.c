@@ -383,6 +383,7 @@ binary_search_tree_node* _avl_tree_insert_e(binary_search_tree* tree, long key, 
 
 	}
 
+	return node;
 	
 }
 

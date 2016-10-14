@@ -96,7 +96,7 @@ sort_representation_cont* _sort_setup_fvect(vector* input, size_t offset, uint8_
 }
 
 
-bool _sort_copy_back_tlist(list* lst, sort_representation_cont* sorter){
+void _sort_copy_back_tlist(list* lst, sort_representation_cont* sorter){
 
 	size_t i;
 
@@ -108,7 +108,7 @@ bool _sort_copy_back_tlist(list* lst, sort_representation_cont* sorter){
 
 }
 
-bool _sort_copy_back_tvect(vector* vect, sort_representation_cont* sorter){
+void _sort_copy_back_tvect(vector* vect, sort_representation_cont* sorter){
 
 	size_t i;
 	vector* nv;

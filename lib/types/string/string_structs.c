@@ -36,10 +36,10 @@ struct string{
 	bool case_insensitive;
 
 	//Number of characters in the string.
-	size_t length;
+	long length;
 
 	//Total number of allocated unicode characters.
-	size_t size;
+	long size;
 
 };
 

@@ -1,4 +1,4 @@
-#include "../lib/algorithms.h"
+#include "../lib/genlib.h"
 
 typedef struct test_str test_str;
 
@@ -10,7 +10,7 @@ struct test_str{
 
 };
 
-void main(){
+int main(){
 
 	standard_library_context ctx;
 

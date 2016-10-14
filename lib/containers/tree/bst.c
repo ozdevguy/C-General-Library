@@ -98,7 +98,7 @@ binary_search_tree_node* _binary_search_tree_insert_e(binary_search_tree* tree, 
 	binary_search_tree_node* parent = 0;
 
 	if(!tree)
-		return;
+		return 0;
 
 	current = &tree->root;
 	tree->total++;

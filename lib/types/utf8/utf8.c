@@ -257,5 +257,7 @@ unsigned int _utf8_lang(utf8_char* unichar){
 
 	/* TO DO */
 
+	return 0;
+
 }
 
