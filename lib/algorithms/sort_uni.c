@@ -50,6 +50,9 @@ sort_representation_cont* _sort_setup_flist(list* input, size_t offset, uint8_t 
 		else if(val_size == sizeof(int))
 			sorter->sort_arr[i].value = *((int*)(data + offset));
 
+		else if(val_size == sizeof(long))
+			sorter->sort_arr[i].value = *((long*)(data + offset));
+		
 		sorter->sort_arr[i].data = data;
 
 	}
@@ -86,6 +89,9 @@ sort_representation_cont* _sort_setup_fvect(vector* input, size_t offset, uint8_
 
 		else if(val_size == sizeof(int))
 			sorter->sort_arr[i].value = *((int*)(data + offset));
+
+		else if(val_size == sizeof(long))
+			sorter->sort_arr[i].value = *((long*)(data + offset));
 
 		sorter->sort_arr[i].data = data;
 
