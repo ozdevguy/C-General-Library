@@ -16,59 +16,62 @@ void main(){
 
 	_std_lib_default(&ctx);
 
-	list* myList = _list_new(&ctx, 10);
+	vector* myVector = _vector_new(&ctx, sizeof(test_str), 100);
+
+	
+	int i;
 
 	test_str a;
-	a.val = 23;
+	srand(time(0));
 
-	test_str b;
-	b.val = 20;
+	for(i = 0; i < 1000000; i++){
 
-	test_str c;
-	c.val = 33;
+		a.val = (rand() % 1000000);
 
-	test_str d;
-	d.val = 90;
+		_vector_add(myVector, &a);
 
-	test_str e;
-	e.val = 56;
+	}
 
-	_list_add(myList, &a);
-	_list_add(myList, &b);
-	_list_add(myList, &c);
-	_list_add(myList, &d);
-	_list_add(myList, &e);
-
-
-	_list_reset_iterator(myList);
 
 	printf("\n\nUNSORTED:\n");
 
-	while(_list_has_next(myList)){
+	/*
+	_vector_reset_iterator(myVector);
 
-		void* p = _list_get_next(myList);
+	while(_vector_has_next(myVector)){
 
-		printf("%d,", ((test_str*)p)->val);		
+		void* p = _vector_get_next(myVector);
+
+		printf("%d,", ((test_str*)p)->val);	
+
 	}
+	*/
 
 	printf("\n");
 
 	size_t offset = (void*)(&a.val) - (void*)(&a);
-	_mergesort_list_asc(myList, offset, sizeof(int));
-
-	_list_reset_iterator(myList);
+	_mergesort_vector_asc(myVector, offset, sizeof(int));
 
 	printf("\n\nSORTED:\n");
 
-	while(_list_has_next(myList)){
+	
+	_vector_reset_iterator(myVector);
 
-		void* p = _list_get_next(myList);
+	i = 0;
 
-		printf("%d,", ((test_str*)p)->val);		
+	while(_vector_has_next(myVector) && i++ < 150){
+
+		void* p = _vector_get_next(myVector);
+
+		printf("%d\n", ((test_str*)p)->val);	
+
 	}
 
-	printf("\n");
+	printf("\n\n");
+	
 
-	_list_delete(myList);
+	_vector_reset_iterator(myVector);
+
+	_vector_delete(myVector);
 
 }

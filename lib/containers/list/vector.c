@@ -33,6 +33,9 @@ void _vector_add(vector*, void*);
 //Get an item from the vector.
 void* _vector_get(vector*, size_t);
 
+//Set a vector item.
+bool _vector_set(vector*, size_t, void*);
+
 //Remove an item from the vector.
 void _vector_remove(vector*, size_t);
 
@@ -97,11 +100,33 @@ void _vector_add(vector* vect, void* data){
 
 void* _vector_get(vector* vect, size_t pos){
 
+	if(!vect)
+		return 0;
+
 	if(pos < vect->used)
 		return (void*)(vect->data + (pos * vect->data_size));
 
 	return 0;
 
+}
+
+bool _vector_set(vector* vect, size_t pos, void* data){
+
+	size_t i, end;
+
+	if(!vect)
+		return false;
+
+	if(pos >= vect->used)
+		return false;
+
+	pos *= vect->data_size;
+	end = pos + vect->data_size;
+
+	for(i = pos; i < end; i++)
+		vect->data[i] = *((byte*)(data + i - pos));
+
+	return true;
 }
 
 void _vector_remove(vector* vect, size_t pos){

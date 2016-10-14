@@ -17,6 +17,9 @@ void main(){
 	_vector_add(vect, &v);
 	_vector_add(vect, &e);
 
+	_vector_set(vect, 1, &t);
+	
+
 	int i;
 
 	_vector_reset_iterator(vect);
