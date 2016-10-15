@@ -38,11 +38,13 @@ struct standard_library_context{
 	//Log handler (logger(byte* message, size_t message_length, uint8_t type, uint32_t instance_id))
 	void* (*logger)(byte*, size_t, uint8_t, uint32_t);
 
+	//Thread initializer.
+	bool (*create_thread)(void*(void*));
+
 	//Operation failure function.
 	//TO DO
 
 };
-
 
 /*==================DEFAULT FUNCTIONS=====================*/
 void* int_std_calloc_bridge(size_t size, uint32_t instance_id){

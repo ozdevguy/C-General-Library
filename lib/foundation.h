@@ -29,7 +29,7 @@ foundation.h
 	#ifdef __linux__
 
 		#include "sys_include.h"
-		#include "posix_thread_wrapper.h"
+		#include <pthread.h>
 
 	#elif _WIN32
 		
@@ -48,7 +48,7 @@ foundation.h
 	#elif __APPLE__
 		
 		#include "sys_include.h"
-		#include "posix_thread_wrapper.h"
+		#include <pthread.h>
 
 	#elif __DITTO_COMPILER_DIRECT__
 		

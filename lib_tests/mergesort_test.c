@@ -24,9 +24,9 @@ int main(){
 	test_str a;
 	srand(time(0));
 
-	for(i = 0; i < 1000000; i++){
+	for(i = 0; i < 10000000; i++){
 
-		a.val = (rand() % 1000000);
+		a.val = rand() % 10000000;
 
 		_vector_add(myVector, &a);
 
@@ -50,7 +50,7 @@ int main(){
 	printf("\n");
 
 	size_t offset = (void*)(&a.val) - (void*)(&a);
-	_mergesort_vector_asc(myVector, offset, sizeof(int));
+	//_th_mergesort_vector_asc(myVector, offset, sizeof(int));
 
 	printf("\n\nSORTED:\n");
 
@@ -59,15 +59,15 @@ int main(){
 
 	i = 0;
 
-	while(_vector_has_next(myVector) && i++ < 150){
+	while(_vector_has_next(myVector)){
 
 		void* p = _vector_get_next(myVector);
 
-		printf("%d\n", ((test_str*)p)->val);	
+		//printf("%d\n", ((test_str*)p)->val);	
 
 	}
 
-	printf("\n\n");
+	//printf("\n\n");
 	
 
 	_vector_reset_iterator(myVector);

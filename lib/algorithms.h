@@ -61,10 +61,17 @@ algorithms.h
 
 #endif
 
-//And, finally, include the algorithms header.
+//And, finally, include the algorithms headers.
 #ifndef STD_LIBS_ST_ALGORITHMS
 	
 	#define STD_LIBS_ST_ALGORITHMS 1
 	#include "algorithms/algorithms.h"
+
+#endif
+
+#ifndef STD_LIBS_THREADED_ALGORITHMS
+	
+	#define STD_LIBS_THREADED_ALGORITHMS 1
+	#include "thread_enhanced/algorithms/th_algorithms.h"
 
 #endif
