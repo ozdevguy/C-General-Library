@@ -69,9 +69,11 @@ algorithms.h
 
 #endif
 
+/*
 #ifndef STD_LIBS_THREADED_ALGORITHMS
 	
 	#define STD_LIBS_THREADED_ALGORITHMS 1
 	#include "thread_enhanced/algorithms/th_algorithms.h"
 
 #endif
+*/

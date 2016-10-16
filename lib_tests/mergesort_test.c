@@ -24,7 +24,7 @@ int main(){
 	test_str a;
 	srand(time(0));
 
-	for(i = 0; i < 10000000; i++){
+	for(i = 0; i < 1000000; i++){
 
 		a.val = rand() % 10000000;
 
@@ -50,7 +50,7 @@ int main(){
 	printf("\n");
 
 	size_t offset = (void*)(&a.val) - (void*)(&a);
-	//_th_mergesort_vector_asc(myVector, offset, sizeof(int));
+	_mergesort_vector_asc(myVector, offset, sizeof(int));
 
 	printf("\n\nSORTED:\n");
 
