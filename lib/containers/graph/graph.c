@@ -255,6 +255,9 @@ bool _graph_delete(graph* gr){
 	if(!gr)
 		return false;
 
+	if(gr->helper_map)
+		_map_delete(gr->helper_map);
+
 	//Loop through each node.
 	for(i = 0; i < gr->size; i++)
 		int_graph_node_delete_edges(gr, gr->nodes + i);
@@ -402,12 +405,9 @@ bool _graph_add_edge(graph* gr, long from, long to, graph_edge** to_edge){
 
 	}
 
-	if(!n1 || !n2){
-
-		_log_error(gr->ctx, "One of the nodes does not exist.", 32);
+	if(!n1 || !n2)
 		return false;
 
-	}
 
 	//Add the edge...
 	e = &n1->last_edge;
@@ -437,7 +437,14 @@ bool _graph_add_double_edge(graph* gr, long from, long to, graph_edge** edge_to,
 	if(!gr)
 		return false;
 
-	for(i = 0; i < gr->used; i++){
+	if(gr->helper_map){
+
+		n1 = _map_lookup(gr->helper_map, from);
+		n2 = _map_lookup(gr->helper_map, to);
+
+	}
+
+	for(i = 0; i < gr->used && !gr->helper_map; i++){
 
 		if(gr->nodes[i].key == from)
 			n1 = gr->nodes + i;
@@ -496,6 +503,9 @@ bool _graph_delete_node(graph* gr, long key){
 
 	if(!gr)
 		return false;
+
+	if(!gr->helper_map)
+		_map_remove(gr->helper_map, key);
 
 	for(i = 0; i < gr->used; i++){
 
@@ -575,7 +585,10 @@ bool _graph_bfs(graph* gr, long start, long end, graph_path* path){
 		return false;
 
 	//Find the root.
-	for(i = 0; i < gr->used; i++){
+	if(gr->helper_map)
+		root = _map_lookup(gr->helper_map, start);
+
+	for(i = 0; i < gr->used && !gr->helper_map; i++){
 
 		if(gr->nodes[i].key == start)
 			root = gr->nodes + i;
@@ -643,7 +656,10 @@ bool _graph_dfs(graph* gr, long start, long end, graph_path* path){
 		return false;
 
 	//Find the root.
-	for(i = 0; i < gr->used; i++){
+	if(gr->helper_map)
+		root = _map_lookup(gr->helper_map, start);
+
+	for(i = 0; i < gr->used && !gr->helper_map; i++){
 
 		if(gr->nodes[i].key == start)
 			root = gr->nodes + i;
