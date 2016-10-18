@@ -6,7 +6,7 @@ void main(){
 	_std_lib_default(&ctx);
 
 	string* myString = _string_new(&ctx);
-	size_t size;
+	long size;
 
 
 	//utf8_char* characters = (utf8_char*)myString->data;
@@ -107,7 +107,7 @@ void main(){
 
 	string_list* tlst = _string_split_delim(myString, tchar2, 0);
 
-	size_t l;
+	long l;
 
 	char* d0 = (char*)_string_pull(tlst->s, &l);
 	char* d1 = (char*)_string_pull(tlst->next->s, &l);
@@ -152,6 +152,8 @@ void main(){
 	printf("%s\n", tt);
 
 	destroy(&ctx, tt);
+
+	printf("Hash value: %ld\n", _string_hash(tlst2->s));
 
 	_string_delete(trimTest);
 	_string_delete_ll(tlst2);

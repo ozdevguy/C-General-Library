@@ -19,14 +19,14 @@ int main(){
 	vector* myVector = _vector_new(&ctx, sizeof(test_str), 100);
 
 	
-	int i;
+	int i, j;
 
 	test_str a;
 	srand(time(0));
 
-	for(i = 0; i < 1000000; i++){
+	for(i = 0; i < 120; i++){
 
-		a.val = rand() % 10000000;
+		a.val = rand() % 120;
 
 		_vector_add(myVector, &a);
 
@@ -35,7 +35,7 @@ int main(){
 
 	printf("\n\nUNSORTED:\n");
 
-	/*
+	
 	_vector_reset_iterator(myVector);
 
 	while(_vector_has_next(myVector)){
@@ -45,7 +45,8 @@ int main(){
 		printf("%d,", ((test_str*)p)->val);	
 
 	}
-	*/
+	
+
 
 	printf("\n");
 
@@ -63,7 +64,7 @@ int main(){
 
 		void* p = _vector_get_next(myVector);
 
-		//printf("%d\n", ((test_str*)p)->val);	
+		printf("%d\n", ((test_str*)p)->val);	
 
 	}
 
@@ -71,7 +72,56 @@ int main(){
 	
 
 	_vector_reset_iterator(myVector);
+	
 
 	_vector_delete(myVector);
+
+
+	printf("LIST TEST...\n\n");
+
+	test_str b;
+	b.val = 23;
+
+	test_str c;
+	c.val = 10;
+
+	test_str d;
+	d.val = 43;
+
+	test_str e;
+	e.val = 8;
+
+	list* myList = _list_new(&ctx, 5);
+
+	_list_add(myList, &b);
+	_list_add(myList, &c);
+	_list_add(myList, &d);
+	_list_add(myList, &e);
+
+	_list_reset_iterator(myList);
+
+	while(_list_has_next(myList)){
+
+		test_str* t = _list_get_next(myList);
+
+		printf("Val: %d\n", t->val);
+
+	}
+
+	printf("Perform sort...\n\n");
+
+	_mergesort_list_desc(myList, offset, sizeof(int));
+
+	_list_reset_iterator(myList);
+
+	while(_list_has_next(myList)){
+
+		test_str* t = _list_get_next(myList);
+
+		printf("Val: %d\n", t->val);
+
+	}
+
+	_list_delete(myList);
 
 }

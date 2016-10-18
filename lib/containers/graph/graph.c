@@ -91,16 +91,16 @@ void _graph_walk_end(graph*);
 
 
 /* HELPER MAP */
-void _graph_enable_helper_map(graph*);
+void _graph_enable_node_helper_map(graph*, bool);
 
-void _graph_disable_helper_map(graph*);
+void _graph_enable_edge_helper_map(graph*, bool);
 
 
 //Increase the size of the node array.
 static void int_graph_resize(graph* gr, size_t new_size){
 
 	graph_node* new_nodes;
-	size_t i, ns;
+	size_t i, ns, hs;
 
 	if(!gr)
 		return;
@@ -108,6 +108,7 @@ static void int_graph_resize(graph* gr, size_t new_size){
 	if(new_size <= gr->size)
 		return;
 
+	hs = new_size / 4;
 	ns = sizeof(graph_node) * new_size;
 	new_nodes = allocate(gr->ctx, ns);
 
@@ -118,6 +119,13 @@ static void int_graph_resize(graph* gr, size_t new_size){
 
 	gr->nodes = new_nodes;
 	gr->size = new_size;
+
+	if(gr->helper_map){
+
+		if(hs > gr->helper_map->size)
+			_map_resize(gr->helper_map, hs);
+
+	}
 
 }
 
@@ -280,6 +288,9 @@ graph_node* _graph_get_node(graph* gr, long key){
 	if(!gr)
 		return 0;
 
+	if(gr->helper_map)
+		return _map_lookup(gr->helper_map, key);
+
 	for(i = 0; i < gr->used; i++){
 
 		if(gr->nodes[i].key == key)
@@ -300,8 +311,15 @@ graph_edge* _graph_get_edge(graph* gr, long from, long to){
 	if(!gr)
 		return 0;
 
+	if(gr->helper_map){
+
+		from_node = _map_lookup(gr->helper_map, from);
+		to_node = _map_lookup(gr->helper_map, to);
+
+	}
+
 	//Get the from and to nodes.
-	for(i = 0; i < gr->used; i++){
+	for(i = 0; i < gr->used && !gr->helper_map; i++){
 
 		if(gr->nodes[i].key == from)
 			from_node = gr->nodes + i;
@@ -313,6 +331,8 @@ graph_edge* _graph_get_edge(graph* gr, long from, long to){
 			break;
 
 	}
+
+
 
 	if(!to_node || !from_node)
 		return 0;
@@ -346,6 +366,9 @@ graph_node* _graph_add_node(graph* gr, long key, void* ptr){
 	c_node->key = key;
 	c_node->data = ptr;
 
+	if(gr->helper_map)
+		_map_insert(gr->helper_map, key, c_node);
+
 	return c_node;
 
 }
@@ -359,7 +382,14 @@ bool _graph_add_edge(graph* gr, long from, long to, graph_edge** to_edge){
 	if(!gr)
 		return false;
 
-	for(i = 0; i < gr->used; i++){
+	if(gr->helper_map){
+
+		n1 = _map_lookup(gr->helper_map, from);
+		n2 = _map_lookup(gr->helper_map, to);
+
+	}
+
+	for(i = 0; i < gr->used && !gr->helper_map; i++){
 
 		if(gr->nodes[i].key == from)
 			n1 = gr->nodes + i;
@@ -877,5 +907,30 @@ void _graph_walk_end(graph* gr){
 	_stack_delete(gr->walk->dfs_stack);
 	destroy(gr->ctx, gr->walk);
 
+}
+
+void _graph_enable_node_helper_map(graph* gr, bool enable){
+
+	size_t i;
+
+	if(!gr)
+		return;
+
+	if(enable && !gr->helper_map){
+
+		gr->helper_map = _map_new(gr->ctx, gr->size);
+
+		if(!gr->used)
+			return;
+
+		for(i = 0; i < gr->used; i++)
+			_map_insert(gr->helper_map, gr->nodes[i].key, gr->nodes + i);
+
+	}
+	else if(!enable && gr->helper_map)
+		_map_delete(gr->helper_map);
+
+	return;
+	
 }
 

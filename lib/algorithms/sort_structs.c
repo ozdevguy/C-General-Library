@@ -1,5 +1,6 @@
 typedef struct mergesort_representation mergesort_representation;
 typedef struct mergesort_vect_description mergesort_vect_description;
+typedef struct mergesort_list_description mergesort_list_description;
 
 struct mergesort_vect_description{
 
@@ -7,6 +8,22 @@ struct mergesort_vect_description{
 	vector* vect;
 
 	//Offset
+	size_t offset;
+
+	//Value size.
+	size_t val_size;
+
+	//Sort order.
+	byte order;
+
+};
+
+struct mergesort_list_description{
+
+	//List to be sorted.
+	list* lst;
+
+	//Offset.
 	size_t offset;
 
 	//Value size.

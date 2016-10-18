@@ -21,6 +21,8 @@ st_merge_sort.c
 
 */
 
+int merges = 0;
+
 //Sort a list in ascending order.
 bool _mergesort_list_asc(list*, size_t, uint8_t);
 
@@ -39,7 +41,7 @@ bool _mergesort_arr_asc(void*, uint8_t);
 //Sort a normal integer array in descending order.
 bool _mergesort_arr_desc(void*, uint8_t);
 
-
+/* ========= VECTOR ========= */
 static mergesort_representation* int_mergesort_vect_copy(mergesort_vect_description* desc, size_t start, size_t end){
 
 	size_t total, i, j, data_size, offset;
@@ -84,7 +86,7 @@ static void int_mergesort_merge_vect_asc(mergesort_vect_description* desc, size_
 
 	mergesort_representation *left, *right;
 	vector* vect;
-	size_t i, j = 0, k = 0, left_total, right_total;
+	size_t i, j = 0, k = 0, left_total, right_total, l;
 
 	left_total = (middle - start) + 1;
 	right_total = end - middle;
@@ -93,7 +95,6 @@ static void int_mergesort_merge_vect_asc(mergesort_vect_description* desc, size_
 	//Create out temporary left and right arrays.
 	left = int_mergesort_vect_copy(desc, start, middle);
 	right = int_mergesort_vect_copy(desc, (middle + 1), end);
-
 	
 	for(i = start; i <= end; i++){
 
@@ -127,6 +128,8 @@ static void int_mergesort_merge_vect_asc(mergesort_vect_description* desc, size_
 			destroy(vect->ctx, right[k++].copy);
 
 		}
+
+		merges++;
 
 	}
 
@@ -211,10 +214,20 @@ static void int_mergesort_vect(mergesort_vect_description* desc, size_t start, s
 
 bool _mergesort_vector_asc(vector* input, size_t offset, uint8_t val_size){
 
+	mergesort_vect_description* desc;
+
 	if(!input)
 		return false;
 
-	//int_mergesort_vect_asc(input, offset, 0, vector->used);
+	desc = allocate(input->ctx, sizeof(mergesort_vect_description));
+	desc->vect = input;
+	desc->offset = offset;
+	desc->val_size = val_size;
+	desc->order = 1;
+
+	int_mergesort_vect(desc, 0, input->used - 1);
+
+	destroy(input->ctx, desc);
 
 	return true;
 
@@ -233,7 +246,188 @@ bool _mergesort_vector_desc(vector* input, size_t offset, uint8_t val_size){
 	desc->val_size = val_size;
 	desc->order = 0;
 
-	int_mergesort_vect(desc, 0, input->used);
+	int_mergesort_vect(desc, 0, input->used - 1);
+
+	destroy(input->ctx, desc);
+
+	return true;
+
+}
+
+
+/* ========= LIST ==========*/
+
+
+static mergesort_representation* int_mergesort_list_copy(mergesort_list_description* desc, size_t start, size_t end){
+
+	size_t total, i, j, data_size, offset;
+	mergesort_representation* rep;
+	list* lst;
+
+	total = end - start + 1;
+	lst = desc->lst;
+	offset = desc->offset;
+
+	rep = allocate(lst->ctx, sizeof(mergesort_representation) * total);
+
+	for(i = 0; i < total; i++){
+
+		if(desc->val_size == sizeof(byte))
+			rep[i].value = *((byte*)(lst->data[start + i] + offset));
+
+		else if(desc->val_size == sizeof(short))
+			rep[i].value = *((short*)(lst->data[start + i] + offset));
+
+		else if(desc->val_size == sizeof(int))
+			rep[i].value = *((int*)(lst->data[start + i] + offset));
+
+		else if(desc->val_size == sizeof(long))
+			rep[i].value = *((long*)(lst->data[start + i] + offset));
+
+		rep[i].copy = lst->data[start + i];
+
+	}
+
+	return rep;
+
+}
+
+static void int_mergesort_merge_list_asc(mergesort_list_description* desc, size_t start, size_t middle, size_t end){
+
+	mergesort_representation *left, *right;
+	list* lst;
+	size_t i, j = 0, k = 0, left_total, right_total, l;
+
+	left_total = (middle - start) + 1;
+	right_total = end - middle;
+	lst = desc->lst;
+
+	//Create out temporary left and right arrays.
+	left = int_mergesort_list_copy(desc, start, middle);
+	right = int_mergesort_list_copy(desc, (middle + 1), end);
+
+	for(i = start; i <= end; i++){
+
+		if(j < left_total && k < right_total){
+
+			if(left[j].value < right[k].value)
+				_list_set(lst, i, left[j++].copy);
+
+			else
+				_list_set(lst, i, right[k++].copy);
+
+		}
+		
+		else if(j < left_total)
+			_list_set(lst, i, left[j++].copy);
+
+
+		else
+			_list_set(lst, i, right[k++].copy);
+
+
+	}
+
+	destroy(lst->ctx, left);
+	destroy(lst->ctx, right);
+
+}
+
+static void int_mergesort_merge_list_desc(mergesort_list_description* desc, size_t start, size_t middle, size_t end){
+
+	mergesort_representation *left, *right;
+	list* lst;
+	size_t i, j = 0, k = 0, left_total, right_total, l;
+
+	left_total = (middle - start) + 1;
+	right_total = end - middle;
+	lst = desc->lst;
+
+	//Create out temporary left and right arrays.
+	left = int_mergesort_list_copy(desc, start, middle);
+	right = int_mergesort_list_copy(desc, (middle + 1), end);
+	
+	for(i = start; i <= end; i++){
+
+		if(j < left_total && k < right_total){
+
+			if(left[j].value > right[k].value)
+				_list_set(lst, i, left[j++].copy);
+
+			else
+				_list_set(lst, i, right[k++].copy);
+
+		}
+		
+		else if(j < left_total)
+			_list_set(lst, i, left[j++].copy);
+
+
+		else
+			_list_set(lst, i, right[k++].copy);
+
+
+	}
+
+	destroy(lst->ctx, left);
+	destroy(lst->ctx, right);
+
+}
+
+
+static void int_mergesort_list(mergesort_list_description* desc, size_t start, size_t end){
+
+	size_t middle = (start + end) / 2;
+
+	if(start < end){
+
+		int_mergesort_list(desc, start, middle);
+		int_mergesort_list(desc, middle + 1, end);
+
+		if(!desc->order)
+			int_mergesort_merge_list_desc(desc, start, middle, end);
+		else
+			int_mergesort_merge_list_asc(desc, start, middle, end);
+	}
+
+}
+
+
+bool _mergesort_list_asc(list* input, size_t offset, uint8_t val_size){
+
+	mergesort_list_description* desc;
+
+	if(!input)
+		return false;
+
+	desc = allocate(input->ctx, sizeof(mergesort_list_description));
+	desc->lst = input;
+	desc->offset = offset;
+	desc->val_size = val_size;
+	desc->order = 1;
+
+	int_mergesort_list(desc, 0, input->used - 1);
+
+	destroy(input->ctx, desc);
+
+	return true;
+
+}
+
+bool _mergesort_list_desc(list* input, size_t offset, uint8_t val_size){
+
+	mergesort_list_description* desc;
+
+	if(!input)
+		return false;
+
+	desc = allocate(input->ctx, sizeof(mergesort_list_description));
+	desc->lst = input;
+	desc->offset = offset;
+	desc->val_size = val_size;
+	desc->order = 0;
+
+	int_mergesort_list(desc, 0, input->used - 1);
 
 	destroy(input->ctx, desc);
 

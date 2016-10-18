@@ -83,6 +83,9 @@ long _string_index_of(string*, utf8_char*, long); //COMPLETE
 //Check to see if two strings are equal.
 bool _string_compare(string*, string*);
 
+//Create a hash from the string.
+size_t _string_hash(string*);
+
 
 /* ===============CREATE AND DESTROY============= */
 
@@ -800,4 +803,18 @@ bool _string_compare(string* str1, string* str2){
 
 	return true;
 
+}
+
+//Create a string hash.
+size_t _string_hash(string* str){
+
+	size_t i, val = 0;
+
+	if(!str)
+		return val;
+
+	for(i = 0; i < str->length; i++)
+		val += (str->data[i].value * i);
+
+	return val;
 }

@@ -45,6 +45,9 @@ bool _list_has_next(list*); //COMPLETE
 //Get the next item in the list.
 void* _list_get_next(list*); //COMPLETE
 
+//Set an item in the list.
+bool _list_set(list*, size_t, void*);
+
 //Merge two lists.
 bool _list_merge(list*, list*);
 
@@ -190,5 +193,17 @@ bool _list_merge(list* lst1, list* lst2){
 
 	return true;
 
+}
+
+bool _list_set(list* lst, size_t pos, void* new_ptr){
+
+	if(!lst)
+		return false;
+
+	if(pos >= lst->used)
+		return false;
+
+	lst->data[pos] = new_ptr;
+	
 }
 

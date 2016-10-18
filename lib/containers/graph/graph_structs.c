@@ -50,14 +50,12 @@ struct graph{
 	//Graph iterator.
 	size_t iterator;
 
-	//Enable helper map?
-	bool helper_map_enabled;
-
 	//Helper map.
 	map* helper_map;
 
 	//Graph walk config.
 	graph_walk_config* walk;
+
 
 };
 
@@ -82,7 +80,10 @@ struct graph_node{
 	size_t level;
 
 	//Data contained at this node.
-	void* data;                                  
+	void* data;  
+
+	//Helper map.
+	map* helper_map;                                
 	
 };
 

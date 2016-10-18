@@ -32,7 +32,7 @@ graph.h
 //Include the queue header.
 #ifndef STD_LIBS_CONTAINERS_QUEUE
 	
-	#define STD_LIBS_CONTAINERS_QUEUE
+	#define STD_LIBS_CONTAINERS_QUEUE 1
 	#include "queue.h"
 
 #endif
@@ -40,8 +40,16 @@ graph.h
 //Include the stack header.
 #ifndef STD_LIBS_CONTAINERS_STACK
 	
-	#define STD_LIBS_CONTAINERS_STACK
+	#define STD_LIBS_CONTAINERS_STACK 1
 	#include "stack.h"
+
+#endif
+
+//Include the map header.
+#ifndef STD_LIBS_CONTAINERS_MAP
+	
+	#define STD_LIBS_CONTAINERS_MAP 1
+	#include "containers/map/map.h"
 
 #endif
 
