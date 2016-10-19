@@ -21,8 +21,6 @@ st_merge_sort.c
 
 */
 
-int merges = 0;
-
 //Sort a list in ascending order.
 bool _mergesort_list_asc(list*, size_t, uint8_t);
 
@@ -128,8 +126,6 @@ static void int_mergesort_merge_vect_asc(mergesort_vect_description* desc, size_
 			destroy(vect->ctx, right[k++].copy);
 
 		}
-
-		merges++;
 
 	}
 

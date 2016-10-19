@@ -49,6 +49,7 @@ void main(){
 	_graph_add_double_edge(myGraph, 24, 26, &e1, &e2);
 	_graph_add_double_edge(myGraph, 24, 37, &e1, &e2);
 	_graph_add_double_edge(myGraph, 23, 36, &e1, &e2);
+	
 
 	/* START THE GRAPH WALK */
 	_graph_walk_init(myGraph, 21);
