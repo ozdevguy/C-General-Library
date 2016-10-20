@@ -34,8 +34,9 @@
 <a href="#library-context">Library Context</a>
 
 <ul>
-<li>Default Setup</li>
-<li>Custom Setup
+<li><a href="#default-setup">Default Setup</a></li>
+<li>
+<a href="#custom-setup">Custom Setup</a>
 
 <ul>
 <li>Memory Allocators &amp; Deallocators</li>
@@ -206,7 +207,7 @@
 <li>External Data</li>
 </ul>
 
-<p>A defined context is required for using the functions within the library. You can create a new context by initializing a new variable of type <em><strong>standard_library_context</strong></em>, like so:</p>
+<p>A defined context is required for using the functions within the library. You can create a new context by generating a new variable of type <em><strong>standard_library_context</strong></em>, like so:</p>
 
 <pre><code> #include "lib/genlib.h" //Include the main general library header.
 
@@ -214,6 +215,27 @@
 
    //Create a new library context.
    standard_library_context ctx;
+
+   return 0;
+ }
+</code></pre>
+
+<div id="default-setup"></div>
+
+<h3>
+<a id="default-setup" class="anchor" href="#default-setup" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Default Setup</h3>
+
+<p>The standard library provides extensive customization with regards to how memory is handled, logging is accomplished, errors are accounted for, and the encapsulation of external data. In many instances, you may want to apply the default configuration to the library context. By using the default configuration, the library will use calloc() as the memory allocator, free() as the memory deallocator, and all errors and logs will be printed to the console. In order to initialize the context to the default configuration, simply call the <em><strong>_std_lib_default()</strong></em> function.</p>
+
+<pre><code> #include "lib/genlib.h" //Include the main general library header.
+
+ int main(int argc, char* argv[]){
+
+   //Create a new library context.
+   standard_library_context ctx;
+
+   //Initialize the context to the default configuration.
+   _std_lib_default(&amp;ctx);
 
    return 0;
  }
