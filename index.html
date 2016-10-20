@@ -29,6 +29,7 @@
 <a href="#getting-started">Getting Started</a>
 
 <ol>
+<li><a href="#file-setup">File Setup</a></li>
 <li>
 <a href="#library-context">Library Context</a>
 
@@ -170,20 +171,19 @@
 
 <p>All the information you need to get up and running.</p>
 
-<div id="library-context"></div>
+<div id="file-setup"></div>
 
 <h2>
-<a id="library-context" class="anchor" href="#library-context" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Library Context</h2>
+<a id="file-setup" class="anchor" href="#file-setup" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>File Setup</h2>
 
-<pre><code>#include "lib/genlib.h"
+<p>In order to use the general libraries, you must first copy the lib folder (as part of the project root) within the source directory of your application. Once you've copied the folder, you can include the main general library header, genlib.h (Individual header files exist for individual library components as well. We'll get to that later)..</p>
 
-standard_library_context ctx;
+<pre><code> #include "lib/genlib.h" //Include the main general library header.
 
-void main(){
+ int main(int argc, char* argv[]){
 
-   _std_lib_default(&amp;ctx);
-
-}
+   return 0;
+ }
 </code></pre>
 
       <footer class="site-footer">
