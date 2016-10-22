@@ -39,7 +39,7 @@ bool _quicksort_arr_asc(void*, uint8_t);
 //Sort a normal integer array in descending order.
 bool _quicksort_arr_desc(void*, uint8_t);
 
-size_t test = 0;
+/*====VECTORS=====*/
 
 static long int_quicksort_vect_value(quicksort_vect_description* desc, size_t index){
 
@@ -54,7 +54,7 @@ static long int_quicksort_vect_value(quicksort_vect_description* desc, size_t in
 
 }
 
-static void int_quicksort_swap(quicksort_vect_description* desc, size_t a, size_t b){
+static void int_quicksort_vect_swap(quicksort_vect_description* desc, size_t a, size_t b){
 
 	_vector_set(desc->vect, desc->vect->used - 1, _vector_get(desc->vect, b));
 	_vector_set(desc->vect, b, _vector_get(desc->vect, a));
@@ -75,12 +75,12 @@ static size_t int_quicksort_vect_partition_desc(quicksort_vect_description* desc
 	for(i = start; i < end; i++){
 
 		if(int_quicksort_vect_value(desc, i) > p)
-			int_quicksort_swap(desc, i, w++);
+			int_quicksort_vect_swap(desc, i, w++);
 
 	}
 
 	if(w != end)
-		int_quicksort_swap(desc, end, w);
+		int_quicksort_vect_swap(desc, end, w);
 
 	else
 		w--;
@@ -102,12 +102,12 @@ static size_t int_quicksort_vect_partition_asc(quicksort_vect_description* desc,
 	for(i = start; i < end; i++){
 
 		if(int_quicksort_vect_value(desc, i) < p)
-			int_quicksort_swap(desc, i, w++);
+			int_quicksort_vect_swap(desc, i, w++);
 
 	}
 
 	if(w != end)
-		int_quicksort_swap(desc, end, w);
+		int_quicksort_vect_swap(desc, end, w);
 
 	else
 		w--;
@@ -128,7 +128,6 @@ static void int_quicksort_vect(quicksort_vect_description* desc, size_t start, s
 			w = int_quicksort_vect_partition_desc(desc, start, end);
 
 		int_quicksort_vect(desc, start, w);
-
 		int_quicksort_vect(desc, w + 1, end);
 
 	}
@@ -141,7 +140,7 @@ bool _quicksort_vector_asc(vector* vect, size_t offset, uint8_t val_size){
 	if(!vect || !val_size)
 		return false;
 
-	if(vect->used <= 1)
+	if(!vect->used)
 		return false;
 
 	desc = allocate(vect->ctx, sizeof(quicksort_vect_description));
@@ -170,7 +169,7 @@ bool _quicksort_vector_desc(vector* vect, size_t offset, uint8_t val_size){
 	if(!vect || !val_size)
 		return false;
 
-	if(vect->used <= 1)
+	if(!vect->used)
 		return false;
 
 	desc = allocate(vect->ctx, sizeof(quicksort_vect_description));
@@ -186,6 +185,145 @@ bool _quicksort_vector_desc(vector* vect, size_t offset, uint8_t val_size){
 	_vector_remove(vect, vect->used - 1);
 
 	destroy(vect->ctx, desc);
+
+	return true;
+
+}
+
+/*======LISTS=====*/
+
+static long int_quicksort_list_value(quicksort_list_description* desc, size_t index){
+
+	if(desc->val_size == sizeof(char))
+		return (long)*((char*)(_list_get(desc->lst, index) + desc->offset));
+	else if(desc->val_size == sizeof(short))
+		return (long)*((short*)(_list_get(desc->lst, index) + desc->offset));
+	else if(desc->val_size == sizeof(int))
+		return (long)*((int*)(_list_get(desc->lst, index) + desc->offset));
+	else if(desc->val_size == sizeof(long))
+		return (long)*((long*)(_list_get(desc->lst, index) + desc->offset));
+
+}
+
+static void int_quicksort_list_swap(quicksort_list_description* desc, size_t a, size_t b){
+
+	void* tmp;
+
+	tmp = _list_get(desc->lst, a);
+	_list_set(desc->lst, a, _list_get(desc->lst, b));
+	_list_set(desc->lst, b, tmp);
+
+}
+
+static size_t int_quicksort_list_partition_asc(quicksort_list_description* desc, size_t start, size_t end){
+
+	size_t w, i;
+	long p;
+
+	w = start;
+	p = int_quicksort_list_value(desc, end);
+
+	for(i = start; i < end; i++){
+
+		if(int_quicksort_list_value(desc, i) < p)
+			int_quicksort_list_swap(desc, i, w++);
+
+	}
+
+	if(w != end)
+		int_quicksort_list_swap(desc, end, w);
+
+	else
+		w--;
+
+	return w;
+
+}
+
+static size_t int_quicksort_list_partition_desc(quicksort_list_description* desc, size_t start, size_t end){
+
+	size_t w, i;
+	long p;
+
+	w = start;
+	p = int_quicksort_list_value(desc, end);
+
+	for(i = start; i < end; i++){
+
+		if(int_quicksort_list_value(desc, i) > p)
+			int_quicksort_list_swap(desc, i, w++);
+
+	}
+
+	if(w != end)
+		int_quicksort_list_swap(desc, end, w);
+
+	else
+		w--;
+
+	return w;
+
+}
+
+static void int_quicksort_list(quicksort_list_description* desc, size_t start, size_t end){
+
+	size_t w;
+
+	if(start < end){
+
+		if(desc->order)
+			w = int_quicksort_list_partition_asc(desc, start, end);
+		else
+			w = int_quicksort_list_partition_desc(desc, start, end);
+
+		int_quicksort_list(desc, start, w);
+		int_quicksort_list(desc, w + 1, end);
+
+	}
+}
+
+bool _quicksort_list_asc(list* lst, size_t offset, uint8_t val_size){
+
+	quicksort_list_description* desc;
+
+	if(!lst || !val_size)
+		return false;
+
+	if(!lst->used)
+		return false;
+
+	desc = allocate(lst->ctx, sizeof(quicksort_list_description));
+	desc->lst = lst;
+	desc->offset = offset;
+	desc->val_size = val_size;
+	desc->order = 1;
+
+	int_quicksort_list(desc, 0, lst->used - 1);
+
+	destroy(lst->ctx, desc);
+
+	return true;
+
+}
+
+bool _quicksort_list_desc(list* lst, size_t offset, uint8_t val_size){
+
+	quicksort_list_description* desc;
+
+	if(!lst || !val_size)
+		return false;
+
+	if(!lst->used)
+		return false;
+
+	desc = allocate(lst->ctx, sizeof(quicksort_list_description));
+	desc->lst = lst;
+	desc->offset = offset;
+	desc->val_size = val_size;
+
+	int_quicksort_list(desc, 0, lst->used - 1);
+
+	destroy(lst->ctx, desc);
 
 	return true;
 

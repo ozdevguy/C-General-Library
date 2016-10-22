@@ -61,7 +61,7 @@ void main(){
 
 	}
 	*/
-
+	
 	_vector_delete(myVect);
 
 
@@ -106,9 +106,9 @@ void main(){
 
 	}
 
-	_quicksort_list_asc(myList, offset, sizeof(int));
+	_quicksort_list_desc(myList, offset, sizeof(int));
 
-	printf("\n\nSorted...\n");
+	printf("\n\nSorted...");
 
 	_list_reset_iterator(myList);
 
@@ -121,7 +121,5 @@ void main(){
 		printf("%d\n", s->val);
 
 	}
-
-	_list_delete(myList);
 
 }
