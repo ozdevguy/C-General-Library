@@ -18,7 +18,6 @@ limitations under the License.
 st_quick_sort.c 
 ========================================================================
 
-
 */
 
 //Sort a list in ascending order.
