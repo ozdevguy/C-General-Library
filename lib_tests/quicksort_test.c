@@ -50,7 +50,7 @@ void main(){
 
 	l = 0;
 
-	/*
+	
 	while(_vector_has_next(myVect) && l++ < 200){
 
 		test_str* t;
@@ -60,7 +60,7 @@ void main(){
 		printf("%d\n", t->val);
 
 	}
-	*/
+	
 
 	_vector_delete(myVect);
 
