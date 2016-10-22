@@ -372,12 +372,8 @@ bool _graph_add_edge(graph* gr, long from, long to, graph_edge** to_edge){
 
 	}
 
-	if(!n1 || !n2){
-
-		_log_error(gr->ctx, "One of the nodes does not exist.", 32);
+	if(!n1 || !n2)
 		return false;
-
-	}
 
 	//Add the edge...
 	e = &n1->last_edge;
@@ -420,12 +416,8 @@ bool _graph_add_double_edge(graph* gr, long from, long to, graph_edge** edge_to,
 
 	}
 
-	if(!n1 || !n2){
-
-		_log_error(gr->ctx, "One of the nodes does not exist.", 32);
+	if(!n1 || !n2)
 		return false;
-
-	}
 
 	//Add the "to" edge...
 	e = &n1->last_edge;

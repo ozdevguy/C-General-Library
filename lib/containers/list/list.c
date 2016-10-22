@@ -204,6 +204,8 @@ bool _list_set(list* lst, size_t pos, void* new_ptr){
 		return false;
 
 	lst->data[pos] = new_ptr;
+
+	return true;
 	
 }
 

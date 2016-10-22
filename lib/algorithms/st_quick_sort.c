@@ -51,6 +51,8 @@ static long int_quicksort_vect_value(quicksort_vect_description* desc, size_t in
 	else if(desc->val_size == sizeof(long))
 		return (long)*((long*)(_vector_get(desc->vect, index) + desc->offset));
 
+	return 0;
+
 }
 
 static void int_quicksort_vect_swap(quicksort_vect_description* desc, size_t a, size_t b){
@@ -202,6 +204,8 @@ static long int_quicksort_list_value(quicksort_list_description* desc, size_t in
 	else if(desc->val_size == sizeof(long))
 		return (long)*((long*)(_list_get(desc->lst, index) + desc->offset));
 
+	return 0;
+	
 }
 
 static void int_quicksort_list_swap(quicksort_list_description* desc, size_t a, size_t b){

@@ -41,10 +41,10 @@ long _string_position_fbytes(string*, byte*, long); //COMPLETE
 long _string_position_fstring(string*, string*, long); //COMPLETE
 
 //Get pure byte array.
-byte* _string_pull(string*, long*); //COMPLETE
+byte* _string_pull(string*, size_t*); //COMPLETE
 
 //Get utf8_char array.
-utf8_char* _string_pull_carr(string*, long*); //COMPLETE
+utf8_char* _string_pull_carr(string*, size_t*); //COMPLETE
 
 //Replace a matching substring within the string..
 bool _string_replace_all_fbytes(string*, byte*, byte*);	//COMPLETE
@@ -175,7 +175,7 @@ void _string_delete_ll(string_list* lst){
 }
 
 //Return a string as a byte array.
-byte* _string_pull(string* str, long* length){
+byte* _string_pull(string* str, size_t* length){
 
 	long i, j = 0, k = 0, total = 0;
 	byte* data;
@@ -206,7 +206,7 @@ byte* _string_pull(string* str, long* length){
 }
 
 //Return a pointer to the character array.
-utf8_char* _string_pull_carr(string* str, long* length){
+utf8_char* _string_pull_carr(string* str, size_t* length){
 
 	if(!str)
 		return 0;
