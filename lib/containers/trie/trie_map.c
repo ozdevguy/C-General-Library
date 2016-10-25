@@ -15,25 +15,20 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 
-genlib.h
+trie_map.c | Trie Map
 ========================================================================
-
 
 */
 
-#include "foundation.h"
-#include "hashmap.h"
-#include "queue.h"
-#include "stack.h"
-#include "string.h"
-#include "vector.h"
-#include "list.h"
-#include "utf8.h"
-#include "binary_heap.h"
-#include "priority_queue.h"
-#include "graph.h"
-#include "weighted_graph.h"
-#include "set.h"
-#include "avl_tree.h"
-#include "algorithms.h"
-#include "trie.h"
+//(Context, charactaristic)
+trie_map* _trie_map_new(standard_library_context, uint8_t);
+
+//(Map, Entry Value, Object, Chained trie (true, false))
+trie_map_entry* _trie_map_add(trie_map*, size_t val, void* ptr, bool);
+
+//Get a complete trie entry.
+trie_map_entry* _trie_map_lookup_e(trie_map*, size_t);
+
+//Get a trie object.
+void* _trie_map_lookup(trie_map*, size_t);
+

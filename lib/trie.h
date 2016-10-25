@@ -15,25 +15,24 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 
-genlib.h
+trie.h
 ========================================================================
 
 
 */
 
-#include "foundation.h"
-#include "hashmap.h"
-#include "queue.h"
-#include "stack.h"
-#include "string.h"
-#include "vector.h"
-#include "list.h"
-#include "utf8.h"
-#include "binary_heap.h"
-#include "priority_queue.h"
-#include "graph.h"
-#include "weighted_graph.h"
-#include "set.h"
-#include "avl_tree.h"
-#include "algorithms.h"
-#include "trie.h"
+//Include foundation header.
+#ifndef STD_LIBS_FOUNDATION
+	
+	#define STD_LIBS_FOUNDATION 1
+	#include "foundation.h"
+
+#endif
+
+//Include trie headers.
+#ifndef STD_LIBS_CONTAINERS_TRIE_MAP
+	
+	#define STD_LIBS_CONTAINERS_TRIE_MAP 1
+	#include "containers/trie/trie_map.h"
+
+#endif

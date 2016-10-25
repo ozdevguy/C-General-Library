@@ -15,25 +15,36 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 
-genlib.h
+trie_structs.c | Trie Structs
 ========================================================================
-
 
 */
 
-#include "foundation.h"
-#include "hashmap.h"
-#include "queue.h"
-#include "stack.h"
-#include "string.h"
-#include "vector.h"
-#include "list.h"
-#include "utf8.h"
-#include "binary_heap.h"
-#include "priority_queue.h"
-#include "graph.h"
-#include "weighted_graph.h"
-#include "set.h"
-#include "avl_tree.h"
-#include "algorithms.h"
-#include "trie.h"
+typedef struct trie_map trie_map;
+typedef struct trie_map_entry trie_map_entry;
+
+
+struct trie_map{
+
+	//Standard library context.
+	standard_library_context* ctx;
+
+	//First trie entry.
+	trie_map_entry* entry;
+
+};
+
+struct trie_map_entry{
+
+	//Array of trie map entries.
+	trie_map_entry* entries;
+
+	/* OBJECT */
+
+	//Object pointer.
+	void* object;
+
+	//Chained trie map.
+	trie_map* chained;
+
+};
