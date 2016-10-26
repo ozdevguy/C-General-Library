@@ -30,7 +30,7 @@ struct trie_map{
 	standard_library_context* ctx;
 
 	//First trie entry.
-	trie_map_entry* entry;
+	trie_map_entry* root;
 
 };
 
@@ -45,6 +45,6 @@ struct trie_map_entry{
 	void* object;
 
 	//Chained trie map.
-	trie_map* chained;
+	trie_map* chained_trie;
 
 };
