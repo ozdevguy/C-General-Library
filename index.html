@@ -43,7 +43,7 @@
 <a href="#custom-setup">Custom Setup</a>
 
 <ul>
-<li>Memory Allocators &amp; Deallocators</li>
+<li><a href="#cust-alloc-dealloc">Memory Allocators &amp; Deallocators</a></li>
 <li>Customized Data Containers</li>
 </ul>
 </li>
@@ -285,19 +285,25 @@
 <pre><code> struct standard_library_context{
 
      //Library instance ID.
-  uint32_t instance_id;
+ uint32_t instance_id;
 
-  //External data.
-  void* data;
+ //Internal data.
+ void* data;
 
-  //Pointer to memory allocator (allocate(size_t total_space, uint32_t instance_id))
-  void* (*memory_allocator)(size_t, uint32_t);
+ //Pointer to memory allocator.
+ void* (*memory_allocator)(size_t, standard_library_context*);
 
-  //Pointer to memory de-allocator (destroy(void* pointer, uint32_t instance_id))
-  bool (*memory_dealloc)(void*, uint32_t);
+ //Pointer to memory de-allocator.
+ bool (*memory_dealloc)(void*, standard_library_context*);
 
-  //Log handler (logger(byte* message, size_t message_length, uint8_t type, uint32_t instance_id))
-  void* (*logger)(byte*, size_t, uint8_t, uint32_t);
+ //Log handler (logger(byte* message, size_t message_length, uint8_t type, standard_library_context* ctx))
+ void* (*logger)(byte*, size_t, uint8_t, standard_library_context*);
+
+ //Thread initializer.
+ bool (*create_thread)(void*(void*));
+
+ //Operation failure function.
+ void (*operation_failure)(uint8_t, standard_library_context*);
 
  }
 </code></pre>
@@ -309,6 +315,19 @@
 <p><strong>memory_allocator</strong> = A pointer to the memory allocator to be used by the library's <strong>allocate()</strong> function.</p>
 
 <p><strong>memory_dealloc</strong> =  A pointer to the memory deallocator to be used by the library's <strong>destroy()</strong> function.</p>
+
+<div id="cust-alloc-dealloc"></div>
+
+<h3>
+<a id="memory-allocators--deallocators" class="anchor" href="#memory-allocators--deallocators" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Memory Allocators &amp; Deallocators</h3>
+
+<p>If you need to set up your own memory allocator, you'll need to create a function that accepts three arguments.</p>
+
+<ol>
+<li>First argument of type <strong>size_t</strong>, which is the size of the memory pool to be allocated in bytes.</li>
+<li>Second argument of type <strong>uint32_t</strong>, which is the instance_id used in the current library context.</li>
+<li>Third argument of type *<em>void</em> **, which is a pointer to the external data object that you may have attached to the context.</li>
+</ol>
 
 <div id="framework-functions"></div>
 
