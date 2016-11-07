@@ -322,7 +322,7 @@
 
 <p>The C General Library contains its own built-in memory <strong>allocate()</strong> function, which is used by each component within the library. The <strong>allocate()</strong> function calls the function that has been set for memory allocation. If configuring the library to use defaults by utilizing the <strong>std_lib_default()</strong> function, <strong>allocate()</strong> defaults to <strong>calloc()</strong>, otherwise your own custom allocator is used.</p>
 
-<p>The syntax of the <strong>allocate</strong> function is as follows:</p>
+<p>The syntax of the <strong>allocate()</strong> function is as follows:</p>
 
 <pre><code> void* allocate(standard_library_context* ctx, size_t bytes_to_allocate);
 </code></pre>
@@ -349,6 +349,20 @@
 
  }
 </code></pre>
+
+<div id="destroy"></div>
+
+<h2>
+<a id="freeing-memory-with-destroy" class="anchor" href="#freeing-memory-with-destroy" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Freeing Memory with destroy()</h2>
+
+<p>Obviously with the <strong>allocate()</strong> function, we need to include a custom library function for releasing memory. That's where <strong>destroy()</strong> comes in. Like <strong>allocate()</strong>, <strong>destroy()</strong> calls the function that has been configured for releasing memory. If you've used the <strong>std_lib_default()</strong> function, the <strong>destroy()</strong> function calls free. Otherwise, your custom memory release function will be called.</p>
+
+<p>The syntax of the <strong>destroy()</strong> function is as follows:</p>
+
+<pre><code> void destroy(standard_library_context* ctx, void* pointer);
+</code></pre>
+
+<p>See the example above for allocate to see how destroy is used. Essentially, it's just like using free(), except with one additional argument.</p>
 
       <footer class="site-footer">
         <span class="site-footer-owner"><a href="https://github.com/ozdevguy/C-General-Library">C General Library</a> is maintained by <a href="https://github.com/ozdevguy">ozdevguy</a>.</span>
