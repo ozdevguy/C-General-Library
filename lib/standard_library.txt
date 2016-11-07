@@ -20,13 +20,13 @@ AVL Tree -> Complete <MODDED> <CHECKED, FINISHED>
 Red-Black Tree -> <SKIP>
 VEB Tree -> <SKIP>
 B-Tree
-Trie
+Trie -> Complete <MODDED> <CHECK, FINISHED>
 Ternary Search Tree
 Fibonacci Heaps
 
-Merge Sort
+Merge Sort -> Complete <MODDED> <CHECK, FINISHED>
 Heap Sort
-Quick Sort
+Quick Sort -> Complete <MODDED> <CHECK, FINISHED>
 Bucket Sort
 Radix Sort
 

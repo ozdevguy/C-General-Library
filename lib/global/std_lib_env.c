@@ -29,11 +29,11 @@ struct standard_library_context{
 	//Internal data.
 	void* data;
 
-	//Pointer to memory allocator (allocate(size_t total_space, uint32_t instance_id))
-	void* (*memory_allocator)(size_t, uint32_t);
+	//Pointer to memory allocator (allocate(size_t total_space, uint32_t instance_id, void* external data))
+	void* (*memory_allocator)(size_t, uint32_t, void*);
 
-	//Pointer to memory de-allocator (destroy(void* pointer, uint32_t instance_id))
-	bool (*memory_dealloc)(void*, uint32_t);
+	//Pointer to memory de-allocator (destroy(void* pointer, uint32_t instance_id, void* external data))
+	bool (*memory_dealloc)(void*, uint32_t, void*);
 
 	//Log handler (logger(byte* message, size_t message_length, uint8_t type, uint32_t instance_id))
 	void* (*logger)(byte*, size_t, uint8_t, uint32_t);
@@ -47,13 +47,13 @@ struct standard_library_context{
 };
 
 /*==================DEFAULT FUNCTIONS=====================*/
-void* int_std_calloc_bridge(size_t size, uint32_t instance_id){
+void* int_std_calloc_bridge(size_t size, uint32_t instance_id, void* data){
 
 	return calloc(size, 1);
 
 }
 
-bool int_std_free_bridge(void* ptr, uint32_t instance_id){
+bool int_std_free_bridge(void* ptr, uint32_t instance_id, void* data){
 
 	free(ptr);
 	return true;
@@ -86,13 +86,13 @@ void _std_lib_default(standard_library_context* ctx){
 
 }
 
-void _std_lib_environment_set_memory_allocator(standard_library_context* ctx, void* (*memory_allocator)(size_t, uint32_t)){
+void _std_lib_environment_set_memory_allocator(standard_library_context* ctx, void* (*memory_allocator)(size_t, uint32_t, void*)){
 
 	ctx->memory_allocator = memory_allocator;
 
 }
 
-void _std_lib_environment_set_memory_deallocator(standard_library_context* ctx, bool (*memory_dealloc)(void*, uint32_t)){
+void _std_lib_environment_set_memory_deallocator(standard_library_context* ctx, bool (*memory_dealloc)(void*, uint32_t, void*)){
 
 	ctx->memory_dealloc = memory_dealloc;
 

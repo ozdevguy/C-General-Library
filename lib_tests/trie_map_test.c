@@ -56,5 +56,65 @@ int main(){
 
 	_trie_map_delete(mp);
 
+
+	/* STRING TEST */
+
+	string* s1 = _string_new_fbytes(&ctx, "static");
+	string* s2 = _string_new_fbytes(&ctx, "inline");
+	string* s3 = _string_new_fbytes(&ctx, "byte");
+
+	mp = _trie_map_new(&ctx);
+
+	ent = _trie_map_add(mp, (uint32_t)_string_hash(s1), s1, true);
+	_trie_map_add(ent->chained_trie, (uint32_t)_string_hash(s2), s2, false);
+
+
+	if((entry = _trie_map_lookup_e(mp, (uint32_t)_string_hash(s1)))){
+
+		size_t s;
+
+		char* data = _string_pull(entry->object, &s);
+		printf("%s ", data);
+		destroy(&ctx, data);
+
+		if((entry = _trie_map_lookup_e(entry->chained_trie, (uint32_t)_string_hash(s2)))){
+
+			data = _string_pull(entry->object, &s);
+			printf("%s\n", data);
+			destroy(&ctx, data);
+
+		}
+
+	}
+
+	if((entry = _trie_map_lookup_e(mp, (uint32_t)_string_hash(s1)))){
+
+		size_t s;
+
+		char* data = _string_pull(entry->object, &s);
+		printf("%s ", data);
+		destroy(&ctx, data);
+
+		if((entry = _trie_map_lookup_e(entry->chained_trie, (uint32_t)_string_hash(s3)))){
+
+			data = _string_pull(entry->object, &s);
+			printf("%s\n", data);
+			destroy(&ctx, data);
+
+		}
+		else{
+
+			printf("SYNTAX ERROR!\n\n");
+		}
+
+	}
+
+	_trie_map_delete(mp);
+
+	_string_delete(s1);
+	_string_delete(s2);
+	_string_delete(s3);
+
+
 	return 0;
 }
