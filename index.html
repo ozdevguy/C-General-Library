@@ -320,6 +320,36 @@
 <h2>
 <a id="allocating-memory-with-allocate" class="anchor" href="#allocating-memory-with-allocate" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Allocating Memory with allocate()</h2>
 
+<p>The C General Library contains its own built-in memory <strong>allocate()</strong> function, which is used by each component within the library. The <strong>allocate()</strong> function calls the function that has been set for memory allocation. If configuring the library to use defaults by utilizing the <strong>std_lib_default()</strong> function, <strong>allocate()</strong> defaults to <strong>calloc()</strong>, otherwise your own custom allocator is used.</p>
+
+<p>The syntax of the <strong>allocate</strong> function is as follows:</p>
+
+<pre><code> void* allocate(standard_library_context* ctx, size_t bytes_to_allocate);
+</code></pre>
+
+<p>Example:</p>
+
+<pre><code> #include "lib/genlib.h" //Include the main general library header.
+
+ int main(int argc, char* argv[]){
+
+   //Create a new library context.
+   standard_library_context ctx;
+
+   //Initialize the context to the default configuration.
+   _std_lib_default(&amp;ctx);
+
+   //Allocate a new variable of type long.
+   long* new_long = allocate(&amp;ctx, sizeof(long));
+
+   //Destroy (free) the allocated variable (we'll explain this in a minute).
+   destroy(&amp;ctx, new_long);
+
+   return 0;
+
+ }
+</code></pre>
+
       <footer class="site-footer">
         <span class="site-footer-owner"><a href="https://github.com/ozdevguy/C-General-Library">C General Library</a> is maintained by <a href="https://github.com/ozdevguy">ozdevguy</a>.</span>
 
