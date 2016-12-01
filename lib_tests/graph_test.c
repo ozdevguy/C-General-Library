@@ -3,7 +3,7 @@
 
 void main(){
 
-	standard_library_context ctx;
+	genlib_env_context ctx;
 
 	_std_lib_default(&ctx);
 

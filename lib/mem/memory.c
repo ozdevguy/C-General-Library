@@ -18,7 +18,6 @@ limitations under the License.
 memory.c
 ========================================================================
 
-
 */
 
 void* allocate(standard_library_context* ctx, size_t size){

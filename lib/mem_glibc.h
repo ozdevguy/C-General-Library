@@ -15,10 +15,10 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 
-std_lib_global.c
+mem_glibc.h
 ========================================================================
 
 
 */
 
-typedef struct standard_library_context standard_library_context;
+#include "mem/mem_glibc.c"

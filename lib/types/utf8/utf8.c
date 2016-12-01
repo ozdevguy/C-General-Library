@@ -78,10 +78,10 @@ utf8_char _utf8_fbytes(byte* data){
 		for(i = (size - 1); i >= 0; i--){
 
 			if(!i)
-				modifier = ((data[i] & (255 >> (size + 1))) << (6 * (size - 1)));
+				modifier = ((data[i] & (0xFF >> (size + 1))) << (6 * (size - 1)));
 
 			else
-				modifier = (data[i] & 63) << (6 * (size - i - 1));
+				modifier = (data[i] & 0x3F) << (6 * (size - i - 1));
 
 
 			dec |= modifier;
@@ -121,10 +121,10 @@ size_t _utf8_ptr_fbytes(utf8_char* unichar, byte* data){
 		for(i = (size - 1); i >= 0; i--){
 
 			if(!i)
-				modifier = ((data[i] & (255 >> (size + 1))) << (6 * (size - 1)));
+				modifier = ((data[i] & (0xFF >> (size + 1))) << (6 * (size - 1)));
 
 			else
-				modifier = (data[i] & 63) << (6 * (size - i - 1));
+				modifier = (data[i] & 0x3F) << (6 * (size - i - 1));
 
 
 			dec |= modifier;

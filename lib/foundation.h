@@ -31,6 +31,24 @@ foundation.h
 		#include "sys_include.h"
 		#include <pthread.h>
 
+		//Include standard types header.
+		#ifndef STD_LIBS_TYPE_TYPES
+			
+			#define STD_LIBS_TYPE_TYPES 1
+			#include "types/std_types.h"
+
+		#endif
+
+		//Include environment header.
+		#ifndef STD_LIBS_ENVIRONMENT
+			
+			#define STD_LIBS_ENVIRONMENT 1
+			#include "global/environment.h"
+
+		#endif
+
+		#include "mem_glibc.h"
+
 	#elif _WIN32
 		
 		#ifdef _WIN64
@@ -50,10 +68,46 @@ foundation.h
 		#include "sys_include.h"
 		#include <pthread.h>
 
+		//Include standard types header.
+		#ifndef STD_LIBS_TYPE_TYPES
+			
+			#define STD_LIBS_TYPE_TYPES 1
+			#include "types/std_types.h"
+
+		#endif
+
+		//Include environment header.
+		#ifndef STD_LIBS_ENVIRONMENT
+			
+			#define STD_LIBS_ENVIRONMENT 1
+			#include "global/environment.h"
+
+		#endif
+
+		#include "mem_glibc.h"
+
 	#elif __DITTO_COMPILER_DIRECT__
 		
 		//Compile for the Ditto Virtual Machine (in progress).
 		#include "spec/dvmetal_sys_include.h"
+
+		//Include standard types header.
+		#ifndef STD_LIBS_TYPE_TYPES
+			
+			#define STD_LIBS_TYPE_TYPES 1
+			#include "types/std_types.h"
+
+		#endif
+
+		//Include environment header.
+		#ifndef STD_LIBS_ENVIRONMENT
+			
+			#define STD_LIBS_ENVIRONMENT 1
+			#include "global/environment.h"
+
+		#endif
+
+		//#include "mem_glibc.h"
 
 	#elif __MAESTRO__
 		
@@ -67,22 +121,6 @@ foundation.h
 		#include "embedded.h"
 	
 	#endif
-
-#endif
-
-//Include standard types header.
-#ifndef STD_LIBS_TYPE_TYPES
-	
-	#define STD_LIBS_TYPE_TYPES 1
-	#include "types/std_types.h"
-
-#endif
-
-//Include environment header.
-#ifndef STD_LIBS_ENVIRONMENT
-	
-	#define STD_LIBS_ENVIRONMENT 1
-	#include "global/environment.h"
 
 #endif
 

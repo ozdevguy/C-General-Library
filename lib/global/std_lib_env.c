@@ -18,8 +18,10 @@ limitations under the License.
 std_lib_env.c
 ========================================================================
 
-
 */
+
+typedef struct standard_library_context standard_library_context;
+typedef struct standard_library_context genlib_env_context;
 
 struct standard_library_context{
 
@@ -29,13 +31,22 @@ struct standard_library_context{
 	//Internal data.
 	void* data;
 
-	//Pointer to memory allocator (allocate(size_t total_space, uint32_t instance_id, void* external data))
+	//Serialization data.
+	void* serialization;
+
+	//Memory data.
+	void* memory;
+
+	//Manage the heap?
+	bool heap_manager_enabed;
+
+	//Pointer to memory allocator.
 	void* (*memory_allocator)(size_t, standard_library_context*);
 
-	//Pointer to memory de-allocator (destroy(void* pointer, uint32_t instance_id, void* external data))
+	//Pointer to memory de-allocator.
 	bool (*memory_dealloc)(void*, standard_library_context*);
 
-	//Log handler (logger(byte* message, size_t message_length, uint8_t type, uint32_t instance_id))
+	//Log handler (logger(byte* message, size_t message_length, uint8_t type, standard_library_context* ctx))
 	void* (*logger)(byte*, size_t, uint8_t, standard_library_context*);
 
 	//Thread initializer.
@@ -45,6 +56,9 @@ struct standard_library_context{
 	void (*operation_failure)(uint8_t, standard_library_context*);
 
 };
+
+//Global context.
+standard_library_context lib_global_context;
 
 /*==================DEFAULT FUNCTIONS=====================*/
 void* int_std_calloc_bridge(size_t size, standard_library_context* ctx){
@@ -65,7 +79,7 @@ bool int_std_free_bridge(void* ptr, standard_library_context* ctx){
 
 }
 
-void operation_failure(uint8_t type, standard_library_context* ctx){
+void int_operation_failure(uint8_t type, standard_library_context* ctx){
 
 	if(type == 1)
 		printf("[LOG] C General Library | The process has been killed due to a memory allocation failure.\n");
@@ -103,6 +117,7 @@ void _std_lib_default(standard_library_context* ctx){
 	ctx->memory_allocator = int_std_calloc_bridge;
 	ctx->memory_dealloc = int_std_free_bridge;
 	ctx->logger = int_std_logger;
+	ctx->operation_failure = int_operation_failure;
 
 }
 
