@@ -21,35 +21,6 @@ vector.c
 
 */
 
-//Create a new vector.
-vector* _vector_new(standard_library_context*, size_t, size_t);
-
-//Delete a vector.
-void _vector_delete(vector*);
-
-//Add an item to the vector.
-void _vector_add(vector*, void*);
-
-//Get an item from the vector.
-void* _vector_get(vector*, size_t);
-
-//Set a vector item.
-bool _vector_set(vector*, size_t, void*);
-
-//Remove an item from the vector.
-void _vector_remove(vector*, size_t);
-
-//Reset the iterator.
-void _vector_reset_iterator(vector*);
-
-//See if there are items left to be iterated through.
-bool _vector_has_next(vector*);
-
-//Get the next item in the vector.
-void* _vector_get_next(vector*);
-
-
-
 vector* _vector_new(standard_library_context* ctx, size_t data_size, size_t start_size){
 
 	if(!ctx || !start_size)

@@ -21,24 +21,6 @@ st_merge_sort.c
 
 */
 
-//Sort a list in ascending order.
-bool _mergesort_list_asc(list*, size_t, uint8_t);
-
-//Sort a list in descending order.
-bool _mergesort_list_desc(list*, size_t, uint8_t);
-
-//Sort a vector in ascending order.
-bool _mergesort_vector_asc(vector*, size_t, uint8_t);
-
-//Sort a vector in descending order.
-bool _mergesort_vector_desc(vector*, size_t, uint8_t);
-
-//Sort a normal integer array in ascending order.
-bool _mergesort_arr_asc(void*, uint8_t);
-
-//Sort a normal integer array in descending order.
-bool _mergesort_arr_desc(void*, uint8_t);
-
 /* ========= VECTOR ========= */
 static mergesort_representation* int_mergesort_vect_copy(mergesort_vect_description* desc, size_t start, size_t end){
 

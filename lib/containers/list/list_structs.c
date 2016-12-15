@@ -21,8 +21,6 @@ list_structs.c
 
 */
 
-typedef struct list list;
-
 struct list{
 
 	//Standard library context.

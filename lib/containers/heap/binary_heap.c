@@ -21,44 +21,6 @@ binary_heap.c
 
 */
 
-//Create a binary heap.
-binary_heap* _binary_heap_new(standard_library_context*, size_t); //FINISHED
-
-//Delete a binary heap.
-bool _binary_heap_delete(binary_heap*); //FINISHED
-
-//Insert into a binary heap.
-void _binary_heap_insert(binary_heap*, long, void*); //FINISHED
-
-//Remove an item from the binary heap at the given index.
-bool _binary_heap_remove(binary_heap*, size_t, binary_heap_entry*); //TO DO
-
-//Set heap ordering.
-void _binary_heap_ordering(binary_heap*, uint8_t); //FINISHED
-
-//Reset iterator.
-void _binary_heap_reset_iterator(binary_heap*); //FINISHED
-
-//Iterator has next?
-bool _binary_heap_has_next(binary_heap*); //FINISHED
-
-//Get the next item.
-binary_heap_entry* _binary_heap_get_next(binary_heap*); //FINISHED
-
-//Get an item at the specified index.
-binary_heap_entry* _binary_heap_get(binary_heap*, size_t); //FINISHED
-
-//Get and remove the root of the binary heap.
-bool _binary_heap_remove_root(binary_heap*, binary_heap_entry*); //FINISHED
-
-//Peek at the root of the binary heap.
-bool _binary_heap_peek(binary_heap*, binary_heap_entry*); //FINISHED
-
-//Rebuild the heap.
-void _binary_heap_build(binary_heap*);
-
-
-
 
 //Swap two items.
 static void int_binary_heap_swap(binary_heap_entry* e1, binary_heap_entry* e2){

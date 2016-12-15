@@ -21,45 +21,6 @@ weighted_graph.c
 
 */
 
-//Create a new weighted, directed graph.
-graph* _weighted_graph_new(standard_library_context*, size_t); //FINISHED
-
-//Delete a weighted, directed graph.
-bool _weighted_graph_delete(graph*); //FINISHED
-
-//Add a new node to the graph.
-graph_node* _weighted_graph_add_node(graph*, long, void*); //FINISHED
-
-//Create an edge (graph, from, to, weight).
-bool _weighted_graph_add_edge(graph*, long, long, long, graph_edge**); //FINISHED
-
-//Create an edge with a mask (graph, from, to, weight, mask, edge).
-bool _weighted_graph_add_masked_edge(graph*, long, long, long, size_t, graph_edge**); //FINISHED
-
-//Remove a node.
-bool _weighted_graph_delete_node(graph*, long); //FINISHED
-
-//Remove an edge.
-bool _weighted_graph_delete_edge(graph*, long, long); //FINISHED
-
-//Clear the graph of levels/parents.
-void _weighted_graph_clear_paths(graph*); //FINISHED
-
-//Get the shortest path from one node to another.
-bool _weighted_graph_spath(graph*, long, long, graph_path*);
-
-//Get the shortest path from one node to another, while avoiding edges with a certain mask.
-bool _weighted_graph_spath_amask(graph*, long, long, size_t, graph_path*);
-
-//Sort the edges of each node by weight.
-bool _weighted_graph_edge_sort(graph*);
-
-//Minimum spanning tree.
-//bool _weighted_graph_min_spanning(graph*, long, long);
-
-
-
-
 graph* _weighted_graph_new(standard_library_context* ctx, size_t start_size){
 
 	graph* new_graph;

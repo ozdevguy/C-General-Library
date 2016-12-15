@@ -95,7 +95,7 @@ struct standard_library_memory_manager{
 	free_block* block_3m;
 
 	//Free blocks less than 4MB.
-	free_block* block_3m;
+	free_block* block_4m;
 
 	//Free blocks less than 8MB.
 	free_block* block_8m;

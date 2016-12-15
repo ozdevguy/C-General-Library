@@ -20,24 +20,6 @@ st_quick_sort.c | Quicksort
 
 */
 
-//Sort a list in ascending order.
-bool _quicksort_list_asc(list*, size_t, uint8_t);
-
-//Sort a list in descending order.
-bool _quicksort_list_desc(list*, size_t, uint8_t);
-
-//Sort a vector in ascending order.
-bool _quicksort_vector_asc(vector*, size_t, uint8_t);
-
-//Sort a vector in descending order.
-bool _quicksort_vector_desc(vector*, size_t, uint8_t);
-
-//Sort a normal integer array in ascending order.
-bool _quicksort_arr_asc(void*, uint8_t);
-
-//Sort a normal integer array in descending order.
-bool _quicksort_arr_desc(void*, uint8_t);
-
 /*====VECTORS=====*/
 
 static long int_quicksort_vect_value(quicksort_vect_description* desc, size_t index){

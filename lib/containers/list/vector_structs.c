@@ -21,8 +21,6 @@ vector_structs.c
 
 */
 
-typedef struct vector vector;
-
 struct vector{
 
 	//Standard library context.

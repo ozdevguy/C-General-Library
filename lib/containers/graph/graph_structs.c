@@ -21,12 +21,6 @@ graph_structs.c
 
 */
 
-typedef struct graph graph;
-typedef struct graph_edge graph_edge;
-typedef struct graph_node graph_node;
-typedef struct graph_path graph_path;
-typedef struct graph_walk_config graph_walk_config;
-
 struct graph{
 
 	//Standard library context.

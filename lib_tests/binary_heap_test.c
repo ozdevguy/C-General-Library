@@ -20,7 +20,7 @@ void main(){
 		_binary_heap_insert(myHeap, i, 0);
 
 	for(i = 0; i < 100; i++)
-		printf("%d\n", myHeap->data[i].key);
+		printf("%ld\n", myHeap->data[i].key);
 
 	_binary_heap_insert(myHeap, 12, 0);
 	
@@ -34,7 +34,7 @@ void main(){
 
 		_binary_heap_remove_root(myHeap, &entry);
 
-		printf("%d\n", entry.key);
+		printf("%ld\n", entry.key);
 
 	}
 

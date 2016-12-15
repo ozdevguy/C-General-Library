@@ -21,36 +21,6 @@ list.c
 
 */
 
-//Create a new list.
-list* _list_new(standard_library_context*, size_t); //COMPLETE
-
-//Delete a list.
-void _list_delete(list*); //COMPLETE
-
-//Add an item to the list.
-void _list_add(list*, void*); //COMPLETE
-
-//Get an item from the list.
-void* _list_get(list*, size_t); //COMPLETE
-
-//Remove an item from the list.
-bool _list_remove(list*, size_t); //COMPLETE
-
-//Reset the iterator.
-void _list_reset_iterator(list*); //COMPLETE
-
-//See if there are items left to be iterated through.
-bool _list_has_next(list*); //COMPLETE
-
-//Get the next item in the list.
-void* _list_get_next(list*); //COMPLETE
-
-//Set an item in the list.
-bool _list_set(list*, size_t, void*);
-
-//Merge two lists.
-bool _list_merge(list*, list*);
-
 static void int_list_resize(list* lst, size_t new_size){
 
 	byte** new_data;

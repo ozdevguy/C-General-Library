@@ -21,11 +21,6 @@ binary_heap_structs.c
 
 */
 
-typedef struct binary_heap binary_heap;
-typedef struct binary_heap_entry binary_heap_entry;
-
-enum{BINARY_HEAP_MAX, BINARY_HEAP_MIN};
-
 struct binary_heap_entry{
 
 	//Value

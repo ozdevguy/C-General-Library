@@ -1,9 +1,3 @@
-typedef struct mergesort_representation mergesort_representation;
-typedef struct mergesort_vect_description mergesort_vect_description;
-typedef struct mergesort_list_description mergesort_list_description;
-typedef struct quicksort_vect_description quicksort_vect_description;
-typedef struct quicksort_list_description quicksort_list_description;
-
 struct mergesort_vect_description{
 
 	//Vector to be sorted.
