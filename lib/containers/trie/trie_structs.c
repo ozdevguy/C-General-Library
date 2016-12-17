@@ -20,10 +20,6 @@ trie_structs.c | Trie Structs
 
 */
 
-typedef struct trie_map trie_map;
-typedef struct trie_map_entry trie_map_entry;
-
-
 struct trie_map{
 
 	//Standard library context.

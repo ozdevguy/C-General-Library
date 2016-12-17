@@ -21,5 +21,37 @@ stack.h
 
 */
 
-#include "stack_structs.c"
-#include "stack.c"
+/* STRUCTURES */
+
+typedef struct stack stack;
+typedef struct stack_item stack_item;
+
+/* STACK */
+
+//Create a new stack.
+stack* _stack_new(standard_library_context*, size_t);
+
+//Reset this stack.
+void _stack_reset(stack*);
+
+//Delete a stack instance.
+void _stack_delete(stack*);
+
+//Delete a stack + all its items using a deallocator.
+void _stack_delete_all(stack*, void (void*));
+
+//Push a new item to the stack.
+void _stack_push(stack*, void*);
+
+//Pop an item from the stack.
+void* _stack_pop(stack*);
+
+//Peek at the item on top of the stack.
+void* _stack_peek(stack*);
+
+#ifndef GENLIB_LINK_OBJECT_NCOMP
+
+	#include "stack_structs.c"
+	#include "stack.c"
+
+#endif

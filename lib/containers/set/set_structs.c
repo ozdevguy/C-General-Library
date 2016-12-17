@@ -21,9 +21,6 @@ set_structs.c
 
 */
 
-typedef struct vset_int vset_int;
-typedef struct vset_config vset_config;
-
 struct vset_int{
 
 	//Object.

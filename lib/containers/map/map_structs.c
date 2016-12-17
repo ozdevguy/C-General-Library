@@ -21,11 +21,6 @@ map_structs.c
 
 */
 
-typedef struct map map;
-typedef struct map_entry map_entry;
-typedef struct hashmap_entry hashmap_entry;
-
-
 struct hashmap_entry{
 
 	string* key;

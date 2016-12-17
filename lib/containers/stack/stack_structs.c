@@ -21,9 +21,6 @@ stack_structs.c
 
 */
 
-typedef struct stack stack;
-typedef struct stack_item stack_item;
-
 //Stack object.
 struct stack{
 

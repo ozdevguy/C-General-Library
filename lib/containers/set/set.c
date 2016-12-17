@@ -21,39 +21,6 @@ set.c
 
 */
 
-//Create a new list.
-list* _set_new(standard_library_context*, size_t); //COMPLETE
-
-//Delete a list.
-void _set_delete(list*); //COMPLETE
-
-//Add an item to the list.
-bool _set_add(list*, void*); //COMPLETE
-
-//Get an item from the list.
-void* _set_get(list*, size_t); //COMPLETE
-
-//Remove an item from the list.
-bool _set_remove(list*, size_t); //COMPLETE
-
-//Reset the iterator.
-void _set_reset_iterator(list*); //COMPLETE
-
-//See if there are items left to be iterated through.
-bool _set_has_next(list*); //COMPLETE
-
-//Get the next item in the list.
-void* _set_get_next(list*); //COMPLETE
-
-//Does this set contain the given pointer?
-bool _set_contains(list*, void*);
-
-//Create a union of two sets.
-list* _set_union(list*, list*);
-
-//Get the intersection of two sets.
-list* _set_intersect(list*, list*);
-
 
 list* _set_new(standard_library_context* ctx, size_t start_size){
 

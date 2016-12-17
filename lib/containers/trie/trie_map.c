@@ -20,21 +20,6 @@ trie_map.c | Trie Map
 
 */
 
-//(Context, charactaristic)
-trie_map* _trie_map_new(standard_library_context*);
-
-//(Map, Entry Value, Object, Chained trie (true, false))
-trie_map_entry* _trie_map_add(trie_map*, uint32_t, void*, bool);
-
-//Get a complete trie entry.
-trie_map_entry* _trie_map_lookup_e(trie_map*, uint32_t);
-
-//Get a trie object.
-void* _trie_map_lookup(trie_map*, uint32_t);
-
-//Delete a trie.
-void _trie_map_delete(trie_map*);
-
 
 static void int_trie_map_delete(standard_library_context* ctx, trie_map_entry* entry){
 

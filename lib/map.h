@@ -29,6 +29,9 @@ map.h
 
 #endif
 
+//Include string header.
+#include "string.h"
+
 //Include map header.
 #ifndef STD_LIBS_CONTAINERS_MAP
 	

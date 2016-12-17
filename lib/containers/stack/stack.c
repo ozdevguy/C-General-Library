@@ -27,29 +27,6 @@ stack.c
 Written by Bobby Crawford
 */
 
-//Create a new stack.
-stack* _stack_new(standard_library_context*, size_t);
-
-//Reset this stack.
-void _stack_reset(stack*);
-
-//Delete a stack instance.
-void _stack_delete(stack*);
-
-//Delete a stack + all its items using a deallocator.
-void _stack_delete_all(stack*, void (void*));
-
-//Push a new item to the stack.
-void _stack_push(stack*, void*);
-
-//Pop an item from the stack.
-void* _stack_pop(stack*);
-
-//Peek at the item on top of the stack.
-void* _stack_peek(stack*);
-
-
-
 
 static void int_stack_resize(stack* st){
 

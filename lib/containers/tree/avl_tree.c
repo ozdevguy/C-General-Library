@@ -21,39 +21,6 @@ avl_tree.c
 
 */
 
-//Create a new binary search tree.
-binary_search_tree* _avl_tree_new(standard_library_context*); //FINISHED
-
-//Delete a binary search tree.
-void _avl_tree_delete(binary_search_tree*); //FINISHED
-
-//Insert an item into the binary search tree.
-bool _avl_tree_insert(binary_search_tree*, long, void*); //FINISHED
-
-binary_search_tree_node* _avl_tree_insert_e(binary_search_tree*, long, void*);
-
-//Insert an item into the binary search tree, then return the newly created node.
-bool _avl_tree_insert(binary_search_tree*, long, void*); //FINISHED
-
-//Remove a node from the binary search tree.
-void* _avl_tree_remove(binary_search_tree*, long);
-
-//Remove a node from the binary search tree, and get a copy of the removed node.
-bool _avl_tree_remove_e(binary_search_tree*, long, binary_search_tree_node*);
-
-//Get an item from the binary search tree.
-void* _avl_tree_lookup(binary_search_tree*, long);
-
-//Get the greatest element in the tree.
-binary_search_tree_node* _avl_tree_greatest(binary_search_tree*);
-
-//Get the greatest sub-node of a particular root.
-binary_search_tree_node* _avl_tree_greatest_s(binary_search_tree_node*);
-
-//Get a node from the binary search tree.
-binary_search_tree_node* _avl_tree_lookup_e(binary_search_tree*, long);
-
-
 binary_search_tree* _avl_tree_new(standard_library_context* ctx){
 
 	return _binary_search_tree_new(ctx);

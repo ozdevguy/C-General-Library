@@ -21,5 +21,36 @@ queue.h
 
 */
 
-#include "queue_structs.c"
-#include "queue.c"
+/* STRUCTURES */
+
+typedef struct queue queue;
+typedef struct queue_entry queue_entry;
+typedef struct priority_queue priority_queue;
+
+/* QUEUE */
+
+//Create a new queue.
+queue* _queue_new(standard_library_context*, size_t);
+
+//Reset the queue.
+void _queue_reset(queue*);
+
+//Delete a queue.
+void _queue_delete(queue*);
+
+//Enqueue a new item.
+void _queue_enqueue(queue*, void*);
+
+//Remove the item at the front of the queue.
+void* _queue_dequeue(queue*);
+
+//Peek at the front of the queue.
+void* _queue_peek(queue*);
+
+
+#ifndef GENLIB_LINK_OBJECT_NCOMP
+
+	#include "queue_structs.c"
+	#include "queue.c"
+
+#endif

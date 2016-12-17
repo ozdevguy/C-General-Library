@@ -21,10 +21,6 @@ queue_structs.c
 
 */
 
-typedef struct queue queue;
-typedef struct queue_entry queue_entry;
-typedef struct priority_queue priority_queue;
-
 //Representation of a queue.
 struct queue{
 

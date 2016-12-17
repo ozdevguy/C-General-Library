@@ -21,39 +21,6 @@ vset.c
 
 */
 
-//Create a new set. (context, data size, value offset, value size, start size)
-vector* _vset_new(standard_library_context*, size_t, void*, void*, size_t, size_t);
-
-//Delete a vector.
-void _vset_delete(vector*);
-
-//Add an item to the vector.
-bool _vset_add(vector*, void*);
-
-//Get an item from the vector.
-void* _vset_get(vector*, size_t);
-
-//Remove an item from the vector.
-void _vset_remove(vector*, size_t);
-
-//Reset the iterator.
-void _vset_reset_iterator(vector*);
-
-//See if there are items left to be iterated through.
-bool _vset_has_next(vector*);
-
-//Get the next item in the vector.
-void* _vset_get_next(vector*);
-
-//Does this set contain the given object?
-bool _vset_contains(vector*, size_t);
-
-//Create a union of two sets.
-vector* _vset_union(vector*, vector*);
-
-//Get the intersection of two sets.
-vector* _vset_intersect(vector*, vector*);
-
 static size_t int_vset_get_value(vset_config* config, void* obj){
 
 	byte* dat;

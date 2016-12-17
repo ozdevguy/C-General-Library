@@ -21,45 +21,6 @@ map.c
 
 */
 
-//Create a new map.
-map* _map_new(standard_library_context*, size_t);
-
-//Delete a map.
-void _map_delete(map*);
-
-//Resize a map.
-bool _map_resize(map*, size_t);
-
-//Map an item.
-bool _map_insert(map*, size_t, void*);
-
-//Map an item, and return its map entry pointer.
-map_entry* _map_insert_e(map*, size_t, void*);
-
-//Remove an item from the map, and return its data pointer.
-void* _map_remove(map*, size_t);
-
-//Remove an item from the map, and return a copy of its map entry.
-bool _map_remove_e(map*, size_t, map_entry*);
-
-//Get an item from the map.
-void* _map_lookup(map*, size_t);
-
-//Get an entry from the map.
-map_entry* _map_lookup_e(map*, size_t);
-
-//Reset the map iterator.
-void _map_reset_iterator(map*);
-
-//Check to see if there are any additional items to iterate through.
-bool _map_has_next(map*);
-
-//Pull the next item in the iteration.
-void* _map_get_next(map*);
-
-//Pull the next full map entry.
-map_entry* _map_get_next_e(map*);
-
 
 //Create a new map.
 map* _map_new(standard_library_context* ctx, size_t start_size){

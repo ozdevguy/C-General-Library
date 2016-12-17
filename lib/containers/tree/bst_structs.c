@@ -21,9 +21,6 @@ bst_structs.c
 
 */
 
-typedef struct binary_search_tree binary_search_tree;
-typedef struct binary_search_tree_node binary_search_tree_node;
-
 struct binary_search_tree{
 
 	//Standard library context.

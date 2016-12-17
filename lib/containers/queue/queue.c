@@ -29,25 +29,6 @@ Written by Bobby Crawford
 
 */
 
-//Create a new queue.
-queue* _queue_new(standard_library_context*, size_t);
-
-//Reset the queue.
-void _queue_reset(queue*);
-
-//Delete a queue.
-void _queue_delete(queue*);
-
-//Enqueue a new item.
-void _queue_enqueue(queue*, void*);
-
-//Remove the item at the front of the queue.
-void* _queue_dequeue(queue*);
-
-//Peek at the front of the queue.
-void* _queue_peek(queue*);
-
-
 static void int_queue_resize(queue* q){
 
 	//New queue size.

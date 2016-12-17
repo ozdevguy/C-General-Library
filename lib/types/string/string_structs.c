@@ -21,9 +21,6 @@ string_structs.c
 
 */
 
-typedef struct string string;
-typedef struct string_list string_list;
-
 struct string{
 
 	//Standard library context.

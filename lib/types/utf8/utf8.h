@@ -21,5 +21,31 @@ utf8.h
 
 */
 
-#include "utf8_structs.c"
-#include "utf8.c"
+/* STRUCTURES */
+
+typedef struct utf8_char utf8_char;
+
+/* UTF-8 */
+
+utf8_char _utf8_fbytes(byte*);
+
+size_t _utf8_ptr_fbytes(utf8_char*, byte*);
+
+bool _utf8_compare(utf8_char*, utf8_char*, bool);
+
+bool _utf8_compare_ci(utf8_char*, utf8_char*);
+
+utf8_char _utf8_fint(uint32_t);
+
+void _utf8_upper(utf8_char*);
+
+void _utf8_lower(utf8_char*);
+
+unsigned int _utf8_lang(utf8_char*);
+
+#ifndef GENLIB_LINK_OBJECT_NCOMP
+
+	#include "utf8_structs.c"
+	#include "utf8.c"
+
+#endif
