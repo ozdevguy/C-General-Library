@@ -1,0 +1,3 @@
+//Default serialization pool size = 16MB, starting at address 0x2800000
+#define DEFAULT_SERIALIZATION_POOL_SIZE 0x1000000
+#define DEFAULT_SERIALIZATION_POOL_STARTADDR 0x2800000

@@ -30,11 +30,13 @@ foundation.h | This header must be included for ALL library components.
 	
 		//This is a POSIX system, so we just need to include the normal POSIX headers.
 		#include "sys_include.h"
-
+	
 	#elif _WIN32
 		
+		//Since this is Windows, we need to include our custom POSIX wrappers.
+		
 		#ifdef _WIN64
-
+			
 			#include "sys/win_posix/sys_include64.h"
 
 		#endif

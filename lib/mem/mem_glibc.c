@@ -123,10 +123,22 @@ struct standard_library_memory_manager{
 
 };
 
-//Genlib malloc override.
-void* _std_malloc(size_t allocation_size){
+//Set memory boundaries.
+inline bool _std_managed_heap_specs(size_t ser_pool_addr, size_t ser_pool_size){
 
-	if(!lib_global_context.memory_allocator)
+	
+}
+
+//Heap setup.
+inline void _std_managed_heap_init(){
+
+
+}
+
+//Genlib malloc override.
+inline void* _std_malloc(size_t allocation_size){
+
+	if(!lib_global_context.heap_management_enabled)
 		return calloc(allocation_size, 1);
 
 	return 0;
@@ -134,17 +146,19 @@ void* _std_malloc(size_t allocation_size){
 }
 
 //Genlib calloc override.
-void* _std_calloc(size_t ntimes, size_t size){
+inline void* _std_calloc(size_t ntimes, size_t size){
 
-	if(!lib_global_context.memory_allocator)
+	if(!lib_global_context.heap_management_enabled)
 		return calloc(size, ntimes);
+
+	return 0;
 
 }
 
 //Genlib free override.
-void _std_free(void* ptr){
+inline void _std_free(void* ptr){
 
-	if(!lib_global_context.memory_dealloc)
+	if(!lib_global_context.heap_management_enabled)
 		return free(ptr);
 
 }

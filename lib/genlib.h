@@ -21,6 +21,7 @@ genlib.h
 
 */
 
+#include "config/config.h"
 #include "foundation.h"
 #include "hashmap.h"
 #include "queue.h"

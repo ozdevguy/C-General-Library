@@ -20,6 +20,10 @@ std_lib_env.c
 
 */
 
+//Library override definitions.
+void* _std_calloc(size_t, size_t);
+void _std_free(void*);
+
 typedef struct standard_library_context standard_library_context;
 typedef struct standard_library_context genlib_env_context;
 
@@ -31,14 +35,17 @@ struct standard_library_context{
 	//Internal data.
 	void* data;
 
-	//Serialization data.
-	void* serialization;
+	//Heap management enabled?
+	bool heap_management_enabled;
+
+	//Serialization pool starting address.
+	size_t ser_pool_start;
+
+	//Serialization pool size.
+	size_t ser_pool_size;
 
 	//Memory data.
 	void* memory;
-
-	//Manage the heap?
-	bool heap_manager_enabed;
 
 	//Pointer to memory allocator.
 	void* (*memory_allocator)(size_t, standard_library_context*);
@@ -68,7 +75,7 @@ void std_lib_sync(standard_library_context* ctx){
 
 	if(!ctx)
 		return;
-	
+
 	lib_global_context_ext = ctx;
 
 }
@@ -76,7 +83,7 @@ void std_lib_sync(standard_library_context* ctx){
 /*==================DEFAULT FUNCTIONS=====================*/
 void* int_std_calloc_bridge(size_t size, standard_library_context* ctx){
 
-	void* ptr = calloc(size, 1);
+	void* ptr = _std_calloc(size, 1);
 
 	if(!ptr)
 		ctx->operation_failure(1, ctx);
@@ -87,7 +94,7 @@ void* int_std_calloc_bridge(size_t size, standard_library_context* ctx){
 
 bool int_std_free_bridge(void* ptr, standard_library_context* ctx){
 
-	free(ptr);
+	_std_free(ptr);
 	return true;
 
 }
@@ -124,6 +131,7 @@ void _std_lib_environment_min_setup(standard_library_context* ctx, uint32_t inst
 
 }
 
+//Setup a new standard library context without the managed heap.
 void _std_lib_default(standard_library_context* ctx){
 
 	ctx->instance_id = 0;
@@ -131,6 +139,19 @@ void _std_lib_default(standard_library_context* ctx){
 	ctx->memory_dealloc = int_std_free_bridge;
 	ctx->logger = int_std_logger;
 	ctx->operation_failure = int_operation_failure;
+	lib_global_context.heap_management_enabled = false;
+
+}
+
+//Setup a new standard library context with managed heap.
+void _std_lib_managed(standard_library_context* ctx){
+
+	ctx->instance_id = 0;
+	ctx->memory_allocator = int_std_calloc_bridge;
+	ctx->memory_dealloc = int_std_free_bridge;
+	ctx->logger = int_std_logger;
+	ctx->operation_failure = int_operation_failure;
+	lib_global_context.heap_management_enabled = true;
 
 }
 

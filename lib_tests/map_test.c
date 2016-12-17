@@ -11,6 +11,11 @@ void main(){
 	int data2 = 61092;
 	int data3 = 3822;
 
+	size_t dat = (size_t)malloc(230);
+
+	printf("Address: %ld\n", dat);
+
+
 	map* myMap = _map_new(&ctx, 2);
 
 
