@@ -15,7 +15,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 
-foundation.h
+foundation.h | This header must be included for ALL library components.
 ========================================================================
 
 
@@ -27,87 +27,32 @@ foundation.h
 	#define SYS_LIBS 1
 	
 	#ifdef __linux__
-
+	
+		//This is a POSIX system, so we just need to include the normal POSIX headers.
 		#include "sys_include.h"
-		#include <pthread.h>
-
-		//Include standard types header.
-		#ifndef STD_LIBS_TYPE_TYPES
-			
-			#define STD_LIBS_TYPE_TYPES 1
-			#include "types/std_types.h"
-
-		#endif
-
-		//Include environment header.
-		#ifndef STD_LIBS_ENVIRONMENT
-			
-			#define STD_LIBS_ENVIRONMENT 1
-			#include "global/environment.h"
-
-		#endif
-
-		#include "mem_glibc.h"
 
 	#elif _WIN32
 		
 		#ifdef _WIN64
 
-			//TO DO (64 bit windows server)
+			#include "sys/win_posix/sys_include64.h"
 
 		#endif
 
 		#ifndef _WIN64
 
-			//TO DO (32 bit windows server)
+			#include "sys/win_posix/sys_include32.h"
 
 		#endif
 	
 	#elif __APPLE__
 		
 		#include "sys_include.h"
-		#include <pthread.h>
-
-		//Include standard types header.
-		#ifndef STD_LIBS_TYPE_TYPES
-			
-			#define STD_LIBS_TYPE_TYPES 1
-			#include "types/std_types.h"
-
-		#endif
-
-		//Include environment header.
-		#ifndef STD_LIBS_ENVIRONMENT
-			
-			#define STD_LIBS_ENVIRONMENT 1
-			#include "global/environment.h"
-
-		#endif
-
-		#include "mem_glibc.h"
 
 	#elif __DITTO_COMPILER_DIRECT__
 		
 		//Compile for the Ditto Virtual Machine (in progress).
 		#include "spec/dvmetal_sys_include.h"
-
-		//Include standard types header.
-		#ifndef STD_LIBS_TYPE_TYPES
-			
-			#define STD_LIBS_TYPE_TYPES 1
-			#include "types/std_types.h"
-
-		#endif
-
-		//Include environment header.
-		#ifndef STD_LIBS_ENVIRONMENT
-			
-			#define STD_LIBS_ENVIRONMENT 1
-			#include "global/environment.h"
-
-		#endif
-
-		//#include "mem_glibc.h"
 
 	#elif __MAESTRO__
 		
@@ -120,6 +65,27 @@ foundation.h
 		#include "embedded_threads.h"
 		#include "embedded.h"
 	
+	#endif
+
+	//Include standard types header.
+	#ifndef STD_LIBS_TYPE_TYPES
+		
+		#define STD_LIBS_TYPE_TYPES 1
+		#include "types/std_types.h"
+
+	#endif
+
+	//Include environment header.
+	#ifndef STD_LIBS_ENVIRONMENT
+		
+		#define STD_LIBS_ENVIRONMENT 1
+
+		//General environment.
+		#include "global/environment.h"
+
+		//Now, we include the custom memory manager and overrides.
+		#include "mem_glibc.h"
+
 	#endif
 
 #endif

@@ -15,7 +15,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 
-sys_include.h
+sys_include.h | POSIX headers needed for this library.
 ========================================================================
 
 
@@ -28,3 +28,4 @@ sys_include.h
 #include <stdint.h>
 #include <stdbool.h>
 #include <math.h>
+#include <pthread.h>

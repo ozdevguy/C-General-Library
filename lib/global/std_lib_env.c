@@ -60,6 +60,19 @@ struct standard_library_context{
 //Global context.
 standard_library_context lib_global_context;
 
+//Global context pointer.
+standard_library_context* lib_global_context_ext;
+
+//Sync contexts.
+void std_lib_sync(standard_library_context* ctx){
+
+	if(!ctx)
+		return;
+	
+	lib_global_context_ext = ctx;
+
+}
+
 /*==================DEFAULT FUNCTIONS=====================*/
 void* int_std_calloc_bridge(size_t size, standard_library_context* ctx){
 

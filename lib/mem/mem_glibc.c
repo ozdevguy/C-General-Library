@@ -123,7 +123,7 @@ struct standard_library_memory_manager{
 
 };
 
-
+//Genlib malloc override.
 void* _std_malloc(size_t allocation_size){
 
 	if(!lib_global_context.memory_allocator)
@@ -133,6 +133,7 @@ void* _std_malloc(size_t allocation_size){
 	
 }
 
+//Genlib calloc override.
 void* _std_calloc(size_t ntimes, size_t size){
 
 	if(!lib_global_context.memory_allocator)
@@ -140,6 +141,7 @@ void* _std_calloc(size_t ntimes, size_t size){
 
 }
 
+//Genlib free override.
 void _std_free(void* ptr){
 
 	if(!lib_global_context.memory_dealloc)
