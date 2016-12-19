@@ -24,18 +24,15 @@ std_lib_env.c
 void* _std_calloc(size_t, size_t);
 void _std_free(void*);
 
+typedef struct standard_library_global standard_library_global;
+typedef struct standard_library_global genlib_global;
+
 typedef struct standard_library_context standard_library_context;
 typedef struct standard_library_context genlib_env_context;
 
-struct standard_library_context{
+struct standard_library_global{
 
-	//Library instance ID.
-	uint32_t instance_id;
-
-	//Internal data.
-	void* data;
-
-	//Heap management enabled?
+	//Auto heap management enabled?
 	bool heap_management_enabled;
 
 	//Serialization pool starting address.
@@ -44,8 +41,21 @@ struct standard_library_context{
 	//Serialization pool size.
 	size_t ser_pool_size;
 
-	//Memory data.
+	//Memory management object.
 	void* memory;
+
+	//Default global context.
+	standard_library_global* ctx;
+
+};
+
+struct standard_library_context{
+
+	//Library instance ID.
+	uint32_t instance_id;
+
+	//Internal data.
+	void* data;
 
 	//Pointer to memory allocator.
 	void* (*memory_allocator)(size_t, standard_library_context*);
@@ -65,18 +75,18 @@ struct standard_library_context{
 };
 
 //Global context.
-standard_library_context lib_global_context;
+standard_library_global def_lib_global_context;
 
 //Global context pointer.
-standard_library_context* lib_global_context_ext;
+standard_library_global* lib_global_context;
 
 //Sync contexts.
-void std_lib_sync(standard_library_context* ctx){
+void std_lib_sync(standard_library_global* gctx){
 
-	if(!ctx)
+	if(!gctx)
 		return;
 
-	lib_global_context_ext = ctx;
+	lib_global_context = gctx;
 
 }
 
@@ -139,7 +149,7 @@ void _std_lib_default(standard_library_context* ctx){
 	ctx->memory_dealloc = int_std_free_bridge;
 	ctx->logger = int_std_logger;
 	ctx->operation_failure = int_operation_failure;
-	lib_global_context.heap_management_enabled = false;
+	lib_global_context->heap_management_enabled = false;
 
 }
 
@@ -151,7 +161,9 @@ void _std_lib_managed(standard_library_context* ctx){
 	ctx->memory_dealloc = int_std_free_bridge;
 	ctx->logger = int_std_logger;
 	ctx->operation_failure = int_operation_failure;
-	lib_global_context.heap_management_enabled = true;
+	lib_global_context->heap_management_enabled = true;
+	lib_global_context->ser_pool_size = DEFAULT_SERIALIZATION_POOL_SIZE;
+	lib_global_context->ser_pool_start = DEFAULT_SERIALIZATION_POOL_STARTADDR;
 
 }
 

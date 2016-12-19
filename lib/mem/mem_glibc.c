@@ -126,11 +126,41 @@ struct standard_library_memory_manager{
 //Set memory boundaries.
 inline bool _std_managed_heap_specs(size_t ser_pool_addr, size_t ser_pool_size){
 
-	
+	if(!ser_pool_size || !ser_pool_addr)
+		return false;
+
+	lib_global_context->ser_pool_start = ser_pool_addr;
+	lib_global_context->ser_pool_size = ser_pool_size;
+
+	return true;
+
 }
 
 //Heap setup.
 inline void _std_managed_heap_init(){
+
+	size_t heap_addr, new_heap_addr;
+
+	//Get the starting address of the heap.
+	heap_addr = (size_t)sbrk(0);
+
+	if(heap_addr >= lib_global_context->ser_pool_start){
+
+		//lib_global_context->operation_failure(1, &lib_global_context);
+		return;
+
+	}
+
+	//Setup the serialization pool.
+	new_heap_addr = lib_global_context->ser_pool_start + lib_global_context->ser_pool_size;
+	brk((void*)new_heap_addr);
+
+	//Create a new memory manager object.
+	lib_global_context->memory = (void*)new_heap_addr;
+
+	//Move the program break past the memory manager object.
+	new_heap_addr += sizeof(standard_library_memory_manager);
+	brk((void*)new_heap_addr);
 
 
 }
@@ -138,8 +168,11 @@ inline void _std_managed_heap_init(){
 //Genlib malloc override.
 inline void* _std_malloc(size_t allocation_size){
 
-	if(!lib_global_context.heap_management_enabled)
+	//Use C stdlib calloc.
+	if(!lib_global_context->heap_management_enabled)
 		return calloc(allocation_size, 1);
+
+	
 
 	return 0;
 	
@@ -148,7 +181,8 @@ inline void* _std_malloc(size_t allocation_size){
 //Genlib calloc override.
 inline void* _std_calloc(size_t ntimes, size_t size){
 
-	if(!lib_global_context.heap_management_enabled)
+	//Use C stdlib calloc.
+	if(!lib_global_context->heap_management_enabled)
 		return calloc(size, ntimes);
 
 	return 0;
@@ -158,11 +192,13 @@ inline void* _std_calloc(size_t ntimes, size_t size){
 //Genlib free override.
 inline void _std_free(void* ptr){
 
-	if(!lib_global_context.heap_management_enabled)
+	//Use C stdlib free.
+	if(!lib_global_context->heap_management_enabled)
 		return free(ptr);
 
 }
 
+//stdlib memory management override macros.
 #define calloc(a,b) _std_calloc(a,b)
 #define malloc(a) _std_malloc(a)
 #define free(a) _std_free(a)

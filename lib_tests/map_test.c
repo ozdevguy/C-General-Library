@@ -4,7 +4,8 @@
 void main(){
 
 	standard_library_context ctx;
-	_std_lib_default(&ctx);
+	_std_lib_managed(GCTX);
+	_std_managed_heap_init();
 
 	int data = 1200;
 	int data1 = 121212;

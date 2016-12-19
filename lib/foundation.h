@@ -25,6 +25,8 @@ foundation.h | This header must be included for ALL library components.
 #ifndef SYS_LIBS
 	
 	#define SYS_LIBS 1
+
+	#include "config/config.h"
 	
 	#ifdef __linux__
 	

@@ -22,3 +22,4 @@ environment.h
 */
 
 #include "std_lib_env.c"
+#define GCTX lib_global_context->ctx
