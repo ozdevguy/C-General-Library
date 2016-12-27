@@ -57,3 +57,25 @@ struct priority_queue{
 	void* heap;
 
 };
+
+//Representation of a thread safe queue.
+struct ts_queue{
+
+	//Mutex lock.
+	pthread_mutex_t lock;
+
+	//Pointer to queue.
+	queue* q;
+
+};
+
+//Representation of a thread safe priority queue.
+struct ts_priority_queue{
+
+	//Mutex lock.
+	pthread_mutex_t lock;
+
+	//Pointer to priority queue.
+	priority_queue* q;
+
+};

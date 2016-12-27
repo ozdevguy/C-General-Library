@@ -123,9 +123,11 @@ struct standard_library_memory_manager{
 
 };
 
+
 //Set memory boundaries.
 inline bool _std_managed_heap_specs(size_t ser_pool_addr, size_t ser_pool_size){
 
+	/*
 	if(!ser_pool_size || !ser_pool_addr)
 		return false;
 
@@ -133,12 +135,14 @@ inline bool _std_managed_heap_specs(size_t ser_pool_addr, size_t ser_pool_size){
 	lib_global_context->ser_pool_size = ser_pool_size;
 
 	return true;
+	*/
 
 }
 
 //Heap setup.
 inline void _std_managed_heap_init(){
 
+	/*
 	size_t heap_addr, new_heap_addr;
 
 	//Get the starting address of the heap.
@@ -161,9 +165,16 @@ inline void _std_managed_heap_init(){
 	//Move the program break past the memory manager object.
 	new_heap_addr += sizeof(standard_library_memory_manager);
 	brk((void*)new_heap_addr);
-
+	*/
+	
 
 }
+
+void int_memory_manager_init(){
+
+	
+}
+
 
 //Genlib malloc override.
 inline void* _std_malloc(size_t allocation_size){

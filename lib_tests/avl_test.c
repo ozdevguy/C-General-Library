@@ -4,11 +4,11 @@ void main(){
 
 	int test = 1;
 
-	standard_library_context ctx;
+	_lib_init();
 
-	_std_lib_default(&ctx);
+	standard_library_context* ctx = _ctx_init();
 
-	binary_search_tree* avl = _avl_tree_new(&ctx);
+	binary_search_tree* avl = _avl_tree_new(ctx);
 
 	printf("Insert 60\n");
 	_avl_tree_insert_e(avl, 60, &test);
@@ -180,5 +180,7 @@ void main(){
 
 	
 	_avl_tree_delete(avl);
+
+	_ctx_delete(ctx);
 
 }

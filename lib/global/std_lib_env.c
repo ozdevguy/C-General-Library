@@ -24,28 +24,37 @@ std_lib_env.c
 void* _std_calloc(size_t, size_t);
 void _std_free(void*);
 
+//Memory management initialization.
+void int_memory_manager_init();
+
 typedef struct standard_library_global standard_library_global;
 typedef struct standard_library_global genlib_global;
 
 typedef struct standard_library_context standard_library_context;
-typedef struct standard_library_context genlib_env_context;
+typedef struct standard_library_context genlib_context;
+
+typedef struct standard_library_global_config standard_library_global_config;
+typedef struct standard_library_global_config genlib_config;
 
 struct standard_library_global{
+
+	//Has global structure been initialized?
+	bool initialized;
 
 	//Auto heap management enabled?
 	bool heap_management_enabled;
 
 	//Serialization pool starting address.
-	size_t ser_pool_start;
+	size_t ser_start;
 
 	//Serialization pool size.
-	size_t ser_pool_size;
+	size_t ser_size;
 
 	//Memory management object.
 	void* memory;
 
-	//Default global context.
-	standard_library_global* ctx;
+	//Default library context.
+	standard_library_context* ctx;
 
 };
 
@@ -74,19 +83,82 @@ struct standard_library_context{
 
 };
 
+struct standard_library_global_config{
+
+	//Serialization segment size.
+	size_t ser_size;
+
+	//Serialization segment start address.
+	size_t ser_start;
+
+};
+
+/* GLOBAL CONTEXT DECLARATION */
+
 //Global context.
 standard_library_global def_lib_global_context;
 
 //Global context pointer.
 standard_library_global* lib_global_context;
 
-//Sync contexts.
-void std_lib_sync(standard_library_global* gctx){
+
+/* GLOBAL CONTEXT FUNCTIONS */
+
+//Sync global structures.
+void _lib_sync(standard_library_global* gctx){
 
 	if(!gctx)
 		return;
 
 	lib_global_context = gctx;
+
+}
+
+//Initialize a default global context.
+void _lib_init(){
+
+	def_lib_global_context.heap_management_enabled = false;
+	def_lib_global_context.initialized = true;
+	lib_global_context = &def_lib_global_context;
+
+}
+
+//Initialized a global context with managed heap.
+void _lib_init_managed(standard_library_global_config* config){
+
+	def_lib_global_context.heap_management_enabled = true;
+	def_lib_global_context.initialized = true;
+	lib_global_context = &def_lib_global_context;
+
+	if(config){
+
+		lib_global_context->ser_start = config->ser_start;
+		lib_global_context->ser_size = config->ser_size;
+
+	}
+	else{
+
+		lib_global_context->ser_start = DEFAULT_SERIALIZATION_POOL_STARTADDR;
+		lib_global_context->ser_size = DEFAULT_SERIALIZATION_POOL_SIZE;
+
+	}
+
+	//Initialize memory management.
+	int_memory_manager_init();
+
+}
+
+//Set default context.
+void _lib_set_default_ctx(standard_library_context* ctx){
+
+	lib_global_context->ctx = ctx;
+
+}
+
+//Retrieve default context.
+inline standard_library_context* _lib_default_ctx(){
+
+	return lib_global_context->ctx;
 
 }
 
@@ -141,32 +213,6 @@ void _std_lib_environment_min_setup(standard_library_context* ctx, uint32_t inst
 
 }
 
-//Setup a new standard library context without the managed heap.
-void _std_lib_default(standard_library_context* ctx){
-
-	ctx->instance_id = 0;
-	ctx->memory_allocator = int_std_calloc_bridge;
-	ctx->memory_dealloc = int_std_free_bridge;
-	ctx->logger = int_std_logger;
-	ctx->operation_failure = int_operation_failure;
-	lib_global_context->heap_management_enabled = false;
-
-}
-
-//Setup a new standard library context with managed heap.
-void _std_lib_managed(standard_library_context* ctx){
-
-	ctx->instance_id = 0;
-	ctx->memory_allocator = int_std_calloc_bridge;
-	ctx->memory_dealloc = int_std_free_bridge;
-	ctx->logger = int_std_logger;
-	ctx->operation_failure = int_operation_failure;
-	lib_global_context->heap_management_enabled = true;
-	lib_global_context->ser_pool_size = DEFAULT_SERIALIZATION_POOL_SIZE;
-	lib_global_context->ser_pool_start = DEFAULT_SERIALIZATION_POOL_STARTADDR;
-
-}
-
 void _std_lib_environment_set_memory_allocator(standard_library_context* ctx, void* (*memory_allocator)(size_t, standard_library_context*)){
 
 	ctx->memory_allocator = memory_allocator;
@@ -182,5 +228,37 @@ void _std_lib_environment_set_memory_deallocator(standard_library_context* ctx, 
 void _std_lib_environment_set_logger(standard_library_context* ctx, void* (*logger)(byte*, size_t, uint8_t, standard_library_context*)){
 
 	ctx->logger = logger;
+
+}
+
+/* LOCAL CONTEXT FUNCTIONS */
+
+//Create a new local context.
+standard_library_context* _ctx_init(){
+
+	standard_library_context* ctx;
+
+	if(!lib_global_context->initialized)
+		return 0;
+
+	ctx = _std_calloc(sizeof(standard_library_context), 1);
+
+	ctx->instance_id = 0;
+	ctx->memory_allocator = int_std_calloc_bridge;
+	ctx->memory_dealloc = int_std_free_bridge;
+	ctx->logger = int_std_logger;
+	ctx->operation_failure = int_operation_failure;
+	
+	return ctx;
+
+}
+
+//Delete a local context.
+void _ctx_delete(standard_library_context* ctx){
+
+	if(!ctx)
+		return;
+
+	free(ctx);
 
 }

@@ -26,6 +26,7 @@ queue.h
 typedef struct queue queue;
 typedef struct queue_entry queue_entry;
 typedef struct priority_queue priority_queue;
+typedef struct ts_queue ts_queue;
 
 /* QUEUE */
 
@@ -47,10 +48,32 @@ void* _queue_dequeue(queue*);
 //Peek at the front of the queue.
 void* _queue_peek(queue*);
 
+/* THREAD SAFE QUEUE */
+
+//Create a new thread safe queue.
+ts_queue* _ts_queue_new(standard_library_context*, size_t);
+
+//Reset the queue.
+void _ts_queue_reset(ts_queue*);
+
+//Delete the queue.
+void _ts_queue_delete(ts_queue*);
+
+//Enqueue a new item.
+void _ts_queue_enqueue(ts_queue*, void*);
+
+//Remove an item at the front of the queue.
+void* _ts_queue_dequeue(ts_queue*);
+
+//Peek at the front of the queue.
+void* _ts_queue_peek(ts_queue*);
+
+
 
 #ifndef GENLIB_LINK_OBJECT_NCOMP
 
 	#include "queue_structs.c"
 	#include "queue.c"
+	#include "ts_queue.c"
 
 #endif

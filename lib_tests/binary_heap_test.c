@@ -4,11 +4,10 @@ void main(){
 
 	printf("Hello world!\n");
 
-	standard_library_context ctx;
+	_lib_init();
+	standard_library_context* ctx = _ctx_init();
 
-	_std_lib_default(&ctx);
-
-	binary_heap* myHeap = _binary_heap_new(&ctx, 5);
+	binary_heap* myHeap = _binary_heap_new(ctx, 5);
 
 	int i;
 
@@ -39,5 +38,6 @@ void main(){
 	}
 
 	_binary_heap_delete(myHeap);
+	_ctx_delete(ctx);
 
 }

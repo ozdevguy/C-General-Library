@@ -2,15 +2,15 @@
 
 void main(){
 
-	standard_library_context ctx;
+	_lib_init();
+	standard_library_context* ctx = _ctx_init();
 
-	_std_lib_default(&ctx);
 
 	int t1 = 2345;
 	int t2 = 4567;
 
-	binary_search_tree* tree = _binary_search_tree_new(&ctx);
-	//binary_search_tree* avltree = _avl_tree_new(&ctx);
+	binary_search_tree* tree = _binary_search_tree_new(ctx);
+	//binary_search_tree* avltree = _avl_tree_new(ctx);
 
 	_binary_search_tree_insert(tree, 23, &t1);
 	_binary_search_tree_insert(tree, 10, &t1);
@@ -41,4 +41,7 @@ void main(){
 
 	_binary_search_tree_delete(tree);
 	//_binary_search_tree_delete(avltree);
+
+	_ctx_delete(ctx);
+	
 }
