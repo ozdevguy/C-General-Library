@@ -50,6 +50,17 @@ void main(){
 		printf("Dat: %d\n", *((int*)_ts_queue_dequeue(myTSQueue)));
 
 	_ts_queue_delete(myTSQueue);
+
+
+	ts_queue* newQueue = _ts_queue_new(ctx, 10);
+
+	newQueue->enqueue(newQueue, &a);
+	newQueue->enqueue(newQueue, &b);
+
+	printf("Data: %d\n", *((int*)newQueue->dequeue(newQueue)));
+
+	newQueue->delete(newQueue);
+	
 	_ctx_delete(ctx);
 
 }

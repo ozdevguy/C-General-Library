@@ -31,6 +31,13 @@ ts_queue* _ts_queue_new(standard_library_context* ctx, size_t start_size){
 
 	q = allocate(ctx, sizeof(ts_queue));
 	q->q = _queue_new(ctx, start_size);
+
+	q->reset = _ts_queue_reset;
+	q->delete = _ts_queue_delete;
+	q->enqueue = _ts_queue_enqueue;
+	q->dequeue = _ts_queue_dequeue;
+	q->peek = _ts_queue_peek;
+	
 	pthread_mutex_init(&(q->lock), 0);
 
 	return q;

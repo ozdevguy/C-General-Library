@@ -67,6 +67,21 @@ struct ts_queue{
 	//Pointer to queue.
 	queue* q;
 
+	//Pointer to reset function.
+	void (*reset)(ts_queue*);
+
+	//Pointer to the delete function.
+	void (*delete)(ts_queue*);
+
+	//Pointer to the enqueue function.
+	void (*enqueue)(ts_queue*, void*);
+
+	//Pointer to the dequeue function.
+	void* (*dequeue)(ts_queue*);
+
+	//Pointer to the peek function.
+	void* (*peek)(ts_queue*);
+
 };
 
 //Representation of a thread safe priority queue.

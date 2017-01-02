@@ -2,11 +2,12 @@
 
 void main(){
 
-	standard_library_context ctx;
+	genlib_context* ctx;
 
-	_std_lib_default(&ctx);
+	_lib_init();
+	ctx = _ctx_init();
 
-	priority_queue* pqueue = _priority_queue_new(&ctx, 5);
+	priority_queue* pqueue = _priority_queue_new(ctx, 5);
 
 	int a = 12;
 	int b = 34;
@@ -28,5 +29,6 @@ void main(){
 	
 
 	_priority_queue_delete(pqueue);
+	_ctx_delete(ctx);
 
 }

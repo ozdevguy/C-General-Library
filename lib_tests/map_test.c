@@ -3,9 +3,10 @@
 
 void main(){
 
-	standard_library_context ctx;
-	_std_lib_managed(&ctx);
-	_std_managed_heap_init();
+	genlib_context* ctx;
+	
+	_lib_init();
+	ctx = _ctx_init();
 
 	int data = 1200;
 	int data1 = 121212;
@@ -17,7 +18,7 @@ void main(){
 	printf("Address: %ld\n", dat);
 
 
-	map* myMap = _map_new(&ctx, 2);
+	map* myMap = _map_new(ctx, 2);
 
 
 	_map_insert(myMap, 23, &data);
@@ -83,7 +84,9 @@ void main(){
 			printf("Problem\n");
 	}
 	
+	free((void*)dat);
 	_map_delete(myMap);
+	_ctx_delete(ctx);
 	
 
 }

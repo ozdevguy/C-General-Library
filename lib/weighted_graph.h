@@ -25,12 +25,7 @@ weighted_graph.h
 #include "graph.h"
 
 //Include the list header.
-#ifndef STD_LIBS_CONTAINERS_LIST
-	
-	#define STD_LIBS_CONTAINERS_LIST 1
-	#include "containers/list/list.h"
-
-#endif
+#include "list.h"
 
 //Include the weighted graph header.
 #ifndef STD_LIBS_CONTAINERS_WEIGHTED_GRAPH

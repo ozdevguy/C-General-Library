@@ -12,11 +12,12 @@ struct test_str{
 
 void main(){
 
-	standard_library_context ctx;
+	standard_library_context* ctx;
 
-	_std_lib_default(&ctx);
+	_lib_init();
+	ctx = _ctx_init();
 
-	vector* myVect = _vector_new(&ctx, sizeof(test_str), 5);
+	vector* myVect = _vector_new(ctx, sizeof(test_str), 5);
 
 	int i;
 
@@ -65,7 +66,7 @@ void main(){
 	_vector_delete(myVect);
 
 
-	list* myList = _list_new(&ctx, 10);
+	list* myList = _list_new(ctx, 10);
 
 	test_str t;
 	t.val = 1;
@@ -121,5 +122,8 @@ void main(){
 		printf("%d\n", s->val);
 
 	}
+
+	_list_delete(myList);
+	_ctx_delete(ctx);
 
 }

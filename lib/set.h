@@ -21,29 +21,11 @@ set.h
 
 */
 
-//Include foundation header.
-#ifndef STD_LIBS_FOUNDATION
-	
-	#define STD_LIBS_FOUNDATION 1
-	#include "foundation.h"
-
-#endif
-
 //Include the list header.
-#ifndef STD_LIBS_CONTAINERS_LIST
-	
-	#define STD_LIBS_CONTAINERS_LIST
-	#include "containers/list/list.h"
-
-#endif
+#include "list.h"
 
 //Include the vector header.
-#ifndef STD_LIBS_CONTAINERS_VECTOR
-	
-	#define STD_LIBS_CONTAINERS_VECTOR
-	#include "containers/list/vector.h"
-
-#endif
+#include "vector.h"
 
 //Include object set header.
 #ifndef STD_LIBS_CONTAINERS_SET

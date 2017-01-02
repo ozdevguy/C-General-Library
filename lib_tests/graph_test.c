@@ -3,12 +3,13 @@
 
 void main(){
 
-	genlib_env_context ctx;
+	genlib_context* ctx;
 
-	_std_lib_default(&ctx);
+	_lib_init();
+	ctx = _ctx_init();
 
 
-	graph* myGraph = _graph_new(&ctx, 10);
+	graph* myGraph = _graph_new(ctx, 10);
 
 	//Nodes
 	_graph_add_node(myGraph, 21, 0);
@@ -63,5 +64,6 @@ void main(){
 
 
 	_graph_delete(myGraph);
+	_ctx_delete(ctx);
 
 }

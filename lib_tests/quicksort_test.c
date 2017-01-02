@@ -12,9 +12,10 @@ struct test_str{
 
 void main(){
 
-	standard_library_context ctx;
+	genlib_context* ctx;
 
-	_std_lib_default(&ctx);
+	_lib_init();
+	ctx = _ctx_init();
 
 	vector* myVect = _vector_new(&ctx, sizeof(test_str), 5);
 

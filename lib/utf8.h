@@ -22,12 +22,7 @@ utf8.h
 */
 
 //Include foundation header.
-#ifndef STD_LIBS_FOUNDATION
-	
-	#define STD_LIBS_FOUNDATION 1
-	#include "foundation.h"
-
-#endif
+#include "foundation.h"
 
 //Include UTF-8 header.
 #ifndef STD_LIBS_TYPE_UTF8

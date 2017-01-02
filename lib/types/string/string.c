@@ -162,6 +162,146 @@ void _string_set_ci(string* str, bool value){
 
 /*=========== MODIFICATION FUNCTIONS ============*/
 
+//Clear the string (empty string).
+void _string_clear(string* str){
+
+	if(!str)
+		return;
+
+	str->length = 0;
+	str->size = 0;
+	destroy(str->ctx, str->data);
+
+}
+
+bool _string_remove_all(string* str, string* pattern){
+
+	string* new_string;
+	size_t i, j;
+
+	if(!str || !pattern)
+		return false;
+
+	new_string = _string_new(str->ctx);
+
+	for(i = 0; i < str->length; i++){
+
+		j = 0;
+
+		while(j < pattern->length && i < str->length && _utf8_compare(str->data + i, pattern->data + j, str->case_insensitive)){
+			
+			i++;
+			j++;
+
+		}
+
+		_string_append_fchar(new_string, str->data + i);
+
+	}
+
+	destroy(str->ctx, str->data);
+
+	str->data = new_string->data;
+	str->length = new_string->length;
+	str->size = new_string->size;
+
+	destroy(str->ctx, new_string);
+
+	return true;
+
+}
+
+bool _string_remove_all_fbytes(string* str, byte* pattern){
+
+	string* new_string;
+	bool result;
+
+	if(!str || !pattern)
+		return false;
+
+	new_string = _string_new_fbytes(str->ctx, pattern);
+
+	result = _string_remove_all(str, new_string);
+
+	_string_delete(new_string);
+
+	return result;
+
+}
+
+bool _string_remove(string* str, string* pattern, long index){
+
+	string *new_string, *string_remainder;
+	size_t i, j;
+
+	if(!str || !pattern)
+		return false;
+
+	if(index < 0 || index > str->length)
+		return false;
+
+	new_string = _string_new(str->ctx);
+	string_remainder = _string_substr(str, 0, index - 1);
+	_string_append_fstring(new_string, string_remainder);
+	_string_delete(string_remainder);
+
+	for(i = index; i < str->length; i++){
+
+		j = 0;
+
+		while(j < pattern->length && i < str->length && _utf8_compare(str->data + i, pattern->data + j, str->case_insensitive)){
+			
+			i++;
+			j++;
+
+		}
+
+		if(j == pattern->length){
+
+			string_remainder = _string_substr(str, i, str->length - 1);
+			_string_append_fstring(new_string, string_remainder);
+			_string_delete(string_remainder);
+			
+			destroy(str->ctx, str->data);
+
+			str->data = new_string->data;
+			str->length = new_string->length;
+			str->size = new_string->size;
+
+			destroy(str->ctx, new_string);
+
+			return true;
+
+		}
+
+		_string_append_fchar(new_string, str->data + i);
+
+	}
+
+	return false;
+
+}
+
+bool _string_remove_fbytes(string* str, byte* pattern, long index){
+
+	string* new_string;
+	bool result;
+
+	if(!str || !pattern)
+		return false;
+
+	new_string = _string_new_fbytes(str->ctx, pattern);
+
+	result = _string_remove(str, new_string, index);
+
+	_string_delete(new_string);
+
+	return result;
+	
+}
+
+
+
 //Append to a string.
 void _string_append_fbytes(string* str, byte* append){
 
@@ -498,17 +638,16 @@ long _string_index_of(string* str, utf8_char* unichar, long pos){
 }
 
 //Get a character at a position.
-bool _string_char_at(string* str, long pos, utf8_char* unichar){
+utf8_char* _string_char_at(string* str, size_t pos){
 
-	if(!str || !unichar)
-		return false;
+	if(!str)
+		return 0;
 
 	if(pos >= str->length)
-		return false;
+		return 0;
 
-	*unichar = str->data[pos];
+	return str->data + pos;
 
-	return true;
 }
 
 //Get a substring.
@@ -751,4 +890,50 @@ size_t _string_hash(string* str){
 		val += (str->data[i].value * i);
 
 	return val;
+
 }
+
+//Reset the string iterator.
+void _string_reset_iterator(string* str){
+
+	if(!str)
+		return;
+
+	str->iter_pos = 0;
+
+}
+
+//Rewind the iterator.
+void _string_iterator_rewind(string* str){
+
+	if(!str)
+		return;
+
+	if(str->iter_pos)
+		str->iter_pos--;
+
+}
+
+//Check to see if this string has another character.
+bool _string_has_next(string* str){
+
+	if(!str)
+		return false;
+
+	if((str->iter_pos + 1) >= (str->length))
+		return false;
+
+	return true;
+
+}
+
+//Get the next character.
+utf8_char* _string_get_next(string* str){
+
+	if(!_string_has_next(str))
+		return 0;
+
+	return str->data + str->iter_pos++;
+
+}
+

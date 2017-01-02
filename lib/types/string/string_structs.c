@@ -38,6 +38,9 @@ struct string{
 	//Total number of allocated unicode characters.
 	long size;
 
+	//Iterator position.
+	size_t iter_pos;
+
 };
 
 struct string_list{

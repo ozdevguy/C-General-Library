@@ -21,13 +21,9 @@ list.h
 
 */
 
-//Include foundation header.
-#ifndef STD_LIBS_FOUNDATION
-	
-	#define STD_LIBS_FOUNDATION 1
-	#include "foundation.h"
+//Include foundation header.	
+#include "foundation.h"
 
-#endif
 
 //Include list header.
 #ifndef STD_LIBS_CONTAINERS_LIST

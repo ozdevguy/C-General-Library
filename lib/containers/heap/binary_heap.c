@@ -413,6 +413,27 @@ binary_heap_entry* _binary_heap_get(binary_heap* heap, size_t index){
 
 }
 
+binary_heap_entry* _binary_heap_find(binary_heap* heap, void* ptr){
+
+	binary_heap_entry* entry = 0;
+	size_t i;
+
+	if(!heap)
+		return 0;
+
+	for(i = 0; i < heap->used; i++){
+		
+		entry = heap->data + i;
+
+		if(entry->data == ptr)
+			return entry;
+
+	}
+
+	return 0;
+
+}
+
 
 
 

@@ -15,25 +15,28 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 
-graph.h
+json.h
 ========================================================================
 
 
 */
 
-//Include the queue header.
-#include "queue.h"
-
 //Include the stack header.
 #include "stack.h"
 
-//Include the map header.
-#include "map.h"
+//Include the hashmap header.
+#include "hashmap.h"
 
-//Include undirected graph header.
-#ifndef STD_LIBS_CONTAINERS_GRAPH
+//Include the vector header.
+#include "vector.h"
 
-	#define STD_LIBS_CONTAINERS_GRAPH 1
-	#include "containers/graph/graph.h"
+//Include the list header.
+#include "list.h"
+
+//Include json header.
+#ifndef STD_LIBS_FORMAT_JSON
+	
+	#define STD_LIBS_FORMAT_JSON 1
+	#include "format/json/json.h"
 
 #endif

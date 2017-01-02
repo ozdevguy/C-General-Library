@@ -35,6 +35,9 @@ void _string_delete(string*);		//COMPLETE
 void _string_delete_ll(string_list*); //COMPLETE
 void _string_set_ci(string*, bool);	//COMPLETE
 
+//Clear the string (empty string).
+void _string_clear(string*);
+
 //Append to a string.
 void _string_append_fbytes(string*, byte*); //COMPLETE
 void _string_append_fstring(string*, string*); //COMPLETE
@@ -53,6 +56,12 @@ byte* _string_pull(string*, size_t*); //COMPLETE
 //Get utf8_char array.
 utf8_char* _string_pull_carr(string*, size_t*); //COMPLETE
 
+//Remove a matching substring from within the string.
+bool _string_remove_all_fbytes(string*, byte*);
+bool _string_remove_fbytes(string*, byte*, long);
+bool _string_remove_all(string*, string*);
+bool _string_remove(string*, string*, long);
+
 //Replace a matching substring within the string..
 bool _string_replace_all_fbytes(string*, byte*, byte*);	//COMPLETE
 bool _string_replace_all_fstring(string*, string*, string*); //COMPLETE
@@ -61,7 +70,7 @@ bool _string_replace_fbytes(string*, byte*, byte*, long); //COMPLETE
 bool _string_replace_fstring(string*, string*, string*, long); //COMPLETE
 
 //Get a character at a position.
-bool _string_char_at(string*, long, utf8_char*); //COMPLETE
+utf8_char* _string_char_at(string*, size_t); //COMPLETE
 
 //Get a substring.
 string* _string_substr(string*, long, long); //COMPLETE
@@ -92,6 +101,20 @@ bool _string_compare(string*, string*);
 
 //Create a hash from the string.
 size_t _string_hash(string*);
+
+//String iterators.
+void _string_reset_iterator(string*);
+
+void _string_iterator_rewind(string*);
+
+bool _string_has_next(string*);
+
+utf8_char* _string_get_next(string*);
+
+bool _string_match_regex_fbytes(string*, byte*);
+
+bool _string_match_regex(string*, string*);
+
 
 #ifndef GENLIB_LINK_OBJECT_NCOMP
 

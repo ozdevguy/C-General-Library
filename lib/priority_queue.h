@@ -21,19 +21,10 @@ priority_queue.h
 
 */
 //Include binary heap header
-#ifndef STD_LIBS_CONTAINERS_BINARY_HEAP
-	
-	#include "binary_heap.h"
-
-#endif
+#include "binary_heap.h"
 
 //Include queue header.
-#ifndef STD_LIBS_CONTAINERS_QUEUE
-	
-	#define STD_LIBS_CONTAINERS_QUEUE 1
-	#include "containers/queue/queue.h"
-
-#endif
+#include "queue.h"
 
 //Include the priority queue header.
 #ifndef STD_LIBS_CONTAINERS_PRIORITY_QUEUE

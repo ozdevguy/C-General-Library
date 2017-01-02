@@ -22,11 +22,7 @@ string.h
 */
 
 //Include UTF-8 header.
-#ifndef STD_LIBS_TYPE_UTF8
-	
-	#include "utf8.h"
-
-#endif
+#include "utf8.h"
 
 //Include string header.
 #ifndef STD_LIBS_TYPE_STRING

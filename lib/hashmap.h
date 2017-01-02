@@ -22,5 +22,13 @@ hashmap.h
 */
 
 #include "string.h"
+
 #include "map.h"
-#include "containers/map/hashmap.h"
+
+#ifndef STD_LIBS_CONTAINERS_HASHMAP
+
+	#include "containers/map/hashmap.h"
+	#define STD_LIBS_CONTAINERS_HASHMAP 1
+
+#endif
+	

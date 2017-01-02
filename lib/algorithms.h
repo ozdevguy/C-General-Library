@@ -21,45 +21,17 @@ algorithms.h
 
 */
 
-//Include foundation header.
-#ifndef STD_LIBS_FOUNDATION
-	
-	#define STD_LIBS_FOUNDATION 1
-	#include "foundation.h"
-
-#endif
-
 //Include list header.
-#ifndef STD_LIBS_CONTAINERS_LIST
-	
-	#define STD_LIBS_CONTAINERS_LIST 1
-	#include "containers/list/list.h"
-
-#endif
+#include "list.h"
 
 //Include vector header.
-#ifndef STD_LIBS_CONTAINERS_VECTOR
-
-	#define STD_LIBS_CONTAINERS_VECTOR 1
-	#include "containers/list/vector.h"
-
-#endif
+#include "vector.h"
 
 //Include binary heap header.
-#ifndef STD_LIBS_CONTAINERS_BINARY_HEAP
-	
-	#define STD_LIBS_CONTAINERS_BINARY_HEAP 1
-	#include "containers/heap/binary_heap.h"
-
-#endif
+#include "binary_heap.h"
 
 //Include set header.
-#ifndef STD_LIBS_CONTAINERS_SET
-	
-	#define STD_LIBS_CONTAINERS_SET 1
-	#include "containers/set/set.h"
-
-#endif
+#include "set.h"
 
 //And, finally, include the algorithms headers.
 #ifndef STD_LIBS_ST_ALGORITHMS

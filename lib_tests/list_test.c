@@ -2,15 +2,18 @@
 
 void main(){
 
-	standard_library_context ctx;
+	genlib_context* ctx;
+
+	_lib_init();
+
+	ctx = _ctx_init();
 
 	int a = 1234;
 	int b = 9843;
 	int d = 4343;
 
-	_std_lib_default(&ctx);
 
-	list* myList = _list_new(&ctx, 2);
+	list* myList = _list_new(ctx, 2);
 
 	_list_add(myList, &a);
 	_list_add(myList, &b);
@@ -37,5 +40,6 @@ void main(){
 
 
 	_list_delete(myList);
+	_ctx_delete(ctx);
 
 }

@@ -21,21 +21,11 @@ avl_tree.h
 
 */
 
-//Include foundation header.
-#ifndef STD_LIBS_FOUNDATION
-	
-	#define STD_LIBS_FOUNDATION 1
-	#include "foundation.h"
-
-#endif
-
 //Include the tree header.
-#ifndef STD_LIBS_CONTAINERS_BST
-	
-	#define STD_LIBS_CONTAINERS_BST 1
-	#include "containers/tree/bst.h"
+#include "set.h"
 
-#endif
+//Include bst header.
+#include "binary_search_tree.h"
 
 //Include the list header.
 #ifndef STD_LIBS_CONTAINERS_AVL
