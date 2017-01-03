@@ -23,7 +23,7 @@ json_parser.c
 
 /* INTERNAL OPERATIONS */
 
-json_object* int_json_parse_object(json_obj_parser* parser);
+json_object* int_json_parse_object(json_obj_parser* parser, json_parse_error* error);
 
 
 //Eliminate whitespace before a variable name.
@@ -46,7 +46,7 @@ bool int_json_parse_var_beg_ws(json_obj_parser* parser, json_parse_error* error)
 
 	}
 
-	if(current_char->value != 34){
+	else if(current_char->value != 34){
 
 		error->code = JSON_ERROR_INVALID_SYNTAX;
 		error->line = parser->json_string->iter_pos - 1;
@@ -104,7 +104,17 @@ string* int_json_parse_var_name(json_obj_parser* parser, json_parse_error* error
 
 		error->code = JSON_ERROR_INVALID_NAME;
 		error->line = parser->json_string->iter_pos - 1;
+		_string_delete(var_name);
 		return 0;
+
+	}
+
+	else if(!current_char){
+
+		error->code = JSON_ERROR_STRING_TERMINATED;
+		error->line = parser->json_string->iter_pos - 1;
+		_string_delete(var_name);
+		return false;
 
 	}
 
@@ -131,6 +141,14 @@ bool int_json_parse_check_sep(json_obj_parser* parser, json_parse_error* error){
 	if(!separator_found){
 
 		error->code = JSON_ERROR_INVALID_SEPARATOR;
+		error->line = parser->json_string->iter_pos - 1;
+		return false;
+
+	}
+
+	else if(!current_char){
+
+		error->code = JSON_ERROR_STRING_TERMINATED;
 		error->line = parser->json_string->iter_pos - 1;
 		return false;
 
@@ -185,7 +203,7 @@ uint8_t int_json_parse_var_type(json_obj_parser* parser, json_parse_error* error
 
 }
 
-json_item* int_json_parse_var_type_string(json_obj_parser* parser, json_parse_error* error){
+inline json_item* int_json_parse_var_type_string(json_obj_parser* parser, json_parse_error* error){
 
 	json_item* item;
 	utf8_char* current_char;
@@ -214,6 +232,9 @@ json_item* int_json_parse_var_type_string(json_obj_parser* parser, json_parse_er
 
 		error->code = JSON_ERROR_STRING_TERMINATED;
 		error->line = parser->json_string->iter_pos - 1;
+		_string_delete(value);
+		destroy(parser->ctx, item);
+
 		return 0;
 
 	}
@@ -231,7 +252,7 @@ json_item* int_json_parse_var_type_string(json_obj_parser* parser, json_parse_er
 
 }
 
-json_item* int_json_parse_var_type_scalar(json_obj_parser* parser, json_parse_error* error){
+inline json_item* int_json_parse_var_type_scalar(json_obj_parser* parser, json_parse_error* error){
 
 	size_t s;
 	char* temp;
@@ -297,7 +318,7 @@ json_item* int_json_parse_var_type_scalar(json_obj_parser* parser, json_parse_er
 
 }
 
-json_item* int_json_parse_var_type_bool(json_obj_parser* parser, json_parse_error* error){
+inline json_item* int_json_parse_var_type_bool(json_obj_parser* parser, json_parse_error* error){
 
 	json_item* item;
 	json_allocation alloc;
@@ -308,7 +329,6 @@ json_item* int_json_parse_var_type_bool(json_obj_parser* parser, json_parse_erro
 	size_t fpos;
 
 	item = allocate(parser->ctx, sizeof(json_item));
-
 	_string_set_ci(parser->json_string, true);
 
 	tpos = _string_position_fbytes(parser->json_string, "true", parser->json_string->iter_pos);
@@ -333,6 +353,9 @@ json_item* int_json_parse_var_type_bool(json_obj_parser* parser, json_parse_erro
 
 	if(!valid){
 
+		error->code = JSON_ERROR_INVALID_TYPE;
+		error->line = parser->json_string->iter_pos;
+		destroy(parser->ctx, item);
 		return 0;
 
 	}
@@ -346,7 +369,7 @@ json_item* int_json_parse_var_type_bool(json_obj_parser* parser, json_parse_erro
 
 }
 
-json_item* int_json_parse_var_type_object(json_obj_parser* parser, json_parse_error* error){
+inline json_item* int_json_parse_var_type_object(json_obj_parser* parser, json_parse_error* error){
 
 	json_item* item;
 	json_allocation alloc;
@@ -363,7 +386,7 @@ json_item* int_json_parse_var_type_object(json_obj_parser* parser, json_parse_er
 
 }
 
-json_item* _int_json_parse_var_type_array(json_obj_parser* parser, json_parse_error* error){
+inline json_item* _int_json_parse_var_type_array(json_obj_parser* parser, json_parse_error* error){
 
 	json_item* item;
 	json_allocation alloc;
@@ -472,20 +495,25 @@ uint8_t int_json_parse_check_more(json_obj_parser* parser, json_parse_error* err
 		if(current_char->value == 93)
 			return JSON_END_ARRAY;
 
-		if(current_char->value != 32)
+		if(current_char->value != 32){
+
+			error->code = JSON_ERROR_INVALID_SYNTAX;
+			error->line = parser->json_string->iter_pos - 1;
+
 			return JSON_ERROR;
+
+		}
 
 	}
 }
 
 //Parse/build a JSON array.
-json_array* int_json_parse_array(json_obj_parser* parser){
+json_array* int_json_parse_array(json_obj_parser* parser, json_parse_error* error){
 
 	standard_library_context* ctx;
 	json_array* current_array;
 	json_array* new_array;
 	json_object* new_object;
-	json_parse_error error;
 	json_allocation alloc;
 	bool cont = true;
 
@@ -516,18 +544,20 @@ json_array* int_json_parse_array(json_obj_parser* parser){
 	while(cont){
 
 		//Eliminate whitespace before the next array element.
-		int_json_parse_elim_ws(parser, &error);
+		int_json_parse_elim_ws(parser, error);
 
 		//Get the type of the next array element.
-		type = int_json_parse_var_type(parser, &error);
+		if((type = int_json_parse_var_type(parser, error)) == JSON_TYPE_UNDEFINED)
+			return 0;
 
 		//Get the item.
-		item = int_json_create_item(parser, &error, type);
+		if(!(item = int_json_create_item(parser, error, type)))
+			return 0;
 
 		if(item->type == JSON_TYPE_OBJECT){
 
 			//Next, we need to do a recursive call to parse the embedded object.
-			new_object = int_json_parse_object(parser);
+			new_object = int_json_parse_object(parser, error);
 
 			item->data = new_object;
 
@@ -535,7 +565,7 @@ json_array* int_json_parse_array(json_obj_parser* parser){
 
 		else if(item->type == JSON_TYPE_ARRAY){
 
-			new_array = int_json_parse_array(parser);
+			new_array = int_json_parse_array(parser, error);
 
 			item->data = new_array;
 
@@ -544,7 +574,7 @@ json_array* int_json_parse_array(json_obj_parser* parser){
 		_vector_add(current_array->items, item);
 
 		//Now, check to see if more variables exist in the current object.
-		if((more_exists = int_json_parse_check_more(parser, &error)) != JSON_MORE_EXISTS){
+		if((more_exists = int_json_parse_check_more(parser, error)) != JSON_MORE_EXISTS){
 
 			if(more_exists == JSON_END_ARRAY)
 				cont = false;
@@ -561,13 +591,12 @@ json_array* int_json_parse_array(json_obj_parser* parser){
 }
 
 //Parse/build a JSON object.
-json_object* int_json_parse_object(json_obj_parser* parser){
+json_object* int_json_parse_object(json_obj_parser* parser, json_parse_error* error){
 	
 	standard_library_context* ctx;
 	json_object* current_object;
 	json_object* new_object;
 	json_array* new_array;
-	json_parse_error error;
 	json_allocation alloc;
 
 	//Parse a variable.
@@ -576,8 +605,13 @@ json_object* int_json_parse_object(json_obj_parser* parser){
 	uint8_t more_exists;
 
 	//The first thing we need to do is check to make sure the current string character is an opening curly brace.
-	if(_string_get_next(parser->json_string)->value != 123)
+	if(_string_get_next(parser->json_string)->value != 123){
+
+		error->code = JSON_ERROR_INVALID_SYNTAX;
+		error->line = 0;
 		return 0;
+
+	}
 
 	ctx = parser->ctx;
 
@@ -593,12 +627,17 @@ json_object* int_json_parse_object(json_obj_parser* parser){
 	_vector_add(parser->allocations, &alloc);
 
 	
-	while((item = int_json_parse_variable(parser, &var_name, &error))){
+	while((item = int_json_parse_variable(parser, &var_name, error))){
 
 		if(item->type == JSON_TYPE_OBJECT){
 
 			//Next, we need to do a recursive call to parse the embedded object.
-			new_object = int_json_parse_object(parser);
+			if(!(new_object = int_json_parse_object(parser, error))){
+
+				_string_delete(var_name);
+				return 0;
+
+			}
 
 			item->data = new_object;
 
@@ -606,7 +645,12 @@ json_object* int_json_parse_object(json_obj_parser* parser){
 
 		else if(item->type == JSON_TYPE_ARRAY){
 
-			new_array = int_json_parse_array(parser);
+			if(!(new_array = int_json_parse_array(parser, error))){
+
+				_string_delete(var_name);
+				return 0;
+
+			}
 
 			item->data = new_array;
 
@@ -617,13 +661,28 @@ json_object* int_json_parse_object(json_obj_parser* parser){
 		_string_delete(var_name);
 
 		//Now, check to see if more variables exist in the current object.
-		if((more_exists = int_json_parse_check_more(parser, &error)) != JSON_MORE_EXISTS){
+		if((more_exists = int_json_parse_check_more(parser, error)) != JSON_MORE_EXISTS){
 
-			break;
+			printf("Dat: %d %d\n", more_exists, _string_get_next(parser->json_string)->value);
+
+			if(more_exists == JSON_END_OBJECT)
+				break;
+
+			else{
+
+
+				printf("WTF? %d\n", _string_get_next(parser->json_string)->value);
+				return 0;
+
+			}
+			
 
 		}
 
 	}
+
+	if(!item)
+		return 0;
 
 	current_object->allocations = parser->allocations;
 
@@ -632,7 +691,7 @@ json_object* int_json_parse_object(json_obj_parser* parser){
 }
 
 //Parse a JSON string.
-json_object* _json_parse(standard_library_context* ctx, string* input){
+json_object* _json_parse(standard_library_context* ctx, string* input, json_parse_error* error){
 
 	json_object* json_obj;
 	json_obj_parser* parser;
@@ -657,7 +716,7 @@ json_object* _json_parse(standard_library_context* ctx, string* input){
 	parser->allocations = _vector_new(ctx, sizeof(json_allocation), 10);
 	
 	//Parse!
-	json_obj = int_json_parse_object(parser);
+	json_obj = int_json_parse_object(parser, error);
 
 	//Destroy the parser object.
 	destroy(ctx, parser);
@@ -667,7 +726,7 @@ json_object* _json_parse(standard_library_context* ctx, string* input){
 }
 
 //Parse a JSON string (char/byte array).
-json_object* _json_parse_fbytes(standard_library_context* ctx, byte* input){
+json_object* _json_parse_fbytes(standard_library_context* ctx, byte* input, json_parse_error* error){
 
 	string* new_string;
 	json_object* json_obj;
@@ -676,7 +735,7 @@ json_object* _json_parse_fbytes(standard_library_context* ctx, byte* input){
 		return 0;
 
 	new_string = _string_new_fbytes(ctx, input);
-	json_obj = _json_parse(ctx, new_string);
+	json_obj = _json_parse(ctx, new_string, error);
 	_string_delete(new_string);
 
 	return json_obj;
