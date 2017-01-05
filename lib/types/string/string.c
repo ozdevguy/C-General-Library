@@ -920,7 +920,7 @@ bool _string_has_next(string* str){
 	if(!str)
 		return false;
 
-	if((str->iter_pos + 1) >= (str->length))
+	if(str->iter_pos >= str->length)
 		return false;
 
 	return true;

@@ -305,6 +305,8 @@ inline json_item* int_json_parse_var_type_scalar(json_obj_parser* parser, json_p
 
 	}
 
+	_string_iterator_rewind(parser->json_string);
+
 	destroy(parser->ctx, temp);
 	_string_delete(value);
 
@@ -313,7 +315,6 @@ inline json_item* int_json_parse_var_type_scalar(json_obj_parser* parser, json_p
 	alloc.ptr = item;
 	_vector_add(parser->allocations, &alloc);
 
-	_string_iterator_rewind(parser->json_string);
 	return item;	
 
 }
@@ -541,7 +542,7 @@ json_array* int_json_parse_array(json_obj_parser* parser, json_parse_error* erro
 	_vector_add(parser->allocations, &alloc);
 
 	//Get each element of the array.
-	while(cont){
+	while(1){
 
 		//Eliminate whitespace before the next array element.
 		int_json_parse_elim_ws(parser, error);
@@ -574,15 +575,19 @@ json_array* int_json_parse_array(json_obj_parser* parser, json_parse_error* erro
 		_vector_add(current_array->items, item);
 
 		//Now, check to see if more variables exist in the current object.
-		if((more_exists = int_json_parse_check_more(parser, error)) != JSON_MORE_EXISTS){
+		more_exists = int_json_parse_check_more(parser, error);
 
-			if(more_exists == JSON_END_ARRAY)
-				cont = false;
+		if(more_exists == JSON_END_ARRAY)
+			break;
 
-			else
-				return 0;
+		else if(more_exists != JSON_MORE_EXISTS){
+
+			error->code = JSON_ERROR_INVALID_SYNTAX;
+			error->line = parser->json_string->iter_pos - 1;
+			return 0;
 
 		}
+
 
 	}
 
@@ -661,21 +666,17 @@ json_object* int_json_parse_object(json_obj_parser* parser, json_parse_error* er
 		_string_delete(var_name);
 
 		//Now, check to see if more variables exist in the current object.
-		if((more_exists = int_json_parse_check_more(parser, error)) != JSON_MORE_EXISTS){
+		more_exists = int_json_parse_check_more(parser, error);
 
-			printf("Dat: %d %d\n", more_exists, _string_get_next(parser->json_string)->value);
+		if(more_exists == JSON_END_OBJECT)
+			break;
+		
 
-			if(more_exists == JSON_END_OBJECT)
-				break;
+		else if(more_exists != JSON_MORE_EXISTS){
 
-			else{
-
-
-				printf("WTF? %d\n", _string_get_next(parser->json_string)->value);
-				return 0;
-
-			}
-			
+			error->code = JSON_ERROR_INVALID_SYNTAX;
+			error->line = parser->json_string->iter_pos - 1;
+			return 0;
 
 		}
 
