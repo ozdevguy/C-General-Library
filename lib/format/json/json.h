@@ -22,4 +22,5 @@ json.h
 */
 
 #include "json_structs.c"
+#include "json.c"
 #include "json_parser.c"
