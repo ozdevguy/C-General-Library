@@ -272,8 +272,11 @@ inline json_item* int_json_parse_var_type_scalar(json_obj_parser* parser, json_p
 
 	while((current_char = _string_get_next(parser->json_string))){
 
-		if(current_char->value == 46)
+		if(current_char->value == 46 && !is_float)
 			is_float = true;
+
+		else if(current_char->value == 46)
+			break;
 
 		if((current_char->value > 47 && current_char->value < 58) || current_char->value == 46)
 			_string_append_fchar(value, current_char);
