@@ -38,6 +38,9 @@ void _string_set_ci(string*, bool);	//COMPLETE
 //Clear the string (empty string).
 void _string_clear(string*);
 
+//Copy a string from one object to another.
+void _string_copy(string*, string*);
+
 //Append to a string.
 void _string_append_fbytes(string*, byte*); //COMPLETE
 void _string_append_fstring(string*, string*); //COMPLETE

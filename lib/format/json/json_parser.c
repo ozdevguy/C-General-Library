@@ -114,7 +114,7 @@ string* int_json_parse_var_name(json_obj_parser* parser, json_parse_error* error
 		error->code = JSON_ERROR_STRING_TERMINATED;
 		error->line = parser->json_string->iter_pos - 1;
 		_string_delete(var_name);
-		return false;
+		return 0;
 
 	}
 
@@ -208,12 +208,10 @@ inline json_item* int_json_parse_var_type_string(json_obj_parser* parser, json_p
 	json_item* item;
 	utf8_char* current_char;
 	string* value;
-	json_allocation alloc;
 
 	current_char = _string_get_next(parser->json_string);
-	value = _string_new(parser->ctx);
 
-	item = allocate(parser->ctx, sizeof(json_item));
+	value = _string_new(parser->ctx);
 
 	while((current_char = _string_get_next(parser->json_string))){
 
@@ -233,20 +231,15 @@ inline json_item* int_json_parse_var_type_string(json_obj_parser* parser, json_p
 		error->code = JSON_ERROR_STRING_TERMINATED;
 		error->line = parser->json_string->iter_pos - 1;
 		_string_delete(value);
-		destroy(parser->ctx, item);
 
 		return 0;
 
 	}
 
+	item = allocate(parser->ctx, sizeof(json_item));
 	item->ctx = parser->ctx;
 	item->type = JSON_TYPE_STRING;
 	item->data = value;
-
-	//Lastly, add this newly allocated item to the allocation vector.
-	alloc.type = JSON_ITEM;
-	alloc.ptr = item;
-	_vector_add(parser->allocations, &alloc);
 
 	return item;
 
@@ -262,13 +255,18 @@ inline json_item* int_json_parse_var_type_scalar(json_obj_parser* parser, json_p
 	json_item* item;
 	utf8_char* current_char;
 	string* value;
-	json_allocation alloc;
 
 	bool is_float = false;
 	bool invalid_char = false;
 
 	value = _string_new(parser->ctx);
-	item = allocate(parser->ctx, sizeof(json_item));
+
+	current_char = _string_get_next(parser->json_string);
+
+	if(current_char->value == 45)
+		_string_append_fbytes(value, "-");
+	else
+		_string_iterator_rewind(parser->json_string);
 
 	while((current_char = _string_get_next(parser->json_string))){
 
@@ -287,6 +285,18 @@ inline json_item* int_json_parse_var_type_scalar(json_obj_parser* parser, json_p
 	}
 
 	temp = _string_pull(value, &s);
+	_string_delete(value);
+
+	if(!current_char){
+
+		error->code = JSON_ERROR_STRING_TERMINATED;
+		error->line = parser->json_string->iter_pos - 1;
+		destroy(parser->ctx, temp);
+		return 0;
+
+	}
+
+	item = allocate(parser->ctx, sizeof(json_item));
 
 	//Parse a new floating point number.
 	if(is_float){
@@ -308,15 +318,8 @@ inline json_item* int_json_parse_var_type_scalar(json_obj_parser* parser, json_p
 
 	}
 
-	_string_iterator_rewind(parser->json_string);
-
 	destroy(parser->ctx, temp);
-	_string_delete(value);
-
-	//Lastly, add this newly allocated item to the allocation vector.
-	alloc.type = JSON_ITEM;
-	alloc.ptr = item;
-	_vector_add(parser->allocations, &alloc);
+	_string_iterator_rewind(parser->json_string);
 
 	return item;	
 
@@ -325,7 +328,6 @@ inline json_item* int_json_parse_var_type_scalar(json_obj_parser* parser, json_p
 inline json_item* int_json_parse_var_type_bool(json_obj_parser* parser, json_parse_error* error){
 
 	json_item* item;
-	json_allocation alloc;
 	utf8_char* current_char;
 
 	bool valid = false;
@@ -333,6 +335,8 @@ inline json_item* int_json_parse_var_type_bool(json_obj_parser* parser, json_par
 	size_t fpos;
 
 	item = allocate(parser->ctx, sizeof(json_item));
+	item->type = JSON_TYPE_BOOL;
+
 	_string_set_ci(parser->json_string, true);
 
 	tpos = _string_position_fbytes(parser->json_string, "true", parser->json_string->iter_pos);
@@ -364,11 +368,6 @@ inline json_item* int_json_parse_var_type_bool(json_obj_parser* parser, json_par
 
 	}
 
-	item->type = JSON_TYPE_BOOL;
-	alloc.type = JSON_ITEM;
-	alloc.ptr = item;
-	_vector_add(parser->allocations, &alloc);
-
 	return item;
 
 }
@@ -376,15 +375,9 @@ inline json_item* int_json_parse_var_type_bool(json_obj_parser* parser, json_par
 inline json_item* int_json_parse_var_type_object(json_obj_parser* parser, json_parse_error* error){
 
 	json_item* item;
-	json_allocation alloc;
 
 	item = allocate(parser->ctx, sizeof(json_item));
 	item->type = JSON_TYPE_OBJECT;
-
-	//Add this newly allocated item to the allocation vector.
-	alloc.type = JSON_ITEM;
-	alloc.ptr = item;
-	_vector_add(parser->allocations, &alloc);
 
 	return item;
 
@@ -393,15 +386,9 @@ inline json_item* int_json_parse_var_type_object(json_obj_parser* parser, json_p
 inline json_item* _int_json_parse_var_type_array(json_obj_parser* parser, json_parse_error* error){
 
 	json_item* item;
-	json_allocation alloc;
 
 	item = allocate(parser->ctx, sizeof(json_item));
 	item->type = JSON_TYPE_ARRAY;
-
-	//Add this newly allocated item to the allocation vector.
-	alloc.type = JSON_ITEM;
-	alloc.ptr = item;
-	_vector_add(parser->allocations, &alloc);
 
 	return item;
 
@@ -518,7 +505,6 @@ json_array* int_json_parse_array(json_obj_parser* parser, json_parse_error* erro
 	json_array* current_array;
 	json_array* new_array;
 	json_object* new_object;
-	json_allocation alloc;
 	bool cont = true;
 
 	//Parse an item.
@@ -537,13 +523,6 @@ json_array* int_json_parse_array(json_obj_parser* parser, json_parse_error* erro
 	current_array->ctx = ctx;
 	current_array->items = _vector_new(ctx, sizeof(json_item), 2);
 
-	//Create an allocation record for this array.
-	alloc.type = JSON_ARRAY;
-	alloc.ptr = current_array;
-
-	//Add this array to the allocations vector.
-	_vector_add(parser->allocations, &alloc);
-
 	//Get each element of the array.
 	while(1){
 
@@ -551,17 +530,31 @@ json_array* int_json_parse_array(json_obj_parser* parser, json_parse_error* erro
 		int_json_parse_elim_ws(parser, error);
 
 		//Get the type of the next array element.
-		if((type = int_json_parse_var_type(parser, error)) == JSON_TYPE_UNDEFINED)
+		if((type = int_json_parse_var_type(parser, error)) == JSON_TYPE_UNDEFINED){
+
+			_json_array_delete(current_array);
 			return 0;
 
+		}
+
 		//Get the item.
-		if(!(item = int_json_create_item(parser, error, type)))
+		if(!(item = int_json_create_item(parser, error, type))){
+
+			_json_array_delete(current_array);
 			return 0;
+
+		}
 
 		if(item->type == JSON_TYPE_OBJECT){
 
 			//Next, we need to do a recursive call to parse the embedded object.
-			new_object = int_json_parse_object(parser, error);
+			if(!(new_object = int_json_parse_object(parser, error))){
+
+				destroy(ctx, item);
+				_json_array_delete(current_array);
+				return 0;
+
+			}
 
 			item->data = new_object;
 
@@ -569,13 +562,21 @@ json_array* int_json_parse_array(json_obj_parser* parser, json_parse_error* erro
 
 		else if(item->type == JSON_TYPE_ARRAY){
 
-			new_array = int_json_parse_array(parser, error);
+			if(!(new_array = int_json_parse_array(parser, error))){
+
+				destroy(ctx, item);
+				_json_array_delete(current_array);
+				return 0;
+
+			}
 
 			item->data = new_array;
 
 		}
 
 		_vector_add(current_array->items, item);
+
+		destroy(ctx, item);
 
 		//Now, check to see if more variables exist in the current object.
 		more_exists = int_json_parse_check_more(parser, error);
@@ -587,6 +588,7 @@ json_array* int_json_parse_array(json_obj_parser* parser, json_parse_error* erro
 
 			error->code = JSON_ERROR_INVALID_SYNTAX;
 			error->line = parser->json_string->iter_pos - 1;
+			_json_array_delete(current_array);
 			return 0;
 
 		}
@@ -605,7 +607,6 @@ json_object* int_json_parse_object(json_obj_parser* parser, json_parse_error* er
 	json_object* current_object;
 	json_object* new_object;
 	json_array* new_array;
-	json_allocation alloc;
 
 	//Parse a variable.
 	string* var_name;
@@ -628,12 +629,6 @@ json_object* int_json_parse_object(json_obj_parser* parser, json_parse_error* er
 	current_object->ctx = ctx;
 	current_object->table = _hashmap_new(ctx, 10);
 
-	alloc.type = JSON_OBJECT;
-	alloc.ptr = current_object;
-
-	//Add this object to the allocations vector.
-	_vector_add(parser->allocations, &alloc);
-
 	
 	while((item = int_json_parse_variable(parser, &var_name, error))){
 
@@ -642,7 +637,9 @@ json_object* int_json_parse_object(json_obj_parser* parser, json_parse_error* er
 			//Next, we need to do a recursive call to parse the embedded object.
 			if(!(new_object = int_json_parse_object(parser, error))){
 
+				destroy(ctx, item);
 				_string_delete(var_name);
+				_json_object_delete(current_object);
 				return 0;
 
 			}
@@ -653,12 +650,14 @@ json_object* int_json_parse_object(json_obj_parser* parser, json_parse_error* er
 
 		else if(item->type == JSON_TYPE_ARRAY){
 
-			if(!(new_array = int_json_parse_array(parser, error))){
+			if(!(new_array = int_json_parse_array(parser, error)))	{
 
+				destroy(ctx, item);
 				_string_delete(var_name);
+				_json_object_delete(current_object);
 				return 0;
 
-			}
+			}			
 
 			item->data = new_array;
 
@@ -679,23 +678,26 @@ json_object* int_json_parse_object(json_obj_parser* parser, json_parse_error* er
 
 			error->code = JSON_ERROR_INVALID_SYNTAX;
 			error->line = parser->json_string->iter_pos - 1;
+			_json_object_delete(current_object);
 			return 0;
 
 		}
 
 	}
 
-	if(!item)
+	if(!item){
+
+		_json_object_delete(current_object);
 		return 0;
 
-	current_object->allocations = parser->allocations;
+	}
 
 	return current_object;
 
 }
 
 //Parse a JSON string.
-json_object* _json_parse(standard_library_context* ctx, string* input, json_parse_error* error){
+json_object* _json_build(standard_library_context* ctx, string* input, json_parse_error* error){
 
 	json_object* json_obj;
 	json_obj_parser* parser;
@@ -717,7 +719,6 @@ json_object* _json_parse(standard_library_context* ctx, string* input, json_pars
 	parser = allocate(ctx, sizeof(json_obj_parser));
 	parser->ctx = ctx;
 	parser->json_string = input;
-	parser->allocations = _vector_new(ctx, sizeof(json_allocation), 10);
 	
 	//Parse!
 	json_obj = int_json_parse_object(parser, error);
@@ -730,7 +731,7 @@ json_object* _json_parse(standard_library_context* ctx, string* input, json_pars
 }
 
 //Parse a JSON string (char/byte array).
-json_object* _json_parse_fbytes(standard_library_context* ctx, byte* input, json_parse_error* error){
+json_object* _json_build_fbytes(standard_library_context* ctx, byte* input, json_parse_error* error){
 
 	string* new_string;
 	json_object* json_obj;
@@ -739,7 +740,7 @@ json_object* _json_parse_fbytes(standard_library_context* ctx, byte* input, json
 		return 0;
 
 	new_string = _string_new_fbytes(ctx, input);
-	json_obj = _json_parse(ctx, new_string, error);
+	json_obj = _json_build(ctx, new_string, error);
 	_string_delete(new_string);
 
 	return json_obj;

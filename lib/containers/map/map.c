@@ -363,6 +363,9 @@ bool _map_has_next(map* mp){
 	if(!mp)
 		return false;
 
+	if(!mp->total)
+		return false;
+
 	if(mp->iter_tbl < mp->size)
 		return true;
 

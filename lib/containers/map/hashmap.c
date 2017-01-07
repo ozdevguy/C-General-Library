@@ -58,6 +58,9 @@ void _hashmap_delete(map* hashmap){
 	map_entry* entry;
 	hashmap_entry* hm_entry;
 
+	if(!hashmap)
+		return;
+	
 	_map_reset_iterator(hashmap);
 
 	while(_map_has_next(hashmap)){

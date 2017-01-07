@@ -165,12 +165,19 @@ void _string_set_ci(string* str, bool value){
 //Clear the string (empty string).
 void _string_clear(string* str){
 
+	size_t i, byte_size;
+	byte* data;
+
 	if(!str)
 		return;
 
 	str->length = 0;
-	str->size = 0;
-	destroy(str->ctx, str->data);
+	
+	byte_size = str->size * sizeof(utf8_char);
+	data = (byte*)str->data;
+
+	for(i = 0; i < byte_size; i++)
+		data[i] = 0;
 
 }
 
