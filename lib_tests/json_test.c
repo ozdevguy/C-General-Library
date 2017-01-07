@@ -58,6 +58,9 @@ void main(){
 
 	json_object* obj = _json_build_fbytes(ctx, js, &error);
 
+	_json_add_int_fbytes(obj, "intVariable", 23);
+	
+
 	if(!obj){
 
 		printf("Error!\n");

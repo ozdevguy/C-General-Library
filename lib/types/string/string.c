@@ -181,6 +181,18 @@ void _string_clear(string* str){
 
 }
 
+//Copy string from source to destination.
+void _string_copy(string* dest, string* src){
+
+	if(!dest || !src)
+		return;
+
+	_string_clear(dest);
+
+	_string_append_fstring(dest, src);
+
+}
+
 bool _string_remove_all(string* str, string* pattern){
 
 	string* new_string;

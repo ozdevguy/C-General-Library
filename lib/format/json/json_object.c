@@ -15,7 +15,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 
-json_parser.c
+json_object.c
 ========================================================================
 
 
@@ -38,6 +38,27 @@ json_item* int_json_retrieve_item(map* table, string* var_name, uint8_t* error){
 	printf("Item: %p\n", item);
 
 	return item;
+
+}
+
+bool int_json_destroy_currrent_data(standard_library_context* ctx, json_item* item){
+
+	if(item->type == JSON_TYPE_STRING)
+		_string_delete(item->data);
+
+	else if(item->type == JSON_TYPE_ARRAY)
+		_json_array_delete(item->data);
+
+	else if(item->type == JSON_TYPE_OBJECT)
+		_json_object_delete(item->data);
+
+	else if(item->type != JSON_TYPE_BOOL)
+		destroy(ctx, item->data);
+
+	else
+		return false;
+
+	return true;
 
 }
 
@@ -107,7 +128,7 @@ bool _json_add_int(json_object* obj, string* name, long value){
 		return false;
 
 	item = allocate(obj->ctx, sizeof(item));
-	item->type = JSON_TYPE_FLOAT;
+	item->type = JSON_TYPE_INT;
 	item->data = allocate(obj->ctx, sizeof(long));
 	data = item->data;
 	*data = value;
@@ -137,7 +158,6 @@ bool _json_add_int_fbytes(json_object* obj, byte* name, long value){
 bool _json_add_bool(json_object* obj, string* name, bool value){
 
 	json_item* item;
-	size_t** data;
 
 	if(!obj)
 		return false;
@@ -146,7 +166,7 @@ bool _json_add_bool(json_object* obj, string* name, bool value){
 		return false;
 
 	item = allocate(obj->ctx, sizeof(item));
-	item->type = JSON_TYPE_FLOAT;
+	item->type = JSON_TYPE_BOOL;
 	item->data = (void*)(size_t)value;
 
 	return true;
@@ -166,16 +186,163 @@ bool _json_add_bool_fbytes(json_object* obj, byte* name, bool value){
 	_string_delete(str);
 
 	return result;
-	
+
+}
+
+//Add a string to a json object.
+bool _json_add_string(json_object* obj, string* name, string* value){
+
+	json_item* item;
+	string* str;
+
+	if(!obj || !name || !value)
+		return false;
+
+	if(_hashmap_lookup(obj->table, name))
+		return false;
+
+	item = allocate(obj->ctx, sizeof(item));
+	item->type = JSON_TYPE_STRING;
+	item->data = _string_new(obj->ctx);
+
+	str = item->data;
+	_string_copy(str, value);
+
+	return true;
+
+}
+
+bool _json_add_string_fbytes(json_object* obj, byte* name, string* value){
+
+	string* str;
+	bool result;
+
+	if(!obj || !name || !value)
+		return false;
+
+	str = _string_new_fbytes(obj->ctx, name);
+	result = _json_add_string(obj, str, value);
+	_string_delete(str);
+
+	return result;
+
+}
+
+//Add an array to a json object.
+bool _json_add_array(json_object* obj, string* name, json_array* value){
+
+	json_item* item;
+
+	if(!obj || !name || !value)
+		return false;
+
+	if(_hashmap_lookup(obj->table, name))
+		return false;
+
+	item = allocate(obj->ctx, sizeof(item));
+	item->type = JSON_TYPE_ARRAY;
+	item->data = value;
+
+	return true;
+
+}
+
+bool _json_add_array_fbytes(json_object* obj, byte* name, json_array* value){
+
+	string* str;
+	bool result;
+
+	if(!obj || !name || !value)
+		return false;
+
+	str = _string_new_fbytes(obj->ctx, name);
+	result = _json_add_array(obj, str, value);
+	_string_delete(str);
+
+	return result;
+
+}
+
+//Add an object to a json object.
+bool _json_add_object(json_object* obj, string* name, json_object* object){
+
+	json_item* item;
+
+	if(!obj || !name || !object)
+		return false;
+
+	if(_hashmap_lookup(obj->table, name))
+		return false;
+
+	item = allocate(obj->ctx, sizeof(item));
+	item->type = JSON_TYPE_OBJECT;
+	item->data = object;
+
+	return true;
+
+}
+
+bool _json_add_object_fbytes(json_object* obj, byte* name, json_object* object){
+
+	string* str;
+	bool result;
+
+	if(!obj || !name || !object)
+		return false;
+
+	str = _string_new_fbytes(obj->ctx, name);
+	result = _json_add_object(obj, str, object);
+	_string_delete(str);
+
+	return result;
+
+}
+
+//Remove an item from the json object.
+bool _json_remove(json_object* obj, string* name){
+
+	json_item* item;
+
+	if(!obj || !name)
+		return false;
+
+	if(!(item = _hashmap_lookup(obj->table, name)))
+		return false;
+
+	if(!int_json_destroy_currrent_data(obj->ctx, item))
+		return false;
+
+	destroy(obj->ctx, item);
+
+	_hashmap_remove(obj->table, name);
+
+	return true;
+
+}
+
+bool _json_remove_fbytes(json_object* obj, byte* name){
+
+	string* str;
+	bool result;
+
+	if(!obj || !name)
+		return false;
+
+	str = _string_new_fbytes(obj->ctx, name);
+	result = _json_remove(obj, str);
+	_string_delete(str);
+
+	return result;
+
 }
 
 //Check to see if a variable exists.
-bool _json_exists(json_object* obj, string* var_name){
+bool _json_exists(json_object* obj, string* name){
 
-	if(!obj || !var_name)
+	if(!obj || !name)
 		return false;
 
-	if(_hashmap_lookup(obj->table, var_name))
+	if(_hashmap_lookup(obj->table, name))
 		return true;
 
 	return false;
@@ -305,7 +472,7 @@ long _json_get_int(json_object* obj, string* var_name, uint8_t* error){
 
 }
 
-long _jsonn_get_int_fbytes(json_object* obj, byte* var_name, uint8_t* error){
+long _json_get_int_fbytes(json_object* obj, byte* var_name, uint8_t* error){
 
 	string* str;
 	long result;
@@ -525,37 +692,234 @@ json_object* _json_get_object_fbytes(json_object* obj, byte* var_name, uint8_t* 
 
 }
 
-void _json_array_delete(json_array* array){
+//Set a value to a floating point number.
+bool _json_set_float(json_object* obj, string* name, double value){
 
-	json_item* current_item;
+	json_item* item;
+	double* ptr;
 
-	if(!array)
-		return;
+	if(!obj || !name )
+		return false;
 
-	//First, we need to iterate through the array's vector.
-	_vector_reset_iterator(array->items);
+	if(!(item = _hashmap_lookup(obj->table, name)))
+		return false;
 
-	while(_vector_has_next(array->items)){
+	if(!int_json_destroy_currrent_data(obj->ctx, item))
+		return false;
 
-		current_item = _vector_get_next(array->items);
+	item->type = JSON_TYPE_FLOAT;
+	item->data = allocate(obj->ctx, sizeof(double));
+	ptr = item->data;
+	*ptr = value;
 
-		if(current_item->type == JSON_TYPE_OBJECT)
-			_json_object_delete(current_item->data);
+	return true;
 
-		else if(current_item->type == JSON_TYPE_ARRAY)
-			_json_array_delete(current_item->data);
+}
 
-		else if(current_item->type == JSON_TYPE_STRING)
-			_string_delete(current_item->data);
+bool _json_set_float_fbytes(json_object* obj, byte* name, double value){
 
-		else if(current_item->type != JSON_TYPE_BOOL)
-			destroy(array->ctx, current_item->data);
+	string* str;
+	bool result;
 
-	}
+	if(!obj || !name )
+		return false;
 
-	//Now, delete the array containers.
-	_vector_delete(array->items);
-	destroy(array->ctx, array);
+	str = _string_new_fbytes(obj->ctx, name);
+	result = _json_set_float(obj, str, value);
+	_string_delete(str);
+
+	return result;
+
+}
+
+//Set a value to an integer.
+bool _json_set_int(json_object* obj, string* name, long value){
+
+	json_item* item;
+	long* ptr;
+
+	if(!obj || !name )
+		return false;
+
+	if(!(item = _hashmap_lookup(obj->table, name)))
+		return false;
+
+	if(!int_json_destroy_currrent_data(obj->ctx, item))
+		return false;
+
+	item->type = JSON_TYPE_INT;
+	item->data = allocate(obj->ctx, sizeof(long));
+	ptr = item->data;
+	*ptr = value;
+
+	return true;
+
+}
+
+bool _json_set_int_fbytes(json_object* obj, byte* name, long value){
+
+	string* str;
+	bool result;
+
+	if(!obj || !name )
+		return false;
+
+	str = _string_new_fbytes(obj->ctx, name);
+	result = _json_set_int(obj, str, value);
+	_string_delete(str);
+
+	return result;
+	
+}
+
+//Set a value to a bool.
+bool _json_set_bool(json_object* obj, string* name, bool value){
+
+	json_item* item;
+
+	if(!obj || !name )
+		return false;
+
+	if(!(item = _hashmap_lookup(obj->table, name)))
+		return false;
+
+	if(!int_json_destroy_currrent_data(obj->ctx, item))
+		return false;
+
+	item->type = JSON_TYPE_BOOL;
+	item->data = (void*)(size_t)value;
+
+	return true;
+
+}
+
+bool _json_set_bool_fbytes(json_object* obj, byte* name, bool value){
+
+	string* str;
+	bool result;
+
+	if(!obj || !name )
+		return false;
+
+	str = _string_new_fbytes(obj->ctx, name);
+	result = _json_set_bool(obj, str, value);
+	_string_delete(str);
+
+	return result;
+	
+}
+
+//Set a value to a string.
+bool _json_set_string(json_object* obj, string* name, string* value){
+
+	json_item* item;
+	string* ptr;
+
+	if(!obj || !name )
+		return false;
+
+	if(!(item = _hashmap_lookup(obj->table, name)))
+		return false;
+
+	if(!int_json_destroy_currrent_data(obj->ctx, item))
+		return false;
+
+	item->type = JSON_TYPE_STRING;
+	item->data = _string_new(obj->ctx);
+	_string_copy(item->data, value);
+
+	return true;
+
+}
+
+bool _json_set_string_fbytes(json_object* obj, byte* name, string* value){
+
+	string* str;
+	bool result;
+
+	if(!obj || !name )
+		return false;
+
+	str = _string_new_fbytes(obj->ctx, name);
+	result = _json_set_string(obj, str, value);
+	_string_delete(str);
+
+	return result;
+	
+}
+
+//Set a value to an object.
+bool _json_set_object(json_object* obj, string* name, json_object* object){
+
+	json_item* item;
+
+	if(!obj || !name )
+		return false;
+
+	if(!(item = _hashmap_lookup(obj->table, name)))
+		return false;
+
+	if(!int_json_destroy_currrent_data(obj->ctx, item))
+		return false;
+
+	item->type = JSON_TYPE_OBJECT;
+	item->data = object;
+
+	return true;
+
+}
+
+bool _json_set_object_fbytes(json_object* obj, byte* name, json_object* object){
+
+	string* str;
+	bool result;
+
+	if(!obj || !name )
+		return false;
+
+	str = _string_new_fbytes(obj->ctx, name);
+	result = _json_set_object(obj, str, object);
+	_string_delete(str);
+
+	return result;
+	
+}
+
+//Set a value to an integer.
+bool _json_set_array(json_object* obj, string* name, json_array* arr){
+
+	json_item* item;
+
+	if(!obj || !name )
+		return false;
+
+	if(!(item = _hashmap_lookup(obj->table, name)))
+		return false;
+
+	if(!int_json_destroy_currrent_data(obj->ctx, item))
+		return false;
+
+	item->type = JSON_TYPE_ARRAY;
+	item->data = arr;
+
+	return true;
+
+}
+
+bool _json_set_array_fbytes(json_object* obj, byte* name, json_array* array){
+
+	string* str;
+	bool result;
+
+	if(!obj || !name )
+		return false;
+
+	str = _string_new_fbytes(obj->ctx, name);
+	result = _json_set_array(obj, str, array);
+	_string_delete(str);
+
+	return result;
+	
 }
 
 //Delete an entire JSON object.

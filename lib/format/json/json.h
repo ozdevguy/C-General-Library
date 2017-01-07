@@ -59,105 +59,105 @@ bool _json_add_bool(json_object*, string*, bool); //FINISHED
 bool _json_add_bool_fbytes(json_object*, byte*, bool); //FINISHED
 
 //Add a string to a json object.
-bool _json_add_string(json_object*, string*, string*);
+bool _json_add_string(json_object*, string*, string*); //FINISHED
 
-bool _json_add_string_fbytes(json_object*, byte*, string*);
+bool _json_add_string_fbytes(json_object*, byte*, string*); //FINISHED
 
 //Add an array to a json object.
-bool _json_add_array(json_object*, string*, json_array*);
+bool _json_add_array(json_object*, string*, json_array*); //FINISHED
 
-bool _json_add_array_fbytes(json_object*, byte*, json_array*);
+bool _json_add_array_fbytes(json_object*, byte*, json_array*); //FINISHED
 
 //Add an object to a json object.
-bool _json_add_object(json_object*, string*, json_object*);
+bool _json_add_object(json_object*, string*, json_object*); //FINISHED
 
-bool _json_add_object_fbytes(json_object*, byte*, json_object*);
+bool _json_add_object_fbytes(json_object*, byte*, json_object*); //FINISHED
 
 //Remove a variable from the JSON object.
-bool _json_remove(json_object*, string*);
+bool _json_remove(json_object*, string*); //FINISHED
 
-bool _json_remove_fbytes(json_object*, byte*);
+bool _json_remove_fbytes(json_object*, byte*); //FINISHED
 
 //Check to see if a variable exists.
-bool _json_exists(json_object*, string*);
+bool _json_exists(json_object*, string*); //FINISHED
 
-bool _json_exists_fbytes(json_object*, byte*);
+bool _json_exists_fbytes(json_object*, byte*); //FINISHED.
 
 //Get the type of a variable.
-uint8_t _json_get_type(json_object*, string*);
-
-uint8_t _json_get_type_fbytes(json_object*, byte*);
+uint8_t _json_get_type(json_object*, string*); //FINISHED.
+ 
+uint8_t _json_get_type_fbytes(json_object*, byte*); //FINISHED.
 
 //Get a floating point value.
-double _json_get_float(json_object*, string*, uint8_t*);
+double _json_get_float(json_object*, string*, uint8_t*); //FINISHED.
 
-double _json_get_float_fbytes(json_object*, byte*, uint8_t*);
+double _json_get_float_fbytes(json_object*, byte*, uint8_t*); //FINISHED.
 
 //Get an integer value.
-long _json_get_int(json_object*, string*, uint8_t*);
+long _json_get_int(json_object*, string*, uint8_t*); //FINISHED
 
-long _json_get_int_fbytes(json_object*, byte*, uint8_t*);
+long _json_get_int_fbytes(json_object*, byte*, uint8_t*); //FINISHED
 
 //Get a string object.
-string* _json_get_string(json_object*, string*, uint8_t*);
+string* _json_get_string(json_object*, string*, uint8_t*); //FINISHED
 
-string* _json_get_string_fbytes(json_object*, byte*, uint8_t*);
+string* _json_get_string_fbytes(json_object*, byte*, uint8_t*); //FINISHED
 
 //Get a boolean value.
-bool _json_get_bool(json_object*, string*, uint8_t*);
+bool _json_get_bool(json_object*, string*, uint8_t*); //FINISHED
 
-bool _json_get_bool_fbytes(json_object*, byte*, uint8_t*);
+bool _json_get_bool_fbytes(json_object*, byte*, uint8_t*); //FINISHED
 
 //Get an array object.
-json_array* _json_get_array(json_object*, string*, uint8_t*);
+json_array* _json_get_array(json_object*, string*, uint8_t*); //FINISHED
 
-json_array* _json_get_array_fbytes(json_object*, byte*, uint8_t*);
+json_array* _json_get_array_fbytes(json_object*, byte*, uint8_t*); //FINISHED
 
 //Get an object.
-json_object* _json_get_object(json_object*, string*, uint8_t*);
+json_object* _json_get_object(json_object*, string*, uint8_t*); //FINISHED
 
-json_object* _json_get_object_fbytes(json_object*, byte*, uint8_t*);
+json_object* _json_get_object_fbytes(json_object*, byte*, uint8_t*); //FINISHED
 
 //Set a value to a floating point number.
-bool _json_set_float(json_object*, string*, double);
+bool _json_set_float(json_object*, string*, double); //FINISHED
 
-bool _json_set_float_fbytes(json_object*, byte*, double);
+bool _json_set_float_fbytes(json_object*, byte*, double); //FINISHED
 
 //Set a value to an integer.
-bool _json_set_int(json_object*, string*, long);
+bool _json_set_int(json_object*, string*, long); //FINISHED
 
-bool _json_set_int_fbytes(json_object*, byte*, long);
+bool _json_set_int_fbytes(json_object*, byte*, long); //FINISHED
 
 //Set a value to a bool.
-bool _json_set_bool(json_object*, string*, bool);
+bool _json_set_bool(json_object*, string*, bool); //FINISHED
 
-bool _json_set_bool_fbytes(json_object*, byte*, bool);
+bool _json_set_bool_fbytes(json_object*, byte*, bool); //FINISHED
 
 //Set a value to a string.
-bool _json_set_string(json_object*, string*, string*);
+bool _json_set_string(json_object*, string*, string*); //FINISHED
 
-bool _json_set_string_fbytes(json_object*, byte*, string*);
+bool _json_set_string_fbytes(json_object*, byte*, string*); //FINISHED
 
 //Set a value to an object.
-bool _json_set_object(json_object*, string*, json_object*);
+bool _json_set_object(json_object*, string*, json_object*); //FINISHED
 
-bool _json_set_object_fbytes(json_object*, byte*, json_object*);
+bool _json_set_object_fbytes(json_object*, byte*, json_object*); //FINISHED
 
-//Set a value to an array.
-bool _json_set_array(json_object*, string*, json_array*);
+//Set a value to an array. 
+bool _json_set_array(json_object*, string*, json_array*); //FINISHED
 
-bool _json_set_array_fbytes(json_object*, byte*, json_array*);
+bool _json_set_array_fbytes(json_object*, byte*, json_array*); //FINISHED
 
 //Pull a JSON string from an object.
 string* _json_pull(json_object*);
 
 //Delete an object in memory.
-void _json_object_delete(json_object*);
+void _json_object_delete(json_object*); //FINISHED
 
 /* JSON ARRAY */
 
 //Create a new JSON array.
-json_array* _json_array_new(standard_library_context*);
+json_array* _json_array_new(standard_library_context*); //FINISHED
 
 //Add a float to a JSON array.
 bool _json_array_add_float(json_array*, double);
@@ -236,5 +236,6 @@ void _json_array_delete(json_array*);
 
 
 #include "json_structs.c"
-#include "json.c"
+#include "json_object.c"
+#include "json_array.c"
 #include "json_parser.c"
