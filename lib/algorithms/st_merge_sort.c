@@ -83,13 +83,13 @@ static void int_mergesort_merge_vect_asc(mergesort_vect_description* desc, size_
 			if(left[j].value < right[k].value){
 
 				_vector_set(vect, i, left[j].copy);
-				destroy(vect->ctx, left[j++].copy);
+				destroy(vect->ctx, (void**)&left[j++].copy);
 
 			}
 			else{
 
 				_vector_set(vect, i, right[k].copy);
-				destroy(vect->ctx, right[k++].copy);
+				destroy(vect->ctx, (void**)&right[k++].copy);
 
 			}
 
@@ -98,21 +98,21 @@ static void int_mergesort_merge_vect_asc(mergesort_vect_description* desc, size_
 		else if(j < left_total){
 
 			_vector_set(vect, i, left[j].copy);
-			destroy(vect->ctx, left[j++].copy);
+			destroy(vect->ctx, (void**)&left[j++].copy);
 
 		}
 
 		else{
 
 			_vector_set(vect, i, right[k].copy);
-			destroy(vect->ctx, right[k++].copy);
+			destroy(vect->ctx, (void**)&right[k++].copy);
 
 		}
 
 	}
 
-	destroy(vect->ctx, left);
-	destroy(vect->ctx, right);
+	destroy(vect->ctx, (void**)&left);
+	destroy(vect->ctx, (void**)&right);
 
 }
 
@@ -138,13 +138,13 @@ static void int_mergesort_merge_vect_desc(mergesort_vect_description* desc, size
 			if(left[j].value > right[k].value){
 
 				_vector_set(vect, i, left[j].copy);
-				destroy(vect->ctx, left[j++].copy);
+				destroy(vect->ctx, (void**)&left[j++].copy);
 
 			}
 			else{
 
 				_vector_set(vect, i, right[k].copy);
-				destroy(vect->ctx, right[k++].copy);
+				destroy(vect->ctx, (void**)&right[k++].copy);
 
 			}
 
@@ -153,21 +153,21 @@ static void int_mergesort_merge_vect_desc(mergesort_vect_description* desc, size
 		else if(j < left_total){
 
 			_vector_set(vect, i, left[j].copy);
-			destroy(vect->ctx, left[j++].copy);
+			destroy(vect->ctx, (void**)&left[j++].copy);
 
 		}
 
 		else{
 
 			_vector_set(vect, i, right[k].copy);
-			destroy(vect->ctx, right[k++].copy);
+			destroy(vect->ctx, (void**)&right[k++].copy);
 
 		}
 
 	}
 
-	destroy(vect->ctx, left);
-	destroy(vect->ctx, right);
+	destroy(vect->ctx, (void**)&left);
+	destroy(vect->ctx, (void**)&right);
 
 }
 
@@ -205,7 +205,7 @@ bool _mergesort_vector_asc(vector* input, size_t offset, uint8_t val_size){
 
 	int_mergesort_vect(desc, 0, input->used - 1);
 
-	destroy(input->ctx, desc);
+	destroy(input->ctx, (void**)&desc);
 
 	return true;
 
@@ -226,7 +226,7 @@ bool _mergesort_vector_desc(vector* input, size_t offset, uint8_t val_size){
 
 	int_mergesort_vect(desc, 0, input->used - 1);
 
-	destroy(input->ctx, desc);
+	destroy(input->ctx, (void**)&desc);
 
 	return true;
 
@@ -306,8 +306,8 @@ static void int_mergesort_merge_list_asc(mergesort_list_description* desc, size_
 
 	}
 
-	destroy(lst->ctx, left);
-	destroy(lst->ctx, right);
+	destroy(lst->ctx, (void**)&left);
+	destroy(lst->ctx, (void**)&right);
 
 }
 
@@ -347,8 +347,8 @@ static void int_mergesort_merge_list_desc(mergesort_list_description* desc, size
 
 	}
 
-	destroy(lst->ctx, left);
-	destroy(lst->ctx, right);
+	destroy(lst->ctx, (void**)&left);
+	destroy(lst->ctx, (void**)&right);
 
 }
 
@@ -386,7 +386,7 @@ bool _mergesort_list_asc(list* input, size_t offset, uint8_t val_size){
 
 	int_mergesort_list(desc, 0, input->used - 1);
 
-	destroy(input->ctx, desc);
+	destroy(input->ctx, (void**)&desc);
 
 	return true;
 
@@ -407,7 +407,7 @@ bool _mergesort_list_desc(list* input, size_t offset, uint8_t val_size){
 
 	int_mergesort_list(desc, 0, input->used - 1);
 
-	destroy(input->ctx, desc);
+	destroy(input->ctx, (void**)&desc);
 
 	return true;
 

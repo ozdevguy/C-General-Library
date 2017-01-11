@@ -28,7 +28,7 @@ static void int_binary_search_tree_delete(binary_search_tree* tree, binary_searc
 
 		int_binary_search_tree_delete(tree, root->left);
 		int_binary_search_tree_delete(tree, root->right);
-		destroy(tree->ctx, root);
+		destroy(tree->ctx, (void**)&root);
 
 	}
 
@@ -54,7 +54,7 @@ void _binary_search_tree_delete(binary_search_tree* tree){
 	if(tree)
 		int_binary_search_tree_delete(tree, tree->root);
 
-	destroy(tree->ctx, tree);
+	destroy(tree->ctx, (void**)&tree);
 
 }
 
@@ -207,7 +207,7 @@ bool _binary_search_tree_remove_e(binary_search_tree* tree, long key, binary_sea
 		else
 			tree->root = 0;
 
-		destroy(tree->ctx, del);
+		destroy(tree->ctx, (void**)&del);
 		return true;
 
 	}
@@ -227,7 +227,7 @@ bool _binary_search_tree_remove_e(binary_search_tree* tree, long key, binary_sea
 		del->key = greatest->key;
 		del->data = greatest->data;
 
-		destroy(tree->ctx, greatest);
+		destroy(tree->ctx, (void**)&greatest);
 		return true;
 
 	}
@@ -249,7 +249,7 @@ bool _binary_search_tree_remove_e(binary_search_tree* tree, long key, binary_sea
 		else
 			tree->root = del->right;
 
-		destroy(tree->ctx, del);
+		destroy(tree->ctx, (void**)&del);
 		return true;
 
 	}

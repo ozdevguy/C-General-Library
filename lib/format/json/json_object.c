@@ -35,8 +35,6 @@ json_item* int_json_retrieve_item(map* table, string* var_name, uint8_t* error){
 
 	item = _hashmap_lookup(table, var_name);
 
-	printf("Item: %p\n", item);
-
 	return item;
 
 }
@@ -53,7 +51,7 @@ bool int_json_destroy_currrent_data(standard_library_context* ctx, json_item* it
 		_json_object_delete(item->data);
 
 	else if(item->type != JSON_TYPE_BOOL)
-		destroy(ctx, item->data);
+		destroy(ctx, (void**)&item->data);
 
 	else
 		return false;
@@ -89,7 +87,7 @@ bool _json_add_float(json_object* obj, string* name, double value){
 	if(_hashmap_lookup(obj->table, name))
 		return false;
 
-	item = allocate(obj->ctx, sizeof(item));
+	item = allocate(obj->ctx, sizeof(json_item));
 	item->type = JSON_TYPE_FLOAT;
 	item->data = allocate(obj->ctx, sizeof(double));
 	data = item->data;
@@ -127,11 +125,13 @@ bool _json_add_int(json_object* obj, string* name, long value){
 	if(_hashmap_lookup(obj->table, name))
 		return false;
 
-	item = allocate(obj->ctx, sizeof(item));
+	item = allocate(obj->ctx, sizeof(json_item));
 	item->type = JSON_TYPE_INT;
 	item->data = allocate(obj->ctx, sizeof(long));
 	data = item->data;
 	*data = value;
+
+	_hashmap_insert(obj->table, name, item);
 
 	return true;
 
@@ -165,9 +165,11 @@ bool _json_add_bool(json_object* obj, string* name, bool value){
 	if(_hashmap_lookup(obj->table, name))
 		return false;
 
-	item = allocate(obj->ctx, sizeof(item));
+	item = allocate(obj->ctx, sizeof(json_item));
 	item->type = JSON_TYPE_BOOL;
 	item->data = (void*)(size_t)value;
+
+	_hashmap_insert(obj->table, name, item);
 
 	return true;
 
@@ -201,12 +203,14 @@ bool _json_add_string(json_object* obj, string* name, string* value){
 	if(_hashmap_lookup(obj->table, name))
 		return false;
 
-	item = allocate(obj->ctx, sizeof(item));
+	item = allocate(obj->ctx, sizeof(json_item));
 	item->type = JSON_TYPE_STRING;
 	item->data = _string_new(obj->ctx);
 
 	str = item->data;
 	_string_copy(str, value);
+
+	_hashmap_insert(obj->table, name, item);
 
 	return true;
 
@@ -239,9 +243,11 @@ bool _json_add_array(json_object* obj, string* name, json_array* value){
 	if(_hashmap_lookup(obj->table, name))
 		return false;
 
-	item = allocate(obj->ctx, sizeof(item));
+	item = allocate(obj->ctx, sizeof(json_item));
 	item->type = JSON_TYPE_ARRAY;
 	item->data = value;
+
+	_hashmap_insert(obj->table, name, item);
 
 	return true;
 
@@ -274,9 +280,11 @@ bool _json_add_object(json_object* obj, string* name, json_object* object){
 	if(_hashmap_lookup(obj->table, name))
 		return false;
 
-	item = allocate(obj->ctx, sizeof(item));
+	item = allocate(obj->ctx, sizeof(json_item));
 	item->type = JSON_TYPE_OBJECT;
 	item->data = object;
+
+	_hashmap_insert(obj->table, name, item);
 
 	return true;
 
@@ -312,7 +320,7 @@ bool _json_remove(json_object* obj, string* name){
 	if(!int_json_destroy_currrent_data(obj->ctx, item))
 		return false;
 
-	destroy(obj->ctx, item);
+	destroy(obj->ctx, (void**)&item);
 
 	_hashmap_remove(obj->table, name);
 
@@ -947,15 +955,15 @@ void _json_object_delete(json_object* object){
 			_string_delete(current_item->data);
 
 		else if(current_item->type != JSON_TYPE_BOOL)
-			destroy(object->ctx, current_item->data);
+			destroy(object->ctx, (void**)&current_item->data);
 
-		destroy(object->ctx, current_item);
+		destroy(object->ctx, (void**)&current_item);
 
 	}
 
 	//Now, delete the object containers.
 	_hashmap_delete(object->table);
-	destroy(object->ctx, object);
+	destroy(object->ctx, (void**)&object);
 
 }
 

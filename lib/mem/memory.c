@@ -26,8 +26,13 @@ void* allocate(standard_library_context* ctx, size_t size){
 	
 }
 
-bool destroy(standard_library_context* ctx, void* ptr){
+bool destroy(standard_library_context* ctx, void** ptr){
 
-	return ctx->memory_dealloc(ptr, ctx);
+	bool result;
+
+	result = ctx->memory_dealloc(*ptr, ctx);
+	*ptr = 0;
+
+	return result;
 
 }

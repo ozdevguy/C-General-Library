@@ -66,13 +66,13 @@ int main(){
 
 		char* data = _string_pull(entry->object, &s);
 		printf("%s ", data);
-		destroy(&ctx, data);
+		destroy(&ctx, (void**)&data);
 
 		if((entry = _trie_map_lookup_e(entry->chained_trie, (uint32_t)_string_hash(s2)))){
 
 			data = _string_pull(entry->object, &s);
 			printf("%s\n", data);
-			destroy(&ctx, data);
+			destroy(&ctx, (void**)&data);
 
 		}
 
@@ -84,13 +84,13 @@ int main(){
 
 		char* data = _string_pull(entry->object, &s);
 		printf("%s ", data);
-		destroy(&ctx, data);
+		destroy(&ctx, (void**)&data);
 
 		if((entry = _trie_map_lookup_e(entry->chained_trie, (uint32_t)_string_hash(s3)))){
 
 			data = _string_pull(entry->object, &s);
 			printf("%s\n", data);
-			destroy(&ctx, data);
+			destroy(&ctx, (void**)&data);
 
 		}
 		else{
@@ -107,7 +107,7 @@ int main(){
 
 	data = _string_pull(str, &s);
 	printf("Data: %s\n", data);
-	destroy(&ctx, data);
+	destroy(&ctx, (void**)&data);
 
 
 	_trie_map_delete(mp);

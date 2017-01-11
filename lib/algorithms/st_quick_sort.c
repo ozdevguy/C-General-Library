@@ -139,7 +139,7 @@ bool _quicksort_vector_asc(vector* vect, size_t offset, uint8_t val_size){
 
 	_vector_remove(vect, vect->used - 1);
 
-	destroy(vect->ctx, desc);
+	destroy(vect->ctx, (void**)&desc);
 
 	return true;
 
@@ -167,7 +167,7 @@ bool _quicksort_vector_desc(vector* vect, size_t offset, uint8_t val_size){
 
 	_vector_remove(vect, vect->used - 1);
 
-	destroy(vect->ctx, desc);
+	destroy(vect->ctx, (void**)&desc);
 
 	return true;
 
@@ -285,7 +285,7 @@ bool _quicksort_list_asc(list* lst, size_t offset, uint8_t val_size){
 
 	int_quicksort_list(desc, 0, lst->used - 1);
 
-	destroy(lst->ctx, desc);
+	destroy(lst->ctx, (void**)&desc);
 
 	return true;
 
@@ -308,7 +308,7 @@ bool _quicksort_list_desc(list* lst, size_t offset, uint8_t val_size){
 
 	int_quicksort_list(desc, 0, lst->used - 1);
 
-	destroy(lst->ctx, desc);
+	destroy(lst->ctx, (void**)&desc);
 
 	return true;
 

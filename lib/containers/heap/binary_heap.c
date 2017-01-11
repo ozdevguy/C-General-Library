@@ -57,7 +57,7 @@ static void int_binary_heap_resize(binary_heap* heap, size_t new_size){
 		heap->data[i] = tmp[i];
 
 	heap->size = new_size;
-	destroy(heap->ctx, tmp);
+	destroy(heap->ctx, (void**)&tmp);
 
 }
 
@@ -325,8 +325,8 @@ bool _binary_heap_delete(binary_heap* heap){
 	if(!heap)
 		return false;
 
-	destroy(heap->ctx, heap->data);
-	destroy(heap->ctx, heap);
+	destroy(heap->ctx, (void**)&heap->data);
+	destroy(heap->ctx, (void**)&heap);
 	return true;
 
 }

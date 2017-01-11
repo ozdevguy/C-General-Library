@@ -68,7 +68,7 @@ void _hashmap_delete(map* hashmap){
 		entry = _map_get_next_e(hashmap);
 		hm_entry = entry->ext;
 		_string_delete(hm_entry->key);
-		destroy(hashmap->ctx, hm_entry);
+		destroy(hashmap->ctx, (void**)&hm_entry);
 		
 	}
 
@@ -136,12 +136,12 @@ bool _hashmap_insert(map* hashmap, string* key, void* data){
 		hm_entry->key = _string_new_fbytes(hashmap->ctx, string_data);
 		hm_entry->data = data;
 		entry->ext = hm_entry;
-		destroy(hashmap->ctx, string_data);
+		destroy(hashmap->ctx, (void**)&string_data);
 		return true;
 
 	}
 
-	destroy(hashmap->ctx, string_data);
+	destroy(hashmap->ctx, (void**)&string_data);
 	return false;
 
 }
@@ -161,7 +161,7 @@ bool _hashmap_remove_fbytes(map* hashmap, byte* key){
 
 		hm_entry = entry.ext;
 		_string_delete(hm_entry->key);
-		destroy(hashmap->ctx, hm_entry);
+		destroy(hashmap->ctx, (void**)&hm_entry);
 		return true;
 
 	}
@@ -182,13 +182,13 @@ bool _hashmap_remove(map* hashmap, string* key){
 
 	string_data = _string_pull(key, &hashed_key);
 	hashed_key = hashmap->hash_algorithm(string_data);
-	destroy(hashmap->ctx, string_data);
+	destroy(hashmap->ctx, (void**)&string_data);
 
 	if(_map_remove_e(hashmap, hashed_key, &entry)){
 
 		hm_entry = entry.ext;
 		_string_delete(hm_entry->key);
-		destroy(hashmap->ctx, hm_entry);
+		destroy(hashmap->ctx, (void**)&hm_entry);
 		return true;
 
 	}
@@ -211,7 +211,7 @@ void* _hashmap_lookup(map* hashmap, string* key){
 
 	hashed_key = hashmap->hash_algorithm(key_data);
 
-	destroy(hashmap->ctx, key_data);
+	destroy(hashmap->ctx, (void**)&key_data);
 
 	entry = _map_lookup_e(hashmap, hashed_key);
 

@@ -47,7 +47,7 @@ void _priority_queue_delete(priority_queue* queue){
 
 	_binary_heap_delete(queue->heap);
 
-	destroy(queue->ctx, queue);
+	destroy(queue->ctx, (void**)&queue);
 
 }
 

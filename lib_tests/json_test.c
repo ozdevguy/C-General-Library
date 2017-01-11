@@ -54,12 +54,21 @@ void main(){
 	
 	*/
 
+	uint8_t er;
+
 	json_parse_error error;
 
 	json_object* obj = _json_build_fbytes(ctx, js, &error);
 
 	_json_add_int_fbytes(obj, "intVariable", 23);
+
+	long test = _json_get_int_fbytes(obj, "intVariable", &er);
+
+	_json_set_int_fbytes(obj, "intVariable", 256);
+
+	test = _json_get_int_fbytes(obj, "intVariable", &er);
 	
+	printf("Test: %ld\n", test);
 
 	if(!obj){
 
@@ -103,7 +112,7 @@ void main(){
 
 	printf("String value: %s\n", dat);
 
-	destroy(ctx, dat);
+	destroy(ctx, (void**)&dat);
 
 	json_array* var0 = _json_get_array_fbytes(obj, "var0", &type);
 
@@ -159,7 +168,7 @@ void main(){
 
 			char* tmp = _string_pull(item->data, &sz);
 			printf("%s\n", tmp);
-			destroy(ctx, tmp);
+			destroy(ctx, (void**)&tmp);
 
 
 		}
@@ -211,7 +220,7 @@ void main(){
 				printf("Found object...\n");
 				json_object* obj = alloc->ptr;
 				_hashmap_delete(obj->table);
-				destroy(ctx, obj);
+				destroy(ctx, (void**)&obj);
 
 			}
 			else if(alloc->type == JSON_ARRAY){
@@ -219,7 +228,7 @@ void main(){
 				printf("Found array...\n");
 				json_array* arr = alloc->ptr;
 				_vector_delete(arr->items);
-				destroy(ctx, arr);
+				destroy(ctx, (void**)&arr);
 
 
 			}
@@ -230,11 +239,11 @@ void main(){
 				if(item->type == JSON_TYPE_STRING)
 					_string_delete(item->data);
 				else if(item->type == JSON_TYPE_FLOAT)
-					destroy(ctx, item->data);
+					destroy(ctx, (void**)&item->data);
 				else if(item->type == JSON_TYPE_INT)
-					destroy(ctx, item->data);
+					destroy(ctx, (void**)&item->data);
 
-				destroy(ctx, item);
+				destroy(ctx, (void**)&item);
 
 			}
 

@@ -55,14 +55,14 @@ void _map_delete(map* mp){
 		while(entry){
 
 			tmp = entry->next;
-			destroy(mp->ctx, entry);
+			destroy(mp->ctx, (void**)&entry);
 			entry = tmp;
 
 		}
 	}
 
-	destroy(mp->ctx, mp->map_table);
-	destroy(mp->ctx, mp);
+	destroy(mp->ctx, (void**)&mp->map_table);
+	destroy(mp->ctx, (void**)&mp);
 
 }
 
@@ -93,13 +93,13 @@ bool _map_resize(map* mp, size_t new_size){
 		while(entry){
 
 			tmp = entry->next;
-			destroy(mp->ctx, entry);
+			destroy(mp->ctx, (void**)&entry);
 			entry = tmp;
 
 		}
 	}
 
-	destroy(mp->ctx, mp->map_table);
+	destroy(mp->ctx, (void**)&mp->map_table);
 
 	mp->iter_tbl = 0;
 	mp->iter_list = 0;
@@ -107,7 +107,7 @@ bool _map_resize(map* mp, size_t new_size){
 	mp->total = new_map->total;
 	mp->map_table = new_map->map_table;
 
-	destroy(mp->ctx, new_map);
+	destroy(mp->ctx, (void**)&new_map);
 	return true;
 
 }
@@ -218,7 +218,7 @@ void* _map_remove(map* mp, size_t key){
 			tmp = entry->next;
 			data = entry->data;
 			*entry = *tmp;
-			destroy(mp->ctx, tmp);
+			destroy(mp->ctx, (void**)&tmp);
 			mp->total--;
 			return data;
 
@@ -256,7 +256,7 @@ bool _map_remove_e(map* mp, size_t key, map_entry* cpy){
 			tmp = entry->next;
 			*cpy = *entry;
 			*entry = *tmp;
-			destroy(mp->ctx, tmp);
+			destroy(mp->ctx, (void**)&tmp);
 			mp->total--;
 			return true;
 

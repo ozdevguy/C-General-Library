@@ -40,7 +40,7 @@ static void int_graph_resize(graph* gr, size_t new_size){
 	for(i = 0; i < gr->used; i++)
 		new_nodes[i] = gr->nodes[i];
 
-	destroy(gr->ctx, gr->nodes);
+	destroy(gr->ctx, (void**)&gr->nodes);
 
 	gr->nodes = new_nodes;
 	gr->size = new_size;
@@ -61,7 +61,7 @@ static void int_graph_node_delete_edges(graph* gr, graph_node* node){
 
 		tmp = current;
 		current = tmp->next;
-		destroy(gr->ctx, tmp);
+		destroy(gr->ctx, (void**)&tmp);
 
 	}
 }
@@ -87,14 +87,14 @@ static bool int_graph_node_remove_edge(graph* gr, graph_node* node, long key){
 			if(tmp){
 
 				*next = *tmp;
-				destroy(gr->ctx, tmp);
+				destroy(gr->ctx, (void**)&tmp);
 
 			}
 			else{
 
 				node->last_edge = prev;
 				prev->next = 0;
-				destroy(gr->ctx, next);
+				destroy(gr->ctx, (void**)&next);
 
 			}
 
@@ -182,12 +182,12 @@ bool _graph_delete(graph* gr){
 
 		_queue_delete(gr->walk->bfs_queue);
 		_stack_delete(gr->walk->dfs_stack);
-		destroy(gr->ctx, gr->walk);
+		destroy(gr->ctx, (void**)&gr->walk);
 
 	}
 
-	destroy(gr->ctx, gr->nodes);
-	destroy(gr->ctx, gr);
+	destroy(gr->ctx, (void**)&gr->nodes);
+	destroy(gr->ctx, (void**)&gr);
 
 	return true;
 }
@@ -195,7 +195,7 @@ bool _graph_delete(graph* gr){
 void _graph_delete_path(graph_path path){
 
 	if(path.list)
-		destroy(path.ctx, path.list);
+		destroy(path.ctx, (void**)&path.list);
 	
 }
 
@@ -793,7 +793,7 @@ void _graph_walk_end(graph* gr){
 
 	_queue_delete(gr->walk->bfs_queue);
 	_stack_delete(gr->walk->dfs_stack);
-	destroy(gr->ctx, gr->walk);
+	destroy(gr->ctx, (void**)&gr->walk);
 
 }
 

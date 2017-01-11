@@ -407,7 +407,7 @@ bool _avl_tree_remove_e(binary_search_tree* tree, long key, binary_search_tree_n
 		else
 			tree->root = 0;
 
-		destroy(tree->ctx, del);
+		destroy(tree->ctx, (void**)&del);
 		return true;
 
 	}
@@ -429,7 +429,7 @@ bool _avl_tree_remove_e(binary_search_tree* tree, long key, binary_search_tree_n
 		//Rebalance the tree (if needed).
 		int_avl_perform_needed_rotations(tree, greatest->parent);
 
-		destroy(tree->ctx, greatest);
+		destroy(tree->ctx, (void**)&greatest);
 		return true;
 
 	}
@@ -454,7 +454,7 @@ bool _avl_tree_remove_e(binary_search_tree* tree, long key, binary_search_tree_n
 		else
 			tree->root = del->right;
 
-		destroy(tree->ctx, del);
+		destroy(tree->ctx, (void**)&del);
 		return true;
 
 	}

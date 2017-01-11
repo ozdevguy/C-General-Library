@@ -59,11 +59,11 @@ void _json_array_delete(json_array* array){
 			_string_delete(current_item->data);
 
 		else if(current_item->type != JSON_TYPE_BOOL)
-			destroy(array->ctx, current_item->data);
+			destroy(array->ctx, (void**)&current_item->data);
 
 	}
 
 	//Now, delete the array containers.
 	_vector_delete(array->items);
-	destroy(array->ctx, array);
+	destroy(array->ctx, (void**)&array);
 }

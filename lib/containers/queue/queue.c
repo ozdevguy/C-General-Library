@@ -50,7 +50,7 @@ static void int_queue_resize(queue* q){
 	q->size = new_size;
 
 	//Free previously used memory.
-	destroy(q->ctx, q->entries);
+	destroy(q->ctx, (void**)&q->entries);
 
 	//Reassign the pointer.
 	q->entries = entries;
@@ -62,8 +62,8 @@ void _queue_delete(queue* q){
 	if(!q)
 		return;
 
-	destroy(q->ctx, q->entries);
-	destroy(q->ctx, q);
+	destroy(q->ctx, (void**)&q->entries);
+	destroy(q->ctx, (void**)&q);
 
 }
 
@@ -87,7 +87,7 @@ queue* _queue_new(standard_library_context* ctx, size_t start_size){
 void _queue_reset(queue* q){
 
 	
-	destroy(q->ctx, q->entries);
+	destroy(q->ctx, (void**)&q->entries);
 
 	q->entries = allocate(q->ctx, q->size);
 	q->used = 0;

@@ -28,7 +28,7 @@ void main(){
 
 	char* str = (char*)_string_pull(myString, &size);
 
-	destroy(ctx, str);
+	destroy(ctx, (void**)&str);
 
 	//printf("\n%s\n", str);
 
@@ -55,7 +55,7 @@ void main(){
 
 	printf("Length: %ld\n", substr->length);
 
-	destroy(ctx, substrchar);
+	destroy(ctx, (void**)&substrchar);
 
 	_string_set_ci(myString, true);
 	_string_replace_all_fbytes(myString, "name", "Robert");
@@ -69,7 +69,7 @@ void main(){
 
 	printf("%s\n", str);
 
-	destroy(ctx, str);
+	destroy(ctx, (void**)&str);
 
 	//Test string split.
 
@@ -81,8 +81,8 @@ void main(){
 	printf("%s\n", s1);
 	printf("%s\n", s2);
 
-	destroy(ctx, s1);
-	destroy(ctx, s2);
+	destroy(ctx, (void**)&s1);
+	destroy(ctx, (void**)&s2);
 
 	utf8_char get_char; 
 
@@ -117,8 +117,8 @@ void main(){
 	printf("%s\n", d0);
 	printf("%s\n", d1);
 
-	destroy(ctx, d0);
-	destroy(ctx, d1);
+	destroy(ctx, (void**)&d0);
+	destroy(ctx, (void**)&d1);
 
 	_string_delete_ll(lst);
 
@@ -138,7 +138,7 @@ void main(){
 
 	printf("TRIMMED=====|%s|=======\n\n", tt);
 
-	destroy(ctx, tt);
+	destroy(ctx, (void**)&tt);
 
 	string_list* tlst2 = _string_split_fbytes(trimTest, " W", 0);
 
@@ -148,12 +148,12 @@ void main(){
 	tt = (char*)_string_pull(tlst2->s, &l);
 	printf("%s\n", tt);
 
-	destroy(ctx, tt);
+	destroy(ctx, (void**)&tt);
 
 	tt = (char*)_string_pull(tlst2->next->s, &l);
 	printf("%s\n", tt);
 
-	destroy(ctx, tt);
+	destroy(ctx, (void**)&tt);
 
 	printf("Hash value: %ld\n", _string_hash(tlst2->s));
 
@@ -170,7 +170,7 @@ void main(){
 
 	printf("Result: %s\n", ns);
 
-	destroy(ctx, ns);
+	destroy(ctx, (void**)&ns);
 
 	string* lastString = _string_new_fbytes(ctx, "Hello there! \"It's a \\\"test\\\".\".");
 	
