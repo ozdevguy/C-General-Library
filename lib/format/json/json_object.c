@@ -39,19 +39,19 @@ json_item* int_json_retrieve_item(map* table, string* var_name, uint8_t* error){
 
 }
 
-bool int_json_destroy_currrent_data(standard_library_context* ctx, json_item* item){
+bool int_json_destroy_currrent_data(standard_library_context* ctx, json_item* item, bool del){
 
 	if(item->type == JSON_TYPE_STRING)
 		_string_delete(item->data);
 
-	else if(item->type == JSON_TYPE_ARRAY)
+	else if(item->type == JSON_TYPE_ARRAY && del)
 		_json_array_delete(item->data);
 
-	else if(item->type == JSON_TYPE_OBJECT)
+	else if(item->type == JSON_TYPE_OBJECT && del)
 		_json_object_delete(item->data);
 
 	else if(item->type != JSON_TYPE_BOOL)
-		destroy(ctx, (void**)&item->data);
+		destroy(ctx, item->data);
 
 	else
 		return false;
@@ -70,9 +70,20 @@ json_object* _json_object_new(standard_library_context* ctx){
 
 	obj = allocate(ctx, sizeof(json_object));
 	obj->table = _hashmap_new(ctx, 10);
+	obj->ctx = ctx;
 
 	return obj;
 
+}
+
+//Instruct the object manager to delete child objects and arrays.
+void _json_object_setdel(json_object* obj, bool value){
+
+	if(!obj)
+		return;
+
+	obj->del_objects = value;
+	
 }
 
 //Add a float to a JSON object.
@@ -92,6 +103,8 @@ bool _json_add_float(json_object* obj, string* name, double value){
 	item->data = allocate(obj->ctx, sizeof(double));
 	data = item->data;
 	*data = value;
+
+	_hashmap_insert(obj->table, name, item);
 
 	return true;
 
@@ -317,10 +330,10 @@ bool _json_remove(json_object* obj, string* name){
 	if(!(item = _hashmap_lookup(obj->table, name)))
 		return false;
 
-	if(!int_json_destroy_currrent_data(obj->ctx, item))
+	if(!int_json_destroy_currrent_data(obj->ctx, item, obj->del_objects))
 		return false;
 
-	destroy(obj->ctx, (void**)&item);
+	destroy(obj->ctx, item);
 
 	_hashmap_remove(obj->table, name);
 
@@ -712,7 +725,7 @@ bool _json_set_float(json_object* obj, string* name, double value){
 	if(!(item = _hashmap_lookup(obj->table, name)))
 		return false;
 
-	if(!int_json_destroy_currrent_data(obj->ctx, item))
+	if(!int_json_destroy_currrent_data(obj->ctx, item, obj->del_objects))
 		return false;
 
 	item->type = JSON_TYPE_FLOAT;
@@ -752,7 +765,7 @@ bool _json_set_int(json_object* obj, string* name, long value){
 	if(!(item = _hashmap_lookup(obj->table, name)))
 		return false;
 
-	if(!int_json_destroy_currrent_data(obj->ctx, item))
+	if(!int_json_destroy_currrent_data(obj->ctx, item, obj->del_objects))
 		return false;
 
 	item->type = JSON_TYPE_INT;
@@ -791,7 +804,7 @@ bool _json_set_bool(json_object* obj, string* name, bool value){
 	if(!(item = _hashmap_lookup(obj->table, name)))
 		return false;
 
-	if(!int_json_destroy_currrent_data(obj->ctx, item))
+	if(!int_json_destroy_currrent_data(obj->ctx, item, obj->del_objects))
 		return false;
 
 	item->type = JSON_TYPE_BOOL;
@@ -829,7 +842,7 @@ bool _json_set_string(json_object* obj, string* name, string* value){
 	if(!(item = _hashmap_lookup(obj->table, name)))
 		return false;
 
-	if(!int_json_destroy_currrent_data(obj->ctx, item))
+	if(!int_json_destroy_currrent_data(obj->ctx, item, obj->del_objects))
 		return false;
 
 	item->type = JSON_TYPE_STRING;
@@ -867,7 +880,7 @@ bool _json_set_object(json_object* obj, string* name, json_object* object){
 	if(!(item = _hashmap_lookup(obj->table, name)))
 		return false;
 
-	if(!int_json_destroy_currrent_data(obj->ctx, item))
+	if(!int_json_destroy_currrent_data(obj->ctx, item, obj->del_objects))
 		return false;
 
 	item->type = JSON_TYPE_OBJECT;
@@ -904,7 +917,7 @@ bool _json_set_array(json_object* obj, string* name, json_array* arr){
 	if(!(item = _hashmap_lookup(obj->table, name)))
 		return false;
 
-	if(!int_json_destroy_currrent_data(obj->ctx, item))
+	if(!int_json_destroy_currrent_data(obj->ctx, item, obj->del_objects))
 		return false;
 
 	item->type = JSON_TYPE_ARRAY;
@@ -945,25 +958,25 @@ void _json_object_delete(json_object* object){
 
 		current_item = _hashmap_get_next(object->table);
 
-		if(current_item->type == JSON_TYPE_OBJECT)
+		if(current_item->type == JSON_TYPE_OBJECT && object->del_objects)
 			_json_object_delete(current_item->data);
 
-		else if(current_item->type == JSON_TYPE_ARRAY)
+		else if(current_item->type == JSON_TYPE_ARRAY && object->del_objects)
 			_json_array_delete(current_item->data);
 
 		else if(current_item->type == JSON_TYPE_STRING)
 			_string_delete(current_item->data);
 
 		else if(current_item->type != JSON_TYPE_BOOL)
-			destroy(object->ctx, (void**)&current_item->data);
+			destroy(object->ctx, current_item->data);
 
-		destroy(object->ctx, (void**)&current_item);
+		destroy(object->ctx, current_item);
 
 	}
 
 	//Now, delete the object containers.
 	_hashmap_delete(object->table);
-	destroy(object->ctx, (void**)&object);
+	destroy(object->ctx, object);
 
 }
 

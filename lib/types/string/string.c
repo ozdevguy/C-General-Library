@@ -82,9 +82,9 @@ void _string_delete(string* str){
 		return;
 
 	if(str->data)
-		destroy(str->ctx, (void**)&str->data);
+		destroy(str->ctx, str->data);
 
-	destroy(str->ctx, (void**)&str);
+	destroy(str->ctx, str);
 
 }
 
@@ -102,7 +102,7 @@ void _string_delete_ll(string_list* lst){
 		tmp = lst->next;
 		ctx = lst->s->ctx;
 		_string_delete(lst->s);
-		destroy(ctx, (void**)&lst);
+		destroy(ctx, lst);
 		lst = tmp;
 	}
 
@@ -218,13 +218,13 @@ bool _string_remove_all(string* str, string* pattern){
 
 	}
 
-	destroy(str->ctx, (void**)&str->data);
+	destroy(str->ctx, str->data);
 
 	str->data = new_string->data;
 	str->length = new_string->length;
 	str->size = new_string->size;
 
-	destroy(str->ctx, (void**)&new_string);
+	destroy(str->ctx, new_string);
 
 	return true;
 
@@ -281,13 +281,13 @@ bool _string_remove(string* str, string* pattern, long index){
 			_string_append_fstring(new_string, string_remainder);
 			_string_delete(string_remainder);
 			
-			destroy(str->ctx, (void**)&str->data);
+			destroy(str->ctx, str->data);
 
 			str->data = new_string->data;
 			str->length = new_string->length;
 			str->size = new_string->size;
 
-			destroy(str->ctx, (void**)&new_string);
+			destroy(str->ctx, new_string);
 
 			return true;
 
@@ -377,7 +377,7 @@ void _string_append_fstring(string* str, string* append){
 		data[i + str->length] = append->data[i];
 
 
-	destroy(str->ctx, (void**)&str->data);
+	destroy(str->ctx, str->data);
 
 	str->data = data;
 	str->size = new_size;
@@ -427,7 +427,7 @@ void _string_insert(string* str, string* insert, long pos){
 	for(i = pos; i < str->length; i++)
 		data[i + insert->length] = str->data[i];
 
-	destroy(str->ctx, (void**)&str->data);
+	destroy(str->ctx, str->data);
 
 	str->data = data;
 	str->size = new_size;
@@ -538,11 +538,11 @@ bool _string_replace_fstring(string* str, string* pattern, string* replace, long
 	_string_append_fstring(s1, s2);
 	_string_delete(s2);
 
-	destroy(str->ctx, (void**)&str->data);
+	destroy(str->ctx, str->data);
 	str->data = s1->data;
 	str->size = s1->size;
 	str->length = s1->length;
-	destroy(str->ctx, (void**)&s1);
+	destroy(str->ctx, s1);
 
 	return true;
 
@@ -623,11 +623,11 @@ bool _string_replace_all_fstring(string* str, string* pattern, string* replace){
 	if(!s1)
 		return false;
 
-	destroy(str->ctx, (void**)&str->data);
+	destroy(str->ctx, str->data);
 	str->data = s1->data;
 	str->size = s1->size;
 	str->length = s1->length;
-	destroy(str->ctx, (void**)&s1);
+	destroy(str->ctx, s1);
 
 	return true;
 
@@ -775,7 +775,7 @@ void _string_trim(string* str){
 
 	if(s_pos == e_pos){
 
-		destroy(str->ctx, (void**)&str->data);
+		destroy(str->ctx, str->data);
 		str->length = 0;
 		return;
 
@@ -796,11 +796,11 @@ void _string_trim(string* str){
 
 	trimmed = _string_substr(str, s_pos, e_pos);
 
-	destroy(str->ctx, (void**)&str->data);
+	destroy(str->ctx, str->data);
 	str->data = trimmed->data;
 	str->length = trimmed->length;
 	str->size = trimmed->size;
-	destroy(str->ctx, (void**)&trimmed);
+	destroy(str->ctx, trimmed);
 
 }
 

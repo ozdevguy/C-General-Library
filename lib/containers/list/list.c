@@ -37,7 +37,7 @@ static void int_list_resize(list* lst, size_t new_size){
 	for(i = 0; i < lst->used; i++)
 		new_data[i] = lst->data[i];
 
-	destroy(lst->ctx, (void**)&lst->data);
+	destroy(lst->ctx, lst->data);
 
 	lst->data = new_data;
 	lst->size = new_size;
@@ -63,8 +63,8 @@ void _list_delete(list* lst){
 	if(!lst)
 		return;
 
-	destroy(lst->ctx, (void**)&lst->data);
-	destroy(lst->ctx, (void**)&lst);
+	destroy(lst->ctx, lst->data);
+	destroy(lst->ctx, lst);
 
 }
 

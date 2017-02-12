@@ -43,6 +43,9 @@ json_object* _json_build_fbytes(standard_library_context*, byte*, json_parse_err
 //Create a new json object.
 json_object* _json_object_new(standard_library_context*); //FINISHED
 
+//Copy a json object.
+json_object* _json_object_copy(json_object*);
+
 //Add a float to a json object.
 bool _json_add_float(json_object*, string*, double); //FINISHED
 
@@ -158,6 +161,9 @@ void _json_object_delete(json_object*); //FINISHED
 
 //Create a new JSON array.
 json_array* _json_array_new(standard_library_context*); //FINISHED
+
+//Copy a JSON array.
+json_array* _json_array_copy(json_array*);
 
 //Add a float to a JSON array.
 bool _json_array_add_float(json_array*, double);

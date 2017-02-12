@@ -66,7 +66,7 @@ void _ts_queue_delete(ts_queue* q){
 
 	qt = q->q;
 
-	destroy(qt->ctx, (void**)&q);
+	destroy(qt->ctx, q);
 	_queue_delete(qt);
 
 }

@@ -46,7 +46,7 @@ static void int_vector_resize(vector* vect){
 		new_data[i] = vect->data[i];
 	
 	vect->size *= 2;
-	destroy(vect->ctx, (void**)&vect->data);
+	destroy(vect->ctx, vect->data);
 
 	vect->data = new_data;
 
@@ -146,8 +146,8 @@ void* _vector_get_next(vector* vect){
 
 void _vector_delete(vector* vect){
 
-	destroy(vect->ctx, (void**)&vect->data);
-	destroy(vect->ctx, (void**)&vect);
+	destroy(vect->ctx, vect->data);
+	destroy(vect->ctx, vect);
 
 }
 

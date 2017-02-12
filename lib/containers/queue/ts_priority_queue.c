@@ -45,7 +45,7 @@ void _ts_priority_queue_delete(ts_priority_queue* pq){
 
 	q = pq->q;
 
-	destroy(q->ctx, (void**)&pq);
+	destroy(q->ctx, pq);
 	_priority_queue_delete(q);
 
 }

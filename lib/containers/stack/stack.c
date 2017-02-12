@@ -37,7 +37,7 @@ static void int_stack_resize(stack* st){
 	for(i = 1; i < st->size; i++)
 		entries[i] = st->entries[i];
 
-	destroy(st->ctx, (void**)&st->entries);
+	destroy(st->ctx, st->entries);
 
 	st->entries = entries;
 	st->size = new_size;
@@ -48,8 +48,8 @@ void _stack_delete(stack* st){
 	if(!st)
 		return;
 
-	destroy(st->ctx, (void**)&st->entries);
-	destroy(st->ctx, (void**)&st);
+	destroy(st->ctx, st->entries);
+	destroy(st->ctx, st);
 
 }
 
@@ -86,7 +86,7 @@ void _stack_reset(stack* st){
 	if(!st)
 		return;
 
-	destroy(st->ctx, (void**)&st->entries);
+	destroy(st->ctx, st->entries);
 	st->entries = allocate(st->ctx, (sizeof(size_t) * st->size));
 	st->top = 0;
 

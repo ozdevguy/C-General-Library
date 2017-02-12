@@ -38,7 +38,7 @@ static void int_trie_map_delete(standard_library_context* ctx, trie_map_entry* e
 		int_trie_map_delete(ctx, entry->entries + 7);
 		int_trie_map_delete(ctx, entry->entries + 8);
 		int_trie_map_delete(ctx, entry->entries + 9);
-		destroy(ctx, (void**)&entry->entries);
+		destroy(ctx, entry->entries);
 
 	}
 
@@ -145,8 +145,8 @@ void _trie_map_delete(trie_map* tm){
 
 	int_trie_map_delete(tm->ctx, tm->root);
 
-	destroy(tm->ctx, (void**)&tm->root);
-	destroy(tm->ctx, (void**)&tm);
+	destroy(tm->ctx, tm->root);
+	destroy(tm->ctx, tm);
 
 }
 

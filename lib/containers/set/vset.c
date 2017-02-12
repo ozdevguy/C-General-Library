@@ -90,9 +90,9 @@ void _vset_delete(vector* vect){
 	dat = (vset_int*)vect->data;
 
 	for(i = 0; i < vect->used; i++)
-		destroy(vect->ctx, (void**)&dat[i].obj);
+		destroy(vect->ctx,  dat[i].obj);
 	
-	destroy(vect->ctx, (void**)&vect->ext);
+	destroy(vect->ctx, vect->ext);
 	_vector_delete(vect);
 
 }
@@ -176,7 +176,7 @@ void _vset_remove(vector* vect, size_t pos){
 
 	dat = (vset_int*)vect->data;
 
-	destroy(vect->ctx, (void**)&dat[pos].obj);
+	destroy(vect->ctx,  dat[pos].obj);
 
 	_vector_remove(vect, pos);
 

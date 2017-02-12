@@ -291,7 +291,7 @@ inline json_item* int_json_parse_var_type_scalar(json_obj_parser* parser, json_p
 
 		error->code = JSON_ERROR_STRING_TERMINATED;
 		error->line = parser->json_string->iter_pos - 1;
-		destroy(parser->ctx, (void**)&temp);
+		destroy(parser->ctx, temp);
 		return 0;
 
 	}
@@ -318,7 +318,7 @@ inline json_item* int_json_parse_var_type_scalar(json_obj_parser* parser, json_p
 
 	}
 
-	destroy(parser->ctx, (void**)&temp);
+	destroy(parser->ctx, temp);
 	_string_iterator_rewind(parser->json_string);
 
 	return item;	
@@ -363,7 +363,7 @@ inline json_item* int_json_parse_var_type_bool(json_obj_parser* parser, json_par
 
 		error->code = JSON_ERROR_INVALID_TYPE;
 		error->line = parser->json_string->iter_pos;
-		destroy(parser->ctx, (void**)&item);
+		destroy(parser->ctx, item);
 		return 0;
 
 	}
@@ -550,7 +550,7 @@ json_array* int_json_parse_array(json_obj_parser* parser, json_parse_error* erro
 			//Next, we need to do a recursive call to parse the embedded object.
 			if(!(new_object = int_json_parse_object(parser, error))){
 
-				destroy(ctx, (void**)&item);
+				destroy(ctx, item);
 				_json_array_delete(current_array);
 				return 0;
 
@@ -564,7 +564,7 @@ json_array* int_json_parse_array(json_obj_parser* parser, json_parse_error* erro
 
 			if(!(new_array = int_json_parse_array(parser, error))){
 
-				destroy(ctx, (void**)&item);
+				destroy(ctx, item);
 				_json_array_delete(current_array);
 				return 0;
 
@@ -576,7 +576,7 @@ json_array* int_json_parse_array(json_obj_parser* parser, json_parse_error* erro
 
 		_vector_add(current_array->items, item);
 
-		destroy(ctx, (void**)&item);
+		destroy(ctx, item);
 
 		//Now, check to see if more variables exist in the current object.
 		more_exists = int_json_parse_check_more(parser, error);
@@ -628,6 +628,7 @@ json_object* int_json_parse_object(json_obj_parser* parser, json_parse_error* er
 	current_object = allocate(ctx, sizeof(json_object));
 	current_object->ctx = ctx;
 	current_object->table = _hashmap_new(ctx, 10);
+	current_object->del_objects = true;
 
 	
 	while((item = int_json_parse_variable(parser, &var_name, error))){
@@ -637,7 +638,7 @@ json_object* int_json_parse_object(json_obj_parser* parser, json_parse_error* er
 			//Next, we need to do a recursive call to parse the embedded object.
 			if(!(new_object = int_json_parse_object(parser, error))){
 
-				destroy(ctx, (void**)&item);
+				destroy(ctx, item);
 				_string_delete(var_name);
 				_json_object_delete(current_object);
 				return 0;
@@ -652,7 +653,7 @@ json_object* int_json_parse_object(json_obj_parser* parser, json_parse_error* er
 
 			if(!(new_array = int_json_parse_array(parser, error)))	{
 
-				destroy(ctx, (void**)&item);
+				destroy(ctx, item);
 				_string_delete(var_name);
 				_json_object_delete(current_object);
 				return 0;
@@ -724,7 +725,7 @@ json_object* _json_build(standard_library_context* ctx, string* input, json_pars
 	json_obj = int_json_parse_object(parser, error);
 
 	//Destroy the parser object.
-	destroy(ctx, (void**)&parser);
+	destroy(ctx, parser);
 
 	return json_obj;
 

@@ -77,8 +77,8 @@ static void int_th_mergesort_merge_desc(sort_representation_cont* cont, size_t s
 
 	}
 
-	destroy(cont->ctx, (void**)&left);
-	destroy(cont->ctx, (void**)&right);
+	destroy(cont->ctx, left);
+	destroy(cont->ctx, right);
 
 }
 
@@ -120,8 +120,8 @@ static void int_th_mergesort_merge_asc(sort_representation_cont* cont, size_t st
 
 	}
 
-	destroy(cont->ctx, (void**)&left);
-	destroy(cont->ctx, (void**)&right);
+	destroy(cont->ctx, left);
+	destroy(cont->ctx, right);
 
 }
 
@@ -215,7 +215,7 @@ bool _th_mergesort_vector_asc(vector* input, size_t offset, uint8_t val_size){
 
 		vector* vect = _vector_new(input->ctx, sizeof(sort_threaded_mergesort_level_comp), 3);
 		_vector_add(levels, vect);
-		destroy(input->ctx, (void**)&vect);
+		destroy(input->ctx, vect);
 
 	}
 
@@ -262,7 +262,7 @@ bool _th_mergesort_vector_asc(vector* input, size_t offset, uint8_t val_size){
 			//pthread_t()
 		}
 
-		destroy(levels->ctx, (void**)&merges->data);
+		destroy(levels->ctx, merges->data);
 
 	}
 

@@ -11,6 +11,9 @@ struct json_object{
 	//JSON string.
 	string* json_string;
 
+	//Delete objects.
+	bool del_objects;
+
 };
 
 //Represents a JSON array.
@@ -21,6 +24,9 @@ struct json_array{
 
 	//Vector of items in this array.
 	vector* items;
+
+	//Delete objects.
+	bool del_objects;
 
 };
 

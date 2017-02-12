@@ -30,6 +30,7 @@ json_array* _json_array_new(standard_library_context* ctx){
 
 	arr = allocate(ctx, sizeof(json_array));
 	arr->items = _vector_new(ctx, sizeof(json_item), 4);
+	arr->ctx = ctx;
 
 	return arr;
 
@@ -49,21 +50,131 @@ void _json_array_delete(json_array* array){
 
 		current_item = _vector_get_next(array->items);
 
-		if(current_item->type == JSON_TYPE_OBJECT)
+		if(current_item->type == JSON_TYPE_OBJECT && array->del_objects)
 			_json_object_delete(current_item->data);
 
-		else if(current_item->type == JSON_TYPE_ARRAY)
+		else if(current_item->type == JSON_TYPE_ARRAY && array->del_objects)
 			_json_array_delete(current_item->data);
 
 		else if(current_item->type == JSON_TYPE_STRING)
 			_string_delete(current_item->data);
 
 		else if(current_item->type != JSON_TYPE_BOOL)
-			destroy(array->ctx, (void**)&current_item->data);
+			destroy(array->ctx, current_item->data);
 
 	}
 
 	//Now, delete the array containers.
 	_vector_delete(array->items);
-	destroy(array->ctx, (void**)&array);
+	destroy(array->ctx, array);
+}
+
+bool _json_array_add_float(json_array* arr, double value){
+
+	json_item* item;
+	double* ptr;
+
+	if(!arr)
+		return false;
+
+	item = allocate(arr->ctx, sizeof(json_item));
+	item->type = JSON_TYPE_FLOAT;
+	item->data = allocate(arr->ctx, sizeof(double));
+	ptr = item->data;
+	*ptr = value;
+
+	_vector_add(arr->items, item);
+
+	return true;
+
+}
+
+bool _json_array_add_int(json_array* arr, long value){
+
+	json_item* item;
+	long* ptr;
+
+	if(!arr)
+		return false;
+
+	item = allocate(arr->ctx, sizeof(json_item));
+	item->type = JSON_TYPE_INT;
+	item->data = allocate(arr->ctx, sizeof(long));
+	ptr = item->data;
+	*ptr = value;
+
+	_vector_add(arr->items, item);
+	
+	return true;
+
+}
+
+bool _json_array_add_bool(json_array* arr, bool value){
+
+	json_item* item;
+
+	if(!arr)
+		return false;
+
+	item = allocate(arr->ctx, sizeof(json_item));
+	item->type = JSON_TYPE_BOOL;
+	item->data = (void*)(size_t)value;
+
+	_vector_add(arr->items, item);
+	
+	return true;
+
+}
+
+bool _json_array_add_string(json_array* arr, string* value){
+
+	json_item* item;
+	string* str;
+
+	if(!arr || !value)
+		return false;
+
+	item = allocate(arr->ctx, sizeof(json_item));
+	item->type = JSON_TYPE_STRING;
+	item->data = _string_new(arr->ctx);
+	_string_copy(item->data, value);
+
+	_vector_add(arr->items, item);
+	
+	return true;
+
+}
+
+bool _json_array_add_array(json_array* arr, json_array* value){
+
+	json_item* item;
+
+	if(!arr || !value)
+		return false;
+
+	item = allocate(arr->ctx, sizeof(json_item));
+	item->type = JSON_TYPE_ARRAY;
+	item->data = value;
+
+	_vector_add(arr->items, item);
+	
+	return true;
+
+}
+
+bool _json_array_add_object(json_array* arr, json_object* obj){
+
+	json_item* item;
+
+	if(!arr || !obj)
+		return false;
+
+	item = allocate(arr->ctx, sizeof(json_item));
+	item->type = JSON_TYPE_OBJECT;
+	item->data = obj;
+
+	_vector_add(arr->items, item);
+	
+	return true;
+
 }
