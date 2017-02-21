@@ -39,5 +39,6 @@ genlib.h
 #include "algorithms.h"
 #include "trie.h"
 #include "json.h"
+#include "regex.h"
 //#include "ts_queue.h"
 //#include "ts_stack.h"

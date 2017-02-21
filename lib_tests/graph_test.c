@@ -1,4 +1,4 @@
-#include "../lib/genlib.h"
+#include "../lib/graph.h"
 
 
 void main(){
@@ -8,8 +8,13 @@ void main(){
 	_lib_init();
 	ctx = _ctx_init();
 
+	graph* myGraph = _graph_new(ctx);
+	
+	string* test = _string_new_fbytes(ctx, "abc");
 
-	graph* myGraph = _graph_new(ctx, 10);
+	printf("hello...\n");
+
+	//regex_object* regex = _regex_new(test);
 
 	//Nodes
 	_graph_add_node(myGraph, 21, 0);
@@ -30,12 +35,13 @@ void main(){
 	_graph_add_node(myGraph, 36, 0);
 	_graph_add_node(myGraph, 37, 0);
 
-
 	//Edges
 	graph_edge* e1;
 	graph_edge* e2;
 
+
 	_graph_add_double_edge(myGraph, 21, 22, &e1, &e2);
+
 	_graph_add_double_edge(myGraph, 22, 27, &e1, &e2);
 	_graph_add_double_edge(myGraph, 27, 30, &e1, &e2);
 	_graph_add_double_edge(myGraph, 27, 31, &e1, &e2);
@@ -52,7 +58,8 @@ void main(){
 	_graph_add_double_edge(myGraph, 23, 36, &e1, &e2);
 	
 
-	/* START THE GRAPH WALK */
+	
+	// START THE GRAPH WALK
 	_graph_walk_init(myGraph, 21);
 
 	graph_node* current;
@@ -63,7 +70,9 @@ void main(){
 		printf("Current: %ld | %ld\n", current->key, current->level);
 
 
+
 	_graph_delete(myGraph);
+	_string_delete(test);
 	_ctx_delete(ctx);
 
 }

@@ -28,11 +28,13 @@ typedef struct graph_edge graph_edge;
 typedef struct graph_node graph_node;
 typedef struct graph_path graph_path;
 typedef struct graph_walk_config graph_walk_config;
+typedef struct graph_mem_pool graph_mem_pool;
+typedef struct graph_mem_pool_freed graph_mem_pool_freed;
 
 /* GRAPH */
 
 //Create a new graph.
-graph* _graph_new(standard_library_context*, size_t); //FINISHED
+graph* _graph_new(standard_library_context*); //FINISHED
 
 //Delete a graph.
 bool _graph_delete(graph*); //FINISHED
@@ -57,6 +59,9 @@ bool _graph_delete_node(graph*, long); //FINISHED
 
 //Remove an edge.
 bool _graph_delete_edge(graph*, long, long); //FINISHED
+
+//Remove a double edge.
+bool _graph_delete_double_edge(graph*, long, long); //FINISHED
 
 //Bredth first search for a node.
 bool _graph_bfs(graph*, long, long, graph_path*);

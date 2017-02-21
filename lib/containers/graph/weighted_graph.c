@@ -21,11 +21,11 @@ weighted_graph.c
 
 */
 
-graph* _weighted_graph_new(standard_library_context* ctx, size_t start_size){
+graph* _weighted_graph_new(standard_library_context* ctx){
 
 	graph* new_graph;
 
-	new_graph = _graph_new(ctx, start_size);
+	new_graph = _graph_new(ctx);
 	new_graph->type = 1;
 
 	return new_graph;
@@ -130,17 +130,21 @@ bool _weighted_graph_spath(graph* gr, long start, long end, graph_path* path){
 	if(!gr || !path)
 		return false;
 
-	//Find the root.
-	for(i = 0; i < gr->used; i++){
+	//Find the start and end nodes.
+	current = gr->nodes;
 
-		if(gr->nodes[i].key == start)
-			root = gr->nodes + i;
+	while(current){
 
-		else if(gr->nodes[i].key == end)
-			destination = gr->nodes + i;
+		if(current->key == start)
+			root = current;
+
+		else if(current->key == end)
+			destination = current;
 
 		if(root && destination)
 			break;
+
+		current = current->next;
 
 	}
 
@@ -211,17 +215,21 @@ bool _weighted_graph_spath_amask(graph* gr, long start, long end, size_t mask, g
 	if(!gr || !path)
 		return false;
 
-	//Find the root.
-	for(i = 0; i < gr->used; i++){
+	//Find the start and end nodes.
+	current = gr->nodes;
 
-		if(gr->nodes[i].key == start)
-			root = gr->nodes + i;
+	while(current){
 
-		else if(gr->nodes[i].key == end)
-			destination = gr->nodes + i;
+		if(current->key == start)
+			root = current;
+
+		else if(current->key == end)
+			destination = current;
 
 		if(root && destination)
 			break;
+
+		current = current->next;
 
 	}
 

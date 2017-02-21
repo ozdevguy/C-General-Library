@@ -30,6 +30,9 @@ graph.h
 //Include the map header.
 #include "map.h"
 
+//Include the list header.
+#include "list.h"
+
 //Include undirected graph header.
 #ifndef STD_LIBS_CONTAINERS_GRAPH
 

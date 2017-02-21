@@ -24,7 +24,7 @@ string.h
 /* STRUCTURES */
 
 typedef struct string string;
-typedef struct string_list string_list;
+typedef struct string_list string_list; 
 
 /* STRING */
 
@@ -113,10 +113,6 @@ void _string_iterator_rewind(string*);
 bool _string_has_next(string*);
 
 utf8_char* _string_get_next(string*);
-
-bool _string_match_regex_fbytes(string*, byte*);
-
-bool _string_match_regex(string*, string*);
 
 
 #ifndef GENLIB_LINK_OBJECT_NCOMP

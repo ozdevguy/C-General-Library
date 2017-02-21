@@ -21,16 +21,48 @@ graph_structs.c
 
 */
 
+struct graph_mem_pool{
+
+	//Used space in this graph pool.
+	size_t used;
+
+	//Pointer to allocated memory.
+	byte* pool;
+
+};
+
+struct graph_mem_pool_freed{
+
+	//Pointer
+	void* ptr;
+
+	//Next
+	graph_mem_pool_freed* next;
+
+};	
+
 struct graph{
 
 	//Standard library context.
 	standard_library_context* ctx;
 
-	//Array of graph nodes.
+	//Memory pool size.
+	size_t pool_size;
+
+	//List of memory pools.
+	list* memory_pools;
+
+	//Freed pool locations (sized for nodes).
+	graph_mem_pool_freed* free_nodes;
+
+	//Freed pool locations (sized for edges).
+	graph_mem_pool_freed* free_edges;
+
+	//Linked list of nodes.
 	graph_node* nodes;
 
-	//Total size (number of available nodes).
-	size_t size;
+	//Last node.
+	graph_node* last_node;
 
 	//Number of used nodes.
 	size_t used;
@@ -42,7 +74,7 @@ struct graph{
 	uint8_t type;
 
 	//Graph iterator.
-	size_t iterator;
+	graph_node** iterator;
 
 	//Helper map.
 	map* helper_map;
@@ -58,7 +90,7 @@ struct graph_node{
 	//Node key.
 	long key;
 
-	//Array of all edges going out of this node.
+	//Linked list of edges.
 	graph_edge* edges;
 
 	//Last edge of the node.
@@ -76,8 +108,8 @@ struct graph_node{
 	//Data contained at this node.
 	void* data;  
 
-	//Helper map.
-	map* helper_map;                                
+	//Next node.
+	graph_node* next;                               
 	
 };
 
@@ -102,9 +134,9 @@ struct graph_edge{
 
 struct graph_walk_config{
 
-	//DFS Helper
-	bool dfs_root_ret;
-
+	//DFS root element.
+	bool dfs_root_returned;
+	
 	//Graph walk queue.
 	queue* bfs_queue;
 

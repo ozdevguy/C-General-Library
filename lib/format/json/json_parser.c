@@ -203,7 +203,7 @@ uint8_t int_json_parse_var_type(json_obj_parser* parser, json_parse_error* error
 
 }
 
-inline json_item* int_json_parse_var_type_string(json_obj_parser* parser, json_parse_error* error){
+json_item* int_json_parse_var_type_string(json_obj_parser* parser, json_parse_error* error){
 
 	json_item* item;
 	utf8_char* current_char;
@@ -245,7 +245,7 @@ inline json_item* int_json_parse_var_type_string(json_obj_parser* parser, json_p
 
 }
 
-inline json_item* int_json_parse_var_type_scalar(json_obj_parser* parser, json_parse_error* error){
+json_item* int_json_parse_var_type_scalar(json_obj_parser* parser, json_parse_error* error){
 
 	size_t s;
 	char* temp;
@@ -325,7 +325,7 @@ inline json_item* int_json_parse_var_type_scalar(json_obj_parser* parser, json_p
 
 }
 
-inline json_item* int_json_parse_var_type_bool(json_obj_parser* parser, json_parse_error* error){
+json_item* int_json_parse_var_type_bool(json_obj_parser* parser, json_parse_error* error){
 
 	json_item* item;
 	utf8_char* current_char;
@@ -372,7 +372,7 @@ inline json_item* int_json_parse_var_type_bool(json_obj_parser* parser, json_par
 
 }
 
-inline json_item* int_json_parse_var_type_object(json_obj_parser* parser, json_parse_error* error){
+json_item* int_json_parse_var_type_object(json_obj_parser* parser, json_parse_error* error){
 
 	json_item* item;
 
@@ -383,7 +383,7 @@ inline json_item* int_json_parse_var_type_object(json_obj_parser* parser, json_p
 
 }
 
-inline json_item* _int_json_parse_var_type_array(json_obj_parser* parser, json_parse_error* error){
+json_item* _int_json_parse_var_type_array(json_obj_parser* parser, json_parse_error* error){
 
 	json_item* item;
 

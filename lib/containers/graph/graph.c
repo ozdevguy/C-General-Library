@@ -21,34 +21,99 @@ graph.c
 
 */
 
+/* START MEMORY ALLOCATION FUNCTIONS */
 
-//Increase the size of the node array.
-static void int_graph_resize(graph* gr, size_t new_size){
+//Add a new memory pool.
+static graph_mem_pool* int_graph_mem_add_pool(graph* gr){
 
-	graph_node* new_nodes;
-	size_t i, ns;
+	graph_mem_pool* pool;
 
-	if(!gr)
-		return;
+	if(gr->pool_size < sizeof(graph_node))
+		return 0;
 
-	if(new_size <= gr->size)
-		return;
+	pool = allocate(gr->ctx, sizeof(graph_mem_pool));
+	pool->pool = allocate(gr->ctx, gr->pool_size);
 
-	ns = sizeof(graph_node) * new_size;
-	new_nodes = allocate(gr->ctx, ns);
+	_list_add(gr->memory_pools, pool);
+	return pool;
 
-	for(i = 0; i < gr->used; i++)
-		new_nodes[i] = gr->nodes[i];
+}
 
-	destroy(gr->ctx, gr->nodes);
+//Delete all pool data.
+static bool int_graph_mem_delete_pools(graph* gr){
 
-	gr->nodes = new_nodes;
-	gr->size = new_size;
+	graph_mem_pool* pool;
+
+	_list_reset_iterator(gr->memory_pools);
+
+	while(_list_has_next(gr->memory_pools)){
+
+		pool = _list_get_next(gr->memory_pools);
+
+		destroy(gr->ctx, pool->pool);
+		destroy(gr->ctx, pool);
+
+	}
+
+	_list_delete(gr->memory_pools);
+
+}
+
+//Delete an edge from the pool, while also modifying edge pointers.
+static void int_graph_mem_delete_edge(graph* gr, graph_edge* target){
+
+	graph_mem_pool* pool;
+	graph_mem_pool_freed *free_block, **current;
+	size_t i, pool_start, edge_start, edge_end;
+
+	edge_start = (size_t)(void*)target;
+	edge_end = edge_start + sizeof(graph_edge);
+
+	//Find the pool where the edge is located.
+	_list_reset_iterator(gr->memory_pools);
+
+	while(_list_has_next(gr->memory_pools)){
+
+		pool = _list_get_next(gr->memory_pools);
+
+		pool_start = (size_t)pool->pool;
+
+		if(pool_start <= edge_start && (pool_start + gr->pool_size) > edge_start)
+			break;
+
+	}
+
+	//Create a new free block entry for this edge.
+	free_block = allocate(gr->ctx, sizeof(graph_mem_pool_freed));
+	free_block->ptr = target;
+
+	//Modify the double pointer.
+	target = target->next;
+
+	//Zero out the memory within the pool
+	edge_start -= pool_start;
+	edge_end -= pool_start;
+
+	for(i = edge_start; i < edge_end; i++)
+		pool->pool[i] = 0;
+
+	current = &gr->free_edges;
+
+	while(*current){
+
+		if(!(*current)->next)
+			break;
+
+		current = &((*current)->next);
+
+	}
+
+	*current = free_block;
 
 }
 
 //Delete a node's edges.
-static void int_graph_node_delete_edges(graph* gr, graph_node* node){
+static void int_graph_mem_delete_edges(graph* gr, graph_node* node){
 
 	graph_edge *current, *tmp;
 
@@ -61,52 +126,209 @@ static void int_graph_node_delete_edges(graph* gr, graph_node* node){
 
 		tmp = current;
 		current = tmp->next;
-		destroy(gr->ctx, tmp);
+		int_graph_mem_delete_edge(gr, tmp);
 
 	}
+
 }
+
+static void int_graph_mem_delete_node(graph* gr, graph_node* target){
+
+	graph_mem_pool* pool;
+	graph_mem_pool_freed *free_block, **current;
+	size_t i, pool_start, node_start, node_end;
+
+	//First, delete all the edges.
+	int_graph_mem_delete_edges(gr, target);
+
+	node_start = (size_t)(void*)target;
+	node_end = node_start + sizeof(graph_node);
+	
+	//Find the pool where the edge is located.
+	_list_reset_iterator(gr->memory_pools);
+
+	while(_list_has_next(gr->memory_pools)){
+
+		pool = _list_get_next(gr->memory_pools);
+
+		pool_start = (size_t)pool->pool;
+
+		if(pool_start <= node_start && (pool_start + gr->pool_size) > node_start)
+			break;
+
+	}
+
+	free_block = allocate(gr->ctx, sizeof(graph_mem_pool_freed));
+	free_block->ptr = target;
+
+	//Modify the double pointer.
+	target = target->next;
+
+	//Zero out the memory.
+	node_start -= pool_start;
+	node_end -= pool_start;
+
+	for(i = node_start; i < node_end; i++)
+		pool->pool[i] = 0;
+
+	//Create a new free block entry for this node.
+	current = &gr->free_nodes;
+
+	while(*current){
+
+		if(!(*current)->next)
+			break;
+
+		current = &((*current)->next);
+
+	}
+
+	*current = free_block;
+
+}
+
+static graph_node* int_graph_mem_create_node(graph* gr){
+
+	graph_mem_pool_freed *current, *tmp;
+	graph_mem_pool* pool;
+	graph_node* ret;
+
+	//First, check to see if there are any free nodes available.
+	current = gr->free_nodes;
+
+	if(current){
+
+		tmp = gr->free_nodes;
+		gr->free_nodes = current->next;
+		ret = current->ptr;
+		destroy(gr->ctx, tmp);
+		return ret;
+
+	}
+	
+	
+	//If there are no free nodes, create one.
+	if(!gr->memory_pools)
+		int_graph_mem_add_pool(gr);
+
+	pool = _list_get(gr->memory_pools, gr->memory_pools->used - 1);
+
+	if((pool->used + sizeof(graph_node)) > gr->pool_size)
+		pool = int_graph_mem_add_pool(gr);
+
+	pool->used += sizeof(graph_node);
+
+	return (graph_node*)(pool->pool + (pool->used - sizeof(graph_node)));
+
+}
+
+static graph_edge* int_graph_mem_create_edge(graph* gr){
+
+	graph_mem_pool_freed *current, *tmp;
+	graph_mem_pool* pool;
+	graph_edge* ret;
+
+	//First, check to see if there are any free edges available.
+	current = gr->free_edges;
+
+	if(current){
+
+		tmp = gr->free_edges;
+		gr->free_edges = current->next;
+		ret = current->ptr;
+		destroy(gr->ctx, tmp);
+		return ret;
+
+	}
+	
+	//If there are no free nodes, create one.
+	if(!gr->memory_pools)
+		int_graph_mem_add_pool(gr);
+
+	pool = _list_get(gr->memory_pools, gr->memory_pools->used - 1);
+
+	if((pool->used + sizeof(graph_edge)) > gr->pool_size)
+		pool = int_graph_mem_add_pool(gr);
+
+	pool->used += sizeof(graph_edge);
+
+	return (graph_edge*)(pool->pool + (pool->used - sizeof(graph_edge)));
+
+}
+
+/* END MEMORY ALLOCATION FUNCTIONS */
 
 static bool int_graph_node_remove_edge(graph* gr, graph_node* node, long key){
 
-	graph_edge *next, *prev = 0, *tmp;
-	bool success = false;
+	graph_edge **current = 0, *target = 0, *prev = 0;
+	bool found = false;
 
 	if(!gr || !node)
 		return false;
 
-	next = node->edges;
+	if(!node->edges)
+		return false;
 
-	while(next){
+	current = &node->edges;
 
-		if(next->to->key == key){
+	while(*current){
 
-			success = true;
+		//Clean up any hanging pointers (from a node removal).
+		if(!(*current)->to){
 
-			tmp = next->next;
-
-			if(tmp){
-
-				*next = *tmp;
-				destroy(gr->ctx, tmp);
-
-			}
-			else{
-
-				node->last_edge = prev;
-				prev->next = 0;
-				destroy(gr->ctx, next);
-
-			}
+			target = *current;
+			*current = (*current)->next;
+			int_graph_mem_delete_edge(gr, target);
 
 		}
 
-		prev = next;
-		next = next->next;
+		if((*current)->to->key == key){
+
+			target = *current;
+			*current = (*current)->next;
+			int_graph_mem_delete_edge(gr, target);
+			found = true;
+
+		}
+
+		if(*current)
+			node->last_edge = *current;
+		else
+			break;
+
+		prev = *current;
+		current = &((*current)->next);
 
 	}
 
-	return success;
+	if(target == node->last_edge)
+		node->last_edge = prev;
 
+	return found;
+
+
+}
+
+static bool int_graph_node_remove_edges(graph* gr, graph_node* node){
+
+	graph_edge *current, *tmp;
+
+	if(!gr || !node)
+		return false;
+
+	current = node->edges;
+
+	while(current){
+
+		tmp = current->next;
+		int_graph_mem_delete_edge(gr, current);
+		current = tmp;
+	}
+
+	node->last_edge = 0;
+	node->edges = 0;
+
+	return true;
 }
 
 //Create a path.
@@ -149,33 +371,39 @@ static void int_graph_build_path(graph* gr, graph_node* node, graph_path* path){
 
 }
 
-graph* _graph_new(standard_library_context* ctx, size_t start_size){
+graph* _graph_new(standard_library_context* ctx){
 
+	graph_mem_pool* pool;
 	graph* gr;
 
 	if(!ctx)
 		return 0;
 
 	gr = allocate(ctx, sizeof(graph));
-	gr->nodes = allocate(ctx, sizeof(graph_node) * start_size);
 	gr->ctx = ctx;
-	gr->size = start_size;
+	gr->pool_size = 4096;
+	gr->memory_pools = _list_new(ctx, 1);
+
+	//Add our first memory pool.
+	int_graph_mem_add_pool(gr);
 
 	return gr;
 
 }
 
+
+
 bool _graph_delete(graph* gr){
 
 	size_t i, j;
+	graph_node* current;
 	graph_edge *c, *ce;
 
 	if(!gr)
 		return false;
 
-	//Loop through each node.
-	for(i = 0; i < gr->size; i++)
-		int_graph_node_delete_edges(gr, gr->nodes + i);
+	//Delete all nodes and edges.
+	int_graph_mem_delete_pools(gr);
 
 	//Check to see if a graph walk object still exists.
 	if(gr->walk){
@@ -186,11 +414,12 @@ bool _graph_delete(graph* gr){
 
 	}
 
-	destroy(gr->ctx, gr->nodes);
 	destroy(gr->ctx, gr);
 
 	return true;
 }
+
+
 
 void _graph_delete_path(graph_path path){
 
@@ -202,15 +431,20 @@ void _graph_delete_path(graph_path path){
 graph_node* _graph_get_node(graph* gr, long key){
 
 	size_t i;
+	graph_node* current;
 
 	if(!gr)
 		return 0;
 
-	for(i = 0; i < gr->used; i++){
+	current = gr->nodes;
 
-		if(gr->nodes[i].key == key)
-			return gr->nodes + i;
-	
+	while(current){
+
+		if(current->key == key)
+			return current;
+
+		current = current->next;
+
 	}
 
 	return 0;
@@ -220,23 +454,27 @@ graph_node* _graph_get_node(graph* gr, long key){
 graph_edge* _graph_get_edge(graph* gr, long from, long to){
 
 	size_t i;
-	graph_node *from_node = 0, *to_node = 0;
+	graph_node *current, *from_node = 0, *to_node = 0;
 	graph_edge* e;
 
 	if(!gr)
 		return 0;
 
 	//Get the from and to nodes.
-	for(i = 0; i < gr->used; i++){
+	current = gr->nodes;
 
-		if(gr->nodes[i].key == from)
-			from_node = gr->nodes + i;
+	while(current){
 
-		else if(gr->nodes[i].key == to)
-			to_node = gr->nodes + i;
+		if(current->key == from)
+			from_node = current;
+
+		else if(current->key == to)
+			to_node = current;
 
 		if(to_node && from_node)
 			break;
+
+		current = current->next;
 
 	}
 
@@ -264,13 +502,17 @@ graph_node* _graph_add_node(graph* gr, long key, void* ptr){
 	if(!gr)
 		return 0;
 
-	if(gr->size == gr->used)
-		int_graph_resize(gr, gr->size * 2);
-
-	c_node = gr->nodes + gr->used++;
+	c_node = int_graph_mem_create_node(gr);
 
 	c_node->key = key;
 	c_node->data = ptr;
+
+	if(gr->last_node)
+		gr->last_node->next = c_node;
+	else
+		gr->nodes = c_node;
+
+	gr->last_node = c_node;
 
 	return c_node;
 
@@ -279,22 +521,27 @@ graph_node* _graph_add_node(graph* gr, long key, void* ptr){
 bool _graph_add_edge(graph* gr, long from, long to, graph_edge** to_edge){
 
 	size_t i;
-	graph_node *n1 = 0, *n2 = 0;
+	graph_node *current = 0, *n1 = 0, *n2 = 0;
 	graph_edge** e;
+	graph_edge* c;
 
 	if(!gr)
 		return false;
 
-	for(i = 0; i < gr->used; i++){
+	current = gr->nodes;
 
-		if(gr->nodes[i].key == from)
-			n1 = gr->nodes + i;
+	while(current){
 
-		if(gr->nodes[i].key == to)
-			n2 = gr->nodes + i;
+		if(current->key == from)
+			n1 = current;
+
+		if(current->key == to)
+			n2 = current;
 
 		if(n1 && n2)
 			break;
+
+		current = current->next;
 
 	}
 
@@ -306,12 +553,12 @@ bool _graph_add_edge(graph* gr, long from, long to, graph_edge** to_edge){
 
 	if(!(*e))
 		e = &n1->edges;
-	
-	else
-		e = &((*e)->next);
-	
 
-	*e = allocate(gr->ctx, sizeof(graph_edge));
+	else		
+		e = &((*e)->next);
+
+	*e = int_graph_mem_create_edge(gr);
+
 	(*e)->to = n2;
 	*to_edge = *e;
 	n1->last_edge = *e;
@@ -323,22 +570,26 @@ bool _graph_add_edge(graph* gr, long from, long to, graph_edge** to_edge){
 bool _graph_add_double_edge(graph* gr, long from, long to, graph_edge** edge_to, graph_edge** edge_back){
 
 	size_t i;
-	graph_node *n1 = 0, *n2 = 0;
+	graph_node *current = 0, *n1 = 0, *n2 = 0;
 	graph_edge** e;
 
 	if(!gr)
 		return false;
 
-	for(i = 0; i < gr->used; i++){
+	current = gr->nodes;
 
-		if(gr->nodes[i].key == from)
-			n1 = gr->nodes + i;
+	while(current){
 
-		if(gr->nodes[i].key == to)
-			n2 = gr->nodes + i;
+		if(current->key == from)
+			n1 = current;
+
+		if(current->key == to)
+			n2 = current;
 
 		if(n1 && n2)
 			break;
+
+		current = current->next;
 
 	}
 
@@ -353,7 +604,7 @@ bool _graph_add_double_edge(graph* gr, long from, long to, graph_edge** edge_to,
 	else
 		e = &((*e)->next);
 	
-	*e = allocate(gr->ctx, sizeof(graph_edge));
+	*e = int_graph_mem_create_edge(gr);
 	(*e)->to = n2;
 	*edge_to = *e;
 	n1->last_edge = *e;
@@ -366,7 +617,7 @@ bool _graph_add_double_edge(graph* gr, long from, long to, graph_edge** edge_to,
 	else
 		e = &((*e)->next);
 	
-	*e = allocate(gr->ctx, sizeof(graph_edge));
+	*e = int_graph_mem_create_edge(gr);
 	(*e)->to = n1;
 	*edge_back = *e;
 	n2->last_edge = *e;
@@ -379,38 +630,35 @@ bool _graph_delete_node(graph* gr, long key){
 
 	size_t i, j;
 	graph_edge **c, *next, *tmp;
-	graph_node* node;
+	graph_node **current, *node, *prev = 0;
 	bool node_found = false;
 
 	if(!gr)
 		return false;
 
-	for(i = 0; i < gr->used; i++){
+	current = &(gr->nodes);
 
-		//Remove the designated node.
-		if(gr->nodes[i].key == key){
+	while(*current){
 
+		if((*current)->key == key){
+
+			node = *current;
+			*current = (*current)->next;
+			int_graph_node_remove_edges(gr, node);
+			int_graph_mem_delete_node(gr, node);
 			node_found = true;
 
-			int_graph_node_delete_edges(gr, gr->nodes + i);
-
-			for(j = (i + 1); j < gr->used; j++)
-				gr->nodes[j - 1] = gr->nodes[j];
-
-			node = gr->nodes + gr->used-- - 1;
-
-			node->key = 0;
-			node->edges = 0;
-			node->parent = 0;
-			node->level = 0;
-			node->data = 0;
-		
 		}
 		else
-			int_graph_node_remove_edge(gr, gr->nodes + i, key);
+			int_graph_node_remove_edge(gr, node, key);
 
-		
+		prev = *current;
+		current = &((*current)->next);
+
 	}
+
+	if(gr->last_node == node)
+		gr->last_node = prev;
 
 	return node_found;
 
@@ -419,35 +667,81 @@ bool _graph_delete_node(graph* gr, long key){
 bool _graph_delete_edge(graph* gr, long from, long to){
 
 	size_t i;
-	graph_node* n;
+	graph_node* current;
 
 	if(!gr)
 		return false;
 
-	for(i = 0; i < gr->used; i++){
+	current = gr->nodes;
 
-		if(gr->nodes[i].key == from){
+	while(current){
 
-			return int_graph_node_remove_edge(gr, gr->nodes + i, to);
+		if(current->key == from)
+			return int_graph_node_remove_edge(gr, current, to);
 
-		}
+
+		current = current->next;
+
 	}
 
 	return false;
 
 }
 
+bool _graph_delete_double_edge(graph* gr, long from, long to){
+
+	size_t i;
+	uint8_t c;
+	graph_node* current;
+
+	if(!gr)
+		return false;
+
+	c = 0;
+
+	current = gr->nodes;
+
+	while(current && c != 2){
+
+		if(current->key == from){
+
+			int_graph_node_remove_edge(gr, current, to);
+			c++;
+
+		}
+		else if(current->key == to){
+
+			int_graph_node_remove_edge(gr, current, from);
+			c++;
+		}
+
+		current = current->next;
+
+	}
+
+	if(c != 2)
+		return false;
+
+	return true;
+
+}
+
 void _graph_clear_paths(graph* gr){
 
 	size_t i;
+	graph_node* current;
 
 	if(!gr)
 		return;
 
-	for(i = 0; i < gr->used; i++){
+	current = gr->nodes;
 
-		gr->nodes[i].parent = 0;
-		gr->nodes[i].level = 0;
+	while(current){
+
+		current->parent = 0;
+		current->level = 0;
+
+		current = current->next;
 
 	}
 }
@@ -463,15 +757,25 @@ bool _graph_bfs(graph* gr, long start, long end, graph_path* path){
 		return false;
 
 	//Find the root.
-	for(i = 0; i < gr->used; i++){
+	current = gr->nodes;
 
-		if(gr->nodes[i].key == start)
-			root = gr->nodes + i;
+	while(current){
+
+		if(current->key == start){
+
+			root = current;
+			break;
+
+		}
+
+		current = current->next;
 
 	}
 
 	if(!root)
 		return false;
+
+	current = 0;
 
 	//Set the root to level 1.
 	root->level = 1;
@@ -531,15 +835,25 @@ bool _graph_dfs(graph* gr, long start, long end, graph_path* path){
 		return false;
 
 	//Find the root.
-	for(i = 0; i < gr->used; i++){
+	current = gr->nodes;
 
-		if(gr->nodes[i].key == start)
-			root = gr->nodes + i;
+	while(current){
+
+		if(current->key == start){
+
+			root = current;
+			break;
+
+		}
+
+		current = current->next;
 
 	}
 
 	if(!root)
 		return false;
+
+	current = 0;
 
 	//Set the root to level 1.
 	root->level = 1;
@@ -596,7 +910,7 @@ void _graph_reset_iterator(graph* gr){
 	if(!gr)
 		return;
 
-	gr->iterator = 0;
+	gr->iterator = &(gr->nodes);
 
 }
 
@@ -605,7 +919,7 @@ bool _graph_has_next(graph* gr){
 	if(!gr)
 		return false;
 
-	if(gr->iterator < gr->used)
+	if(*(gr->iterator))
 		return true;
 
 	return false;
@@ -614,18 +928,24 @@ bool _graph_has_next(graph* gr){
 
 graph_node* _graph_get_next(graph* gr){
 
+	graph_node* current;
+
 	if(!gr)
 		return 0;
 
-	if(gr->iterator >= gr->used)
+	if(!*(gr->iterator))
 		return 0;
 
-	return gr->nodes + gr->iterator++;
+	current = *(gr->iterator);
+	gr->iterator = &(current->next);
+
+	return current;
 
 }
 
 bool _graph_walk_init(graph* gr, long root){
 
+	graph_node* current;
 	graph_walk_config* config;
 	size_t i;
 
@@ -636,27 +956,35 @@ bool _graph_walk_init(graph* gr, long root){
 
 	if(gr->walk){
 
-		_queue_reset(gr->walk->bfs_queue);
-		_stack_reset(gr->walk->dfs_stack);
-		return false;
+		if(gr->walk->bfs_queue){
 
+			_queue_delete(gr->walk->bfs_queue);
+			_stack_delete(gr->walk->dfs_stack);
+
+		}
 	}
 
-	for(i = 0; i < gr->used; i++){
+	current = gr->nodes;
 
-		if(gr->nodes[i].key == root){
+	while(current){
 
-			gr->nodes[i].level = 1;
+		if(current->key == root){
+
+			current->level = 1;
 			config = allocate(gr->ctx, sizeof(graph_walk_config));
 			config->bfs_queue = _queue_new(gr->ctx, 10);
 			config->dfs_stack = _stack_new(gr->ctx, 10);
-			_queue_enqueue(config->bfs_queue, gr->nodes + i);
-			_stack_push(config->dfs_stack, gr->nodes + i);
+			config->dfs_root_returned = false;
+			_queue_enqueue(config->bfs_queue, current);
+			_stack_push(config->dfs_stack, current);
 			gr->walk = config;
 
 			return true;
 
 		}
+
+		current = current->next;
+
 	}
 
 	return false;
@@ -683,7 +1011,6 @@ void _graph_walk_dfs_stack_reset(graph* gr){
 	if(!gr->walk)
 		return;
 
-	gr->walk->dfs_root_ret = false;
 	_stack_reset(gr->walk->dfs_stack);
 	
 }
@@ -702,10 +1029,10 @@ graph_node* _graph_walk_dfs_next(graph* gr){
 
 	dfs_stack = gr->walk->dfs_stack;
 
-	if(!gr->walk->dfs_root_ret){
+	if(!gr->walk->dfs_root_returned){
 
-		gr->walk->dfs_root_ret = true;
-		return (graph_node*)_stack_peek(dfs_stack);
+		gr->walk->dfs_root_returned = true;
+		return _stack_peek(dfs_stack);
 
 	}
 
@@ -736,6 +1063,15 @@ graph_node* _graph_walk_dfs_next(graph* gr){
 		_stack_pop(dfs_stack);
 
 	}
+
+	_queue_delete(gr->walk->bfs_queue);
+	_stack_delete(gr->walk->dfs_stack);
+
+	gr->walk->bfs_queue = 0;
+	gr->walk->dfs_stack = 0;
+	
+	destroy(gr->ctx, gr->walk);
+	gr->walk = 0;
 
 	return 0;
 
@@ -780,20 +1116,14 @@ graph_node* _graph_walk_bfs_next(graph* gr){
 
 	}
 
-	return 0;
-}
-
-void _graph_walk_end(graph* gr){
-
-	if(!gr)
-		return;
-
-	if(!gr->walk)
-		return;
-
 	_queue_delete(gr->walk->bfs_queue);
 	_stack_delete(gr->walk->dfs_stack);
+
+	gr->walk->bfs_queue = 0;
+	gr->walk->dfs_stack = 0;
+	
 	destroy(gr->ctx, gr->walk);
+	gr->walk = 0;
 
+	return 0;
 }
-

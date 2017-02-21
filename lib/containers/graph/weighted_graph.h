@@ -24,7 +24,7 @@ weighted_graph.h
 /* WEIGHTED GRAPH */
 
 //Create a new weighted, directed graph.
-graph* _weighted_graph_new(standard_library_context*, size_t); //FINISHED
+graph* _weighted_graph_new(standard_library_context*); //FINISHED
 
 //Delete a weighted, directed graph.
 bool _weighted_graph_delete(graph*); //FINISHED
