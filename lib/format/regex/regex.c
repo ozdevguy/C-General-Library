@@ -13,61 +13,273 @@ regex_node_descriptor* int_regex_create_node_descriptor(standard_library_context
 
 }
 
-//Add the character after an escape (TERMINAL).
-bool int_regex_add_post_esc(regex_compiled* obj){
-
-	regex_node_descriptor* descriptor;
-	utf8_char* character;
+bool int_regex_build_tree(regex_compiled* obj){
+ 
+	graph_node *n1, *n2, *n3;
 	graph_edge* edge;
-	graph_node* node;
+	regex_node_descriptor *descriptor, *tmp;
 
-	if(!_string_has_next(obj->regex))
-		return false;
+	descriptor = ((graph_node*)_stack_peek(obj->parse_stack))->data;
 
-	character = _string_get_next(obj->regex);
+	if(descriptor->type == REGEX_CHAR){
 
-	//Create a new descriptor for this character.
-	descriptor = int_regex_create_node_descriptor(obj->regex->ctx, REGEX_CHAR, character->value, character->value);
+		n1 = _stack_pop(obj->parse_stack);
+		obj->last_popped = n1;
+		n2 = _stack_peek(obj->parse_stack);
 
-	//Add this descriptor to the parse tree.
-	node = _graph_add_node(obj->parse_tree, obj->key++, descriptor);
+		_graph_add_edge(obj->parse_tree, n2->key, n1->key, &edge);
 
-	//Create the edge between the new node and its parent.
-	_graph_add_edge(obj->parse_tree, obj->parent_node->key, node->key, &edge);
+		return true;
 
-	node->parent = obj->parent_node;
-	obj->child_node = node;
+	}
+
+	if(descriptor->type == REGEX_BRACKET_END){
+
+		//Pop the bracket ending descriptor off the stack.
+		_stack_pop(obj->parse_stack);
+
+		//Get the bracket node.
+		n1 = _stack_pop(obj->parse_stack);
+		n2 = _stack_peek(obj->parse_stack);
+
+		while(n1){
+
+			obj->last_popped = n1;
+
+			_graph_add_edge(obj->parse_tree, n2->key, n1->key, &edge);
+
+			if(((regex_node_descriptor*)(n1->data))->type != REGEX_BRACKET){
+
+				n1 = _stack_pop(obj->parse_stack);
+				n2 = _stack_peek(obj->parse_stack);
+
+			}
+			else
+				break;
+
+		}
+
+		if(!n1)
+			return false;
+
+		//Check to see if the next item in the stack is a NOT descriptor.
+		n1 = _stack_peek(obj->parse_stack);
+
+		if(((regex_node_descriptor*)(n1->data))->type == REGEX_NOT){
+
+			n1 = _stack_pop(obj->parse_stack); //REGEX NOT
+			n2 = _stack_peek(obj->parse_stack); //PARENT
+			n3 = obj->last_popped; //BRACKET EXP
+
+			_graph_delete_edge(obj->parse_tree, n2->key, n3->key);
+			_graph_add_edge(obj->parse_tree, n2->key, n1->key, &edge);
+			_graph_add_edge(obj->parse_tree, n1->key, n3->key, &edge);
+
+		}
+
+
+	}
+
+	if(descriptor->type == REGEX_CAPTURE_END){
+
+		//Pop the bracket ending descriptor off the stack.
+		_stack_pop(obj->parse_stack);
+
+		//Get the bracket node.
+
+		n1 = _stack_pop(obj->parse_stack);
+		n2 = _stack_peek(obj->parse_stack);
+
+		while(n1){
+
+			obj->last_popped = n1;
+
+			_graph_add_edge(obj->parse_tree, n2->key, n1->key, &edge);
+
+			if(((regex_node_descriptor*)(n1->data))->type != REGEX_CAPTURE){
+
+				n1 = _stack_pop(obj->parse_stack);
+				n2 = _stack_peek(obj->parse_stack);
+
+			}
+			else
+				break;
+
+		}
+
+		if(!n1)
+			return false;
+
+		//Get the parent.
+		n2 = _stack_peek(obj->parse_stack);
+	}
+
+	//Quantifiers.
+	if(descriptor->type == REGEX_ZERO_OR_MORE || descriptor->type == REGEX_ONE_OR_MORE || descriptor->type == REGEX_ZERO_OR_ONE){
+
+		n1 = _stack_pop(obj->parse_stack); //REGEX ZERO OR MORE
+		n2 = _stack_peek(obj->parse_stack); //REGEX PARENT
+		n3 = obj->last_popped; //REGEX BRACKET
+
+		obj->last_popped = n1;
+
+		_graph_delete_edge(obj->parse_tree, n2->key, n3->key);
+		_graph_add_edge(obj->parse_tree, n2->key, n1->key, &edge);
+		_graph_add_edge(obj->parse_tree, n1->key, n3->key, &edge);
+
+		return true;
+
+	}
+
+	//Or
+	if(descriptor->type == REGEX_OR){
+
+		tmp = int_regex_create_node_descriptor(obj->regex->ctx, REGEX_OR_SUB, 0, 0);
+		n1 = _graph_add_node(obj->parse_tree, obj->key++, tmp); //OR SUBEXPRESSION FOR FIRST PORTION.
+		n2 = _stack_pop(obj->parse_stack); //OR
+		n3 = _stack_peek(obj->parse_stack); //PARENT
+
+		//Give the parent's edges to the subexpression.
+		n1->edges = n3->edges;
+		n3->edges = 0;
+		n3->last_edge = 0;
+
+		//Create an edge between the or and the subexp.
+		_graph_add_edge(obj->parse_tree, n2->key, n1->key, &edge);
+		
+		tmp = int_regex_create_node_descriptor(obj->regex->ctx, REGEX_OR_SUB, 0, 0);
+
+		_stack_push(obj->parse_stack, n2);
+		_stack_push(obj->parse_stack, _graph_add_node(obj->parse_tree, obj->key++, tmp));
+
+		return true;
+
+	}
 
 	return true;
 
 }
 
-//Add a new character.
-bool int_regex_add_character(regex_compiled* obj){
+void int_regex_roll_stack(regex_compiled* obj){
+
+	graph_node *n1, *n2;
+	graph_edge* edge;
+
+	n1 = _stack_pop(obj->parse_stack);
+	n2 = _stack_peek(obj->parse_stack);
+
+	while(n1){
+
+		if(n2)
+			_graph_add_edge(obj->parse_tree, n2->key, n1->key, &edge);
+		else
+			break;
+
+		n1 = _stack_pop(obj->parse_stack);
+		n2 = _stack_peek(obj->parse_stack);
+
+	}
+
+}
+
+bool int_regex_match_zero_more(regex_compiled* obj){
 
 	regex_node_descriptor* descriptor;
-	utf8_char *character, *character2;
-	graph_edge* edge;
-	graph_node* node;
-	uint32_t start = 0;
-	uint32_t end = 0;
 
-	_string_iterator_rewind(obj->regex);
-	character = _string_get_next(obj->regex);
-	start = character->value;
+	descriptor =  int_regex_create_node_descriptor(obj->regex->ctx, REGEX_ZERO_OR_MORE, 0, 0);
 
-	//Check to see if this is a range.
-	character2 = _string_get_next(obj->regex);
+	_stack_push(obj->parse_stack, _graph_add_node(obj->parse_tree, obj->key++, descriptor));
 
-	if(character2){
+	return int_regex_build_tree(obj);
 
-		if(character2->value == 45){
+}
 
-			if(!_string_has_next(obj->regex))
-				return false;
+bool int_regex_match_one_more(regex_compiled* obj){
 
-			character2 = _string_get_next(obj->regex);
-			end = character2->value;
+	regex_node_descriptor* descriptor;
+
+	descriptor =  int_regex_create_node_descriptor(obj->regex->ctx, REGEX_ONE_OR_MORE, 0, 0);
+
+	_stack_push(obj->parse_stack, _graph_add_node(obj->parse_tree, obj->key++, descriptor));
+
+	return int_regex_build_tree(obj);
+
+}
+
+bool int_regex_match_zero_one(regex_compiled* obj){
+
+	regex_node_descriptor* descriptor;
+
+	descriptor =  int_regex_create_node_descriptor(obj->regex->ctx, REGEX_ZERO_OR_ONE, 0, 0);
+
+	_stack_push(obj->parse_stack, _graph_add_node(obj->parse_tree, obj->key++, descriptor));
+
+	return int_regex_build_tree(obj);
+
+}
+
+bool int_regex_match_or(regex_compiled* obj){
+
+	regex_node_descriptor* descriptor;
+
+	descriptor =  int_regex_create_node_descriptor(obj->regex->ctx, REGEX_OR, 0, 0);
+
+	_stack_push(obj->parse_stack, _graph_add_node(obj->parse_tree, obj->key++, descriptor));
+
+	return int_regex_build_tree(obj);
+
+}
+
+bool int_regex_end_capture(regex_compiled* obj){
+
+	regex_node_descriptor* descriptor;
+
+	descriptor =  int_regex_create_node_descriptor(obj->regex->ctx, REGEX_CAPTURE_END, 0, 0);
+
+	_stack_push(obj->parse_stack, _graph_add_node(obj->parse_tree, obj->key++, descriptor));
+
+	return int_regex_build_tree(obj);
+
+}
+
+bool int_regex_start_capture(regex_compiled* obj){
+
+	regex_node_descriptor* descriptor;
+
+	descriptor =  int_regex_create_node_descriptor(obj->regex->ctx, REGEX_CAPTURE, 0, 0);
+
+	_stack_push(obj->parse_stack, _graph_add_node(obj->parse_tree, obj->key++, descriptor));
+
+	return int_regex_build_tree(obj);
+
+}
+
+bool int_regex_end_bracket(regex_compiled* obj){
+
+	regex_node_descriptor* descriptor;
+
+	descriptor =  int_regex_create_node_descriptor(obj->regex->ctx, REGEX_BRACKET_END, 0, 0);
+
+	_stack_push(obj->parse_stack, _graph_add_node(obj->parse_tree, obj->key++, descriptor));
+
+	return int_regex_build_tree(obj);
+
+}
+
+bool int_regex_start_bracket(regex_compiled* obj){
+
+	utf8_char* character;
+	regex_node_descriptor *descriptor, *notdesc;
+
+	//Check to see if this is a negation.
+	if(_string_has_next(obj->regex)){
+
+		character = _string_get_next(obj->regex);
+
+		if(character->value == 94){
+
+			notdesc =  int_regex_create_node_descriptor(obj->regex->ctx, REGEX_NOT, 0, 0);
+			_stack_push(obj->parse_stack, _graph_add_node(obj->parse_tree, obj->key++, notdesc));
 
 		}
 		else
@@ -75,228 +287,72 @@ bool int_regex_add_character(regex_compiled* obj){
 
 	}
 
-	//Create a new descriptor for this character.
-	descriptor = int_regex_create_node_descriptor(obj->regex->ctx, REGEX_CHAR, start, end);
+	descriptor =  int_regex_create_node_descriptor(obj->regex->ctx, REGEX_BRACKET, 0, 0);
 
-	node = _graph_add_node(obj->parse_tree, obj->key++, descriptor);
+	_stack_push(obj->parse_stack, _graph_add_node(obj->parse_tree, obj->key++, descriptor));
 
-	_graph_add_edge(obj->parse_tree, obj->parent_node->key, node->key, &edge);
-
-	node->parent = obj->parent_node;
-	obj->child_node = node;
-
-	return true;
+	return int_regex_build_tree(obj);
 
 }
 
-//Add an open bracket descriptor.
-bool int_regex_start_bracket(regex_compiled* obj){
+bool int_regex_add_character(regex_compiled* obj){
 
-	regex_node_descriptor* descriptor;
 	utf8_char* character;
-	graph_edge* edge;
-	graph_node* node;
+	regex_node_descriptor* descriptor;
+	uint32_t min, max;
 
-	if(!_string_has_next(obj->regex))
-		return false;
-
-	//Check to see if the opening bracket is followed by a caret (for NOT).
+	_string_iterator_rewind(obj->regex);
 	character = _string_get_next(obj->regex);
+	min = character->value;
+	max = min;
 
-	//If this is a not expression...
-	if(character->value == 94){
+	//Check to see if this is a range.
+	if(_string_has_next(obj->regex)){
 
-		descriptor = int_regex_create_node_descriptor(obj->regex->ctx, REGEX_NOT, 0, 0);
+		character = _string_get_next(obj->regex);
 
-		node = _graph_add_node(obj->parse_tree, obj->key++, descriptor);
+		if(character->value == 45){
 
-		_graph_add_edge(obj->parse_tree, obj->parent_node->key, node->key, &edge);
+			character = _string_get_next(obj->regex);
 
-		node->parent = obj->parent_node;
-		obj->parent_node = node;
-		obj->child_node = node;
+			if(!character)
+				return false;
+
+			max = character->value;
+
+		}
+		else
+			_string_iterator_rewind(obj->regex);
 
 	}
 
+	descriptor =  int_regex_create_node_descriptor(obj->regex->ctx, REGEX_CHAR, min, max);
 
+	_stack_push(obj->parse_stack, _graph_add_node(obj->parse_tree, obj->key++, descriptor));
 
-	//Create a new descriptor.
-	descriptor = int_regex_create_node_descriptor(obj->regex->ctx, REGEX_BRACKET, 0, 0);
-
-	//Add this descriptor to the parse tree.
-	node = _graph_add_node(obj->parse_tree, obj->key++, descriptor);
-
-	//Create the edge between the new node and its parent.
-	_graph_add_edge(obj->parse_tree, obj->parent_node->key, node->key, &edge);
-
-	node->parent = obj->parent_node;
-	obj->parent_node = node;
-	obj->child_node = node;
-
-	return true;
-
+	return int_regex_build_tree(obj);
 }
 
-//Close an open bracket.
-bool int_regex_end_bracket(regex_compiled* obj){
+bool int_regex_add_post_esc(regex_compiled* obj){
 
-	if(((regex_node_descriptor*)(obj->parent_node->data))->type != REGEX_BRACKET)
-		return false;
-
-	obj->child_node = obj->parent_node;
-	obj->parent_node = obj->parent_node->parent;
-
-	return true;
-
-}
-
-bool int_regex_start_capture(regex_compiled* obj){
-
+	utf8_char* character;
 	regex_node_descriptor* descriptor;
-	graph_edge* edge;
-	graph_node* node;
 
 	if(!_string_has_next(obj->regex))
 		return false;
 
-	//Create a new descriptor.
-	descriptor = int_regex_create_node_descriptor(obj->regex->ctx, REGEX_CAPTURE, 0, 0);
-
-	node = _graph_add_node(obj->parse_tree, obj->key++, descriptor);
-
-	//Create the edge between the new node and its parent.
-	_graph_add_edge(obj->parse_tree, obj->parent_node->key, node->key, &edge);
-
-	node->parent = obj->parent_node;
-	obj->parent_node = node;
-	obj->child_node = node;
-
-	return true;
+	return int_regex_add_character(obj);
 
 }
 
-bool int_regex_end_capture(regex_compiled* obj){
 
-	if(((regex_node_descriptor*)(obj->parent_node->data))->type != REGEX_CAPTURE)
-		return false;
-
-	obj->child_node = obj->parent_node;
-	obj->parent_node = obj->parent_node->parent;
-
-	return true;
-
-}
-
-bool int_regex_match_zero_more(regex_compiled* obj){
-
-	regex_node_descriptor* descriptor;
-	graph_edge* edge;
-	graph_node* node;
-
-	//Create a new descriptor.
-	descriptor = int_regex_create_node_descriptor(obj->regex->ctx, REGEX_ZERO_OR_MORE, 0, 0);
-
-	node = _graph_add_node(obj->parse_tree, obj->key++, descriptor);
-
-	if(!obj->parent_node || !obj->child_node)
-		return false;
-
-	//Now, we need to eliminate the edge between the most recent nodes.
-	_graph_delete_edge(obj->parse_tree, obj->parent_node->key, obj->child_node->key);
-
-	//Create an edge between the parent node and the new node.
-	_graph_add_edge(obj->parse_tree, obj->parent_node->key, node->key, &edge);
-
-	//Create an edge between the new node and the child node.
-	_graph_add_edge(obj->parse_tree, node->key, obj->child_node->key, &edge);
-
-	node->parent = obj->parent_node;
-
-	//Now, modify the parent pointer of the child node.
-	obj->child_node->parent = node;
-
-	//Set the child node to the parent node.
-	obj->child_node = obj->parent_node;
-
-	return true;
-
-}
-
-bool int_regex_match_one_more(regex_compiled* obj){
-
-	regex_node_descriptor* descriptor;
-	graph_edge* edge;
-	graph_node* node;
-
-	//Create a new descriptor.
-	descriptor = int_regex_create_node_descriptor(obj->regex->ctx, REGEX_ONE_OR_MORE, 0, 0);
-
-	node = _graph_add_node(obj->parse_tree, obj->key++, descriptor);
-
-	if(!obj->parent_node || !obj->child_node)
-		return false;
-
-	//Now, we need to eliminate the edge between the most recent nodes.
-	_graph_delete_edge(obj->parse_tree, obj->parent_node->key, obj->child_node->key);
-
-	//Create an edge between the parent node and the new node.
-	_graph_add_edge(obj->parse_tree, obj->parent_node->key, node->key, &edge);
-
-	//Create an edge between the new node and the child node.
-	_graph_add_edge(obj->parse_tree, node->key, obj->child_node->key, &edge);
-
-	node->parent = obj->parent_node;
-
-	//Now, modify the parent pointer of the child node.
-	obj->child_node->parent = node;
-
-	//Set the child node to the parent node.
-	obj->child_node = obj->parent_node;
-
-	return true;
-
-}
-
-bool int_regex_match_zero_one(regex_compiled* obj){
-
-	regex_node_descriptor* descriptor;
-	graph_edge* edge;
-	graph_node* node;
-
-	//Create a new descriptor.
-	descriptor = int_regex_create_node_descriptor(obj->regex->ctx, REGEX_ZERO_OR_ONE, 0, 0);
-
-	node = _graph_add_node(obj->parse_tree, obj->key++, descriptor);
-
-	if(!obj->parent_node || !obj->child_node)
-		return false;
-
-	//Now, we need to eliminate the edge between the most recent nodes.
-	_graph_delete_edge(obj->parse_tree, obj->parent_node->key, obj->child_node->key);
-
-	//Create an edge between the parent node and the new node.
-	_graph_add_edge(obj->parse_tree, obj->parent_node->key, node->key, &edge);
-
-	//Create an edge between the new node and the child node.
-	_graph_add_edge(obj->parse_tree, node->key, obj->child_node->key, &edge);
-
-	node->parent = obj->parent_node;
-
-	//Now, modify the parent pointer of the child node.
-	obj->child_node->parent = node;
-
-	//Set the child node to the parent node.
-	obj->child_node = obj->parent_node;
-
-	return true;
-
-}
-
-//Make a decision based on the next character in the sequence.
+//Make a compilation decision based on the next character in the sequence.
 bool int_regex_next_op(regex_compiled* obj){
 
 	utf8_char* character;
 	bool result;
+
+	_string_reset_iterator(obj->regex);
 
 	while(_string_has_next(obj->regex)){
 
@@ -336,6 +392,10 @@ bool int_regex_next_op(regex_compiled* obj){
 				result = int_regex_match_one_more(obj);
 				break;
 
+			case 124:
+				result = int_regex_match_or(obj);
+				break;
+
 			default:
 				result = int_regex_add_character(obj);
 				break;
@@ -347,60 +407,64 @@ bool int_regex_next_op(regex_compiled* obj){
 
 	}
 
+	//Roll up the stack.
+	int_regex_roll_stack(obj);
+
 	return true;
 
 }
 
 
-//Create a new regex object.
-
-
 regex_compiled* _regex_new(string* input){
 
-	regex_compiled* obj;
-	regex_node_descriptor* root;
-	string* regex;
+	graph_node* root;
+	regex_compiled* compiler_obj;
+	regex_node_descriptor* root_descriptor;
 
 	if(!input)
 		return 0;
 
-	obj = allocate(input->ctx, sizeof(regex_compiled));
-	obj->parse_tree = _graph_new(input->ctx);
-	regex = _string_new(input->ctx);
-	_string_copy(regex, input);
-	_string_reset_iterator(regex);
-	obj->regex = regex;
+	compiler_obj = allocate(input->ctx, sizeof(regex_compiled));
+	compiler_obj->parse_tree = _graph_new(input->ctx);
+	compiler_obj->parse_stack = _stack_new(input->ctx, 10);
+	compiler_obj->regex = _string_new(input->ctx);
+	_string_copy(compiler_obj->regex, input);
 
-	//Create the root REGEX node in the graph/tree.
-	root = allocate(input->ctx, sizeof(regex_node_descriptor));
-	root->type = REGEX_ROOT;
+	root_descriptor = int_regex_create_node_descriptor(input->ctx, REGEX_ROOT, 0, 0);
+	root = _graph_add_node(compiler_obj->parse_tree, compiler_obj->key++, root_descriptor);
 
-	obj->parent_node =  _graph_add_node(obj->parse_tree, obj->key++, root);
-	obj->child_node = obj->parent_node;
-	int_regex_next_op(obj);
+	_stack_push(compiler_obj->parse_stack, root);
 
-	return obj;
+	compiler_obj->success = int_regex_next_op(compiler_obj);
+
+	return compiler_obj;
 
 }
 
-void _regex_delete(regex_compiled* obj){
+void _regex_delete(regex_compiled* compiled){
 
-	graph_node* current;
-	regex_node_descriptor* desc;
 	standard_library_context* ctx;
+	graph_node* current;
 
-	if(!obj)
+	if(!compiled)
 		return;
 
-	ctx = obj->parse_tree->ctx;
+	ctx = compiled->regex->ctx;
 
-	_graph_walk_init(obj->parse_tree, 0);
+	_graph_reset_iterator(compiled->parse_tree);
 
-	while((current = _graph_walk_dfs_next(obj->parse_tree)))
+	while(_graph_has_next(compiled->parse_tree)){
+
+		current = _graph_get_next(compiled->parse_tree);
 		destroy(ctx, current->data);
-	
-	_graph_delete(obj->parse_tree);
-	_string_delete(obj->regex);
-	destroy(ctx, obj);
+
+	}
+
+	_graph_delete(compiled->parse_tree);
+	_stack_delete(compiled->parse_stack);
+	_string_delete(compiled->regex);
+
+	destroy(ctx, compiled);
 
 }
+

@@ -11,7 +11,10 @@ void main(int argc, char* argv[]){
 
 	regex_compiled* regex;
 
-	char* test = "([ABCa-z0-9]*\\_[ab]+)";
+	char* test = "([^A-Za-z0-9]*test|123+)";
+
+	string* source = _string_new_fbytes(ctx, "Hello, world!\n");
+
 	//char* test = "ABC";
 
 	string* rs = _string_new_fbytes(ctx, test);
@@ -55,7 +58,7 @@ void main(int argc, char* argv[]){
 				break;
 			case REGEX_ZERO_OR_MORE:
 				printf("*\n");
-
+				break;
 			case REGEX_ONE_OR_MORE:
 				printf("+\n");
 				break;
@@ -65,6 +68,15 @@ void main(int argc, char* argv[]){
 			case REGEX_CHAR:
 				printf("CHARACTER: %c, END: %c\n", (char)desc->start, (char)desc->end);
 				break;
+			case REGEX_NOT:
+				printf("NOT\n");
+				break;
+			case REGEX_OR:
+				printf("OR\n");
+				break;
+			case REGEX_OR_SUB:
+				printf("SUB OR\n");
+				break;
 			default:
 				printf("N/A: %d\n", desc->type);
 				break;
@@ -72,8 +84,10 @@ void main(int argc, char* argv[]){
 		}
 	}
 
+	long pos = _regex_position(regex, source, 0);
 
 	_regex_delete(regex);
+	_string_delete(source);
 	_string_delete(rs);
 	_ctx_delete(ctx);
 
