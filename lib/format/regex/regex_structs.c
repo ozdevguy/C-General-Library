@@ -1,22 +1,57 @@
 typedef struct regex_compiled regex_compiled;
 typedef struct regex_results regex_results;
-typedef struct regex_node_descriptor regex_node_descriptor;
+typedef struct regex_token regex_token;
+typedef struct regex_analyzer regex_analyzer;
+typedef struct regex_capture regex_capture;
 
-enum{REGEX_ROOT, REGEX_BRACKET, REGEX_BRACKET_END, REGEX_CAPTURE, REGEX_CAPTURE_END, REGEX_NOT, REGEX_ZERO_OR_ONE, REGEX_ZERO_OR_MORE, REGEX_ONE_OR_MORE, REGEX_STRING_START, REGEX_STRING_END, REGEX_TERMINAL_VAL, REGEX_RANGE, REGEX_CHAR, REGEX_OR, REGEX_OR_SUB};
+enum{REGEX_ROOT, REGEX_BRACKET, REGEX_NOT_BRACKET, REGEX_BRACKET_END, REGEX_CAPTURE, REGEX_NON_CAPTURE, REGEX_CAPTURE_END, REGEX_MIN_MAX, REGEX_ZERO_OR_ONE, REGEX_ZERO_OR_MORE, REGEX_ONE_OR_MORE, REGEX_CHAR, REGEX_OR, REGEX_OR_SUB};
+
+struct regex_result{
+
+	//Starting position.
+	size_t start_pos;
+
+	//List of captures.
+	list* captures;
+	
+};
+
+struct regex_capture{
+
+	//Capture string.
+	string* capture;
+
+	//Capture start position.
+	size_t start;
+
+	//Capture end position.
+	size_t end;
+
+};
 
 struct regex_analyzer{
+
+	//Current capture group.
+	stack* current_capture;
+
+	//Capture swap stack.
+	stack* swap_stack;
+
+	//Temporary stack pointer.
+	stack* tmp_stack;
+
+	//Input string.
+	string* input;
 
 	//List of capture group strings.
 	list* captures;
 
-	//Stack for use by capture group.
-	stack* capture_group;
-
-	//Are we currently within the confines of square brackets?
-	bool in_brackets;
-
+	//Position.
+	long pos;
 
 };
+
+
 
 struct regex_compiled{
 
@@ -40,7 +75,7 @@ struct regex_compiled{
 
 };
 
-struct regex_node_descriptor{
+struct regex_token{
 
 	//Node type.
 	uint8_t type;

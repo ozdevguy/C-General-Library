@@ -1127,3 +1127,39 @@ graph_node* _graph_walk_bfs_next(graph* gr){
 
 	return 0;
 }
+
+void _graph_compute_parents_dfs(graph* gr){
+
+	if(!gr)
+		return;
+
+	if(!gr->nodes)
+		return;
+
+	_graph_walk_init(gr, gr->nodes->key);
+
+	while(_graph_walk_dfs_next(gr)){
+
+		//DO NOTHING...
+
+	}
+
+}
+
+void _graph_compute_parents_bfs(graph* gr){
+
+	if(!gr)
+		return;
+
+	if(!gr->nodes)
+		return;
+
+	_graph_walk_init(gr, gr->nodes->key);
+
+	while(_graph_walk_bfs_next(gr)){
+
+		//DO NOTHING
+
+	}
+	
+}

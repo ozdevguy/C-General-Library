@@ -1,9 +1,9 @@
 
-regex_node_descriptor* int_regex_create_node_descriptor(standard_library_context* ctx, uint8_t type, uint32_t start, uint32_t end){
+regex_token* int_regex_create_node_descriptor(standard_library_context* ctx, uint8_t type, uint32_t start, uint32_t end){
 
-	regex_node_descriptor* descriptor;
+	regex_token* descriptor;
 
-	descriptor = allocate(ctx, sizeof(regex_node_descriptor));
+	descriptor = allocate(ctx, sizeof(regex_token));
 
 	descriptor->type = type;
 	descriptor->start = start;
@@ -17,7 +17,7 @@ bool int_regex_build_tree(regex_compiled* obj){
  
 	graph_node *n1, *n2, *n3;
 	graph_edge* edge;
-	regex_node_descriptor *descriptor, *tmp;
+	regex_token *descriptor, *tmp;
 
 	descriptor = ((graph_node*)_stack_peek(obj->parse_stack))->data;
 
@@ -48,7 +48,7 @@ bool int_regex_build_tree(regex_compiled* obj){
 
 			_graph_add_edge(obj->parse_tree, n2->key, n1->key, &edge);
 
-			if(((regex_node_descriptor*)(n1->data))->type != REGEX_BRACKET){
+			if(((regex_token*)(n1->data))->type != REGEX_BRACKET && ((regex_token*)(n1->data))->type != REGEX_NOT_BRACKET){
 
 				n1 = _stack_pop(obj->parse_stack);
 				n2 = _stack_peek(obj->parse_stack);
@@ -64,19 +64,6 @@ bool int_regex_build_tree(regex_compiled* obj){
 
 		//Check to see if the next item in the stack is a NOT descriptor.
 		n1 = _stack_peek(obj->parse_stack);
-
-		if(((regex_node_descriptor*)(n1->data))->type == REGEX_NOT){
-
-			n1 = _stack_pop(obj->parse_stack); //REGEX NOT
-			n2 = _stack_peek(obj->parse_stack); //PARENT
-			n3 = obj->last_popped; //BRACKET EXP
-
-			_graph_delete_edge(obj->parse_tree, n2->key, n3->key);
-			_graph_add_edge(obj->parse_tree, n2->key, n1->key, &edge);
-			_graph_add_edge(obj->parse_tree, n1->key, n3->key, &edge);
-
-		}
-
 
 	}
 
@@ -96,7 +83,7 @@ bool int_regex_build_tree(regex_compiled* obj){
 
 			_graph_add_edge(obj->parse_tree, n2->key, n1->key, &edge);
 
-			if(((regex_node_descriptor*)(n1->data))->type != REGEX_CAPTURE){
+			if(((regex_token*)(n1->data))->type != REGEX_CAPTURE && ((regex_token*)(n1->data))->type != REGEX_NON_CAPTURE){
 
 				n1 = _stack_pop(obj->parse_stack);
 				n2 = _stack_peek(obj->parse_stack);
@@ -115,9 +102,9 @@ bool int_regex_build_tree(regex_compiled* obj){
 	}
 
 	//Quantifiers.
-	if(descriptor->type == REGEX_ZERO_OR_MORE || descriptor->type == REGEX_ONE_OR_MORE || descriptor->type == REGEX_ZERO_OR_ONE){
+	if(descriptor->type == REGEX_MIN_MAX || descriptor->type == REGEX_ZERO_OR_MORE || descriptor->type == REGEX_ONE_OR_MORE || descriptor->type == REGEX_ZERO_OR_ONE){
 
-		n1 = _stack_pop(obj->parse_stack); //REGEX ZERO OR MORE
+		n1 = _stack_pop(obj->parse_stack); //REGEX QUANTIFIER
 		n2 = _stack_peek(obj->parse_stack); //REGEX PARENT
 		n3 = obj->last_popped; //REGEX BRACKET
 
@@ -182,9 +169,75 @@ void int_regex_roll_stack(regex_compiled* obj){
 
 }
 
+bool int_regex_match_min_max(regex_compiled* obj){
+
+	int i;
+	char buffer[6];
+	regex_token* descriptor;
+	utf8_char* character;
+	uint32_t min;
+	uint32_t max;
+
+	if(!_string_has_next(obj->regex))
+		return false;
+
+	for(i = 0; i < 6; i++)
+		buffer[i] = 0;
+
+	i = 0;
+
+	while(_string_has_next(obj->regex) && i < 6){
+
+		character = _string_get_next(obj->regex);
+
+		if(character->value < 47 || character->value > 57)
+			break;
+
+		  buffer[i++] = character->value;
+
+	}
+
+	if(character->value != 44 || !_string_has_next(obj->regex))
+		return false;
+
+	min = atoi(buffer);
+
+	for(i = 0; i < 6; i++)
+		buffer[i] = 0;
+
+	i = 0;
+
+	while(_string_has_next(obj->regex) && i < 6){
+
+		character = _string_get_next(obj->regex);
+
+		if(character->value < 47 || character->value > 57)
+			break;
+
+	  	buffer[i++] = character->value;
+
+	}
+
+	if(character->value != 125)
+		return false;
+
+	if(!buffer[0])
+		max = 3000000000;
+
+	else
+		max = atoi(buffer);
+
+	descriptor = int_regex_create_node_descriptor(obj->regex->ctx, REGEX_MIN_MAX, min, max);
+
+	_stack_push(obj->parse_stack, _graph_add_node(obj->parse_tree, obj->key++, descriptor));
+
+	return int_regex_build_tree(obj);
+
+}
+
 bool int_regex_match_zero_more(regex_compiled* obj){
 
-	regex_node_descriptor* descriptor;
+	regex_token* descriptor;
 
 	descriptor =  int_regex_create_node_descriptor(obj->regex->ctx, REGEX_ZERO_OR_MORE, 0, 0);
 
@@ -196,7 +249,7 @@ bool int_regex_match_zero_more(regex_compiled* obj){
 
 bool int_regex_match_one_more(regex_compiled* obj){
 
-	regex_node_descriptor* descriptor;
+	regex_token* descriptor;
 
 	descriptor =  int_regex_create_node_descriptor(obj->regex->ctx, REGEX_ONE_OR_MORE, 0, 0);
 
@@ -206,21 +259,9 @@ bool int_regex_match_one_more(regex_compiled* obj){
 
 }
 
-bool int_regex_match_zero_one(regex_compiled* obj){
-
-	regex_node_descriptor* descriptor;
-
-	descriptor =  int_regex_create_node_descriptor(obj->regex->ctx, REGEX_ZERO_OR_ONE, 0, 0);
-
-	_stack_push(obj->parse_stack, _graph_add_node(obj->parse_tree, obj->key++, descriptor));
-
-	return int_regex_build_tree(obj);
-
-}
-
 bool int_regex_match_or(regex_compiled* obj){
 
-	regex_node_descriptor* descriptor;
+	regex_token* descriptor;
 
 	descriptor =  int_regex_create_node_descriptor(obj->regex->ctx, REGEX_OR, 0, 0);
 
@@ -230,9 +271,22 @@ bool int_regex_match_or(regex_compiled* obj){
 
 }
 
+bool int_regex_match_zero_one(regex_compiled* obj){
+
+	regex_token* descriptor;
+
+	descriptor =  int_regex_create_node_descriptor(obj->regex->ctx, REGEX_ZERO_OR_ONE, 0, 0);
+
+	_stack_push(obj->parse_stack, _graph_add_node(obj->parse_tree, obj->key++, descriptor));
+
+	return int_regex_build_tree(obj);
+
+}
+
+
 bool int_regex_end_capture(regex_compiled* obj){
 
-	regex_node_descriptor* descriptor;
+	regex_token* descriptor;
 
 	descriptor =  int_regex_create_node_descriptor(obj->regex->ctx, REGEX_CAPTURE_END, 0, 0);
 
@@ -244,9 +298,34 @@ bool int_regex_end_capture(regex_compiled* obj){
 
 bool int_regex_start_capture(regex_compiled* obj){
 
-	regex_node_descriptor* descriptor;
+	uint8_t type;
+	utf8_char* character;
+	regex_token* descriptor;
 
-	descriptor =  int_regex_create_node_descriptor(obj->regex->ctx, REGEX_CAPTURE, 0, 0);
+	type = REGEX_CAPTURE;
+
+	if(_string_has_next(obj->regex)){
+
+		character = _string_get_next(obj->regex);
+
+		if(character->value == 63){
+
+			if(!_string_has_next(obj->regex))
+				return false;
+
+			character = _string_get_next(obj->regex);
+
+			if(character->value == 58)
+				type = REGEX_NON_CAPTURE;
+		
+		}
+		else
+			_string_iterator_rewind(obj->regex);
+
+
+	}
+
+	descriptor =  int_regex_create_node_descriptor(obj->regex->ctx, type, 0, 0);
 
 	_stack_push(obj->parse_stack, _graph_add_node(obj->parse_tree, obj->key++, descriptor));
 
@@ -256,7 +335,7 @@ bool int_regex_start_capture(regex_compiled* obj){
 
 bool int_regex_end_bracket(regex_compiled* obj){
 
-	regex_node_descriptor* descriptor;
+	regex_token* descriptor;
 
 	descriptor =  int_regex_create_node_descriptor(obj->regex->ctx, REGEX_BRACKET_END, 0, 0);
 
@@ -269,25 +348,35 @@ bool int_regex_end_bracket(regex_compiled* obj){
 bool int_regex_start_bracket(regex_compiled* obj){
 
 	utf8_char* character;
-	regex_node_descriptor *descriptor, *notdesc;
+	regex_token *descriptor;
+	uint8_t type = REGEX_BRACKET;
+
 
 	//Check to see if this is a negation.
 	if(_string_has_next(obj->regex)){
 
 		character = _string_get_next(obj->regex);
 
-		if(character->value == 94){
-
-			notdesc =  int_regex_create_node_descriptor(obj->regex->ctx, REGEX_NOT, 0, 0);
-			_stack_push(obj->parse_stack, _graph_add_node(obj->parse_tree, obj->key++, notdesc));
-
-		}
+		if(character->value == 94)
+			type = REGEX_NOT_BRACKET;
 		else
 			_string_iterator_rewind(obj->regex);
 
 	}
 
-	descriptor =  int_regex_create_node_descriptor(obj->regex->ctx, REGEX_BRACKET, 0, 0);
+	descriptor =  int_regex_create_node_descriptor(obj->regex->ctx, type, 0, 0);
+
+	_stack_push(obj->parse_stack, _graph_add_node(obj->parse_tree, obj->key++, descriptor));
+
+	return int_regex_build_tree(obj);
+
+}
+
+bool int_regex_add_character_any(regex_compiled* obj){
+
+	regex_token* descriptor;
+
+	descriptor = int_regex_create_node_descriptor(obj->regex->ctx, REGEX_CHAR, 0, 65536);
 
 	_stack_push(obj->parse_stack, _graph_add_node(obj->parse_tree, obj->key++, descriptor));
 
@@ -298,7 +387,7 @@ bool int_regex_start_bracket(regex_compiled* obj){
 bool int_regex_add_character(regex_compiled* obj){
 
 	utf8_char* character;
-	regex_node_descriptor* descriptor;
+	regex_token* descriptor;
 	uint32_t min, max;
 
 	_string_iterator_rewind(obj->regex);
@@ -336,11 +425,12 @@ bool int_regex_add_character(regex_compiled* obj){
 bool int_regex_add_post_esc(regex_compiled* obj){
 
 	utf8_char* character;
-	regex_node_descriptor* descriptor;
+	regex_token* descriptor;
 
 	if(!_string_has_next(obj->regex))
 		return false;
 
+	_string_get_next(obj->regex);
 	return int_regex_add_character(obj);
 
 }
@@ -392,8 +482,20 @@ bool int_regex_next_op(regex_compiled* obj){
 				result = int_regex_match_one_more(obj);
 				break;
 
+			case 63:
+				result = int_regex_match_zero_one(obj);
+				break;
+
 			case 124:
 				result = int_regex_match_or(obj);
+				break;
+
+			case 46:
+				result = int_regex_add_character_any(obj);
+				break;
+
+			case 123:
+				result = int_regex_match_min_max(obj);
 				break;
 
 			default:
@@ -419,7 +521,7 @@ regex_compiled* _regex_new(string* input){
 
 	graph_node* root;
 	regex_compiled* compiler_obj;
-	regex_node_descriptor* root_descriptor;
+	regex_token* root_descriptor;
 
 	if(!input)
 		return 0;
