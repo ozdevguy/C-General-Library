@@ -6,7 +6,7 @@ typedef struct regex_capture regex_capture;
 
 enum{REGEX_ROOT, REGEX_BRACKET, REGEX_NOT_BRACKET, REGEX_BRACKET_END, REGEX_CAPTURE, REGEX_NON_CAPTURE, REGEX_CAPTURE_END, REGEX_MIN_MAX, REGEX_ZERO_OR_ONE, REGEX_ZERO_OR_MORE, REGEX_ONE_OR_MORE, REGEX_CHAR, REGEX_OR, REGEX_OR_SUB};
 
-struct regex_result{
+struct regex_results{
 
 	//Starting position.
 	size_t start_pos;

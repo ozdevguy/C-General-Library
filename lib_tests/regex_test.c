@@ -11,18 +11,55 @@ void main(int argc, char* argv[]){
 
 	regex_compiled* regex;
 
-	//char* test = " *(static|inline)? +([A-Za-z0-9\\-_]+) +([A-Za-z0-9\\-_]+)\\((?:(?:([A-Za-z0-9\\-_]+) +([A-Za-z0-9\\-_]+))(?: *, *([A-Za-z0-9\\-_]+) +([A-Za-z0-9\\-_]+))*)*\\)";
+	char* test = " *(static|inline)? +([A-Za-z0-9\\-_]+) +([A-Za-z0-9\\-_]+)\\(([A-Za-z0-9\\-_\\,\\[\\] ]*)\\)";
 	//char* test = "(public|protected|private) +(static) +([A-Za-z0-9\\-_]+) +([A-Za-z0-9\\-_]+)\\(([A-Za-z 0-9\\[\\]]+)\\)";
 
-	char* test = "[^a]";
+	//char* test = "llo";
 	//char* test = "(?:([A-Za-z0-9\\-_\\[\\]]+) +([A-Za-z0-9\\-_\\[\\]]+))( *, *(([A-Za-z0-9\\-_\\[\\]]+) +([A-Za-z0-9\\-_\\[\\]]+)))*";
 
 	//char* test = "a{1,3}";
-	string* source = _string_new_fbytes(ctx, "hello!\n");
+	string* source = _string_new_fbytes(ctx, "static int testFunction(int t1, int t2)\n");
 
 	string* rs = _string_new_fbytes(ctx, test);
 
-	regex = _regex_new(rs); 
+	//Compile the regex...
+	regex = _regex_new(rs);
+
+	//Run the compiled regex against the source string and receive results.
+	regex_results* res = _regex_results(regex, source, 0);
+
+	if(res){
+
+		_list_reset_iterator(res->captures);
+
+		while(_list_has_next(res->captures)){
+
+			regex_capture* capture = _list_get_next(res->captures);
+
+			size_t size;
+			char* data = _string_pull(capture->capture, &size);
+			printf("Capture: %s | Start: %ld, End: %ld\n", data, capture->start, capture->end);
+
+			destroy(ctx, data);
+
+		}
+	}
+
+	long pos = _regex_position(regex, source, 0);
+
+	printf("Position: %ld\n", pos);
+
+	_regex_delete(regex);
+	_string_delete(source);
+	_string_delete(rs);
+	_ctx_delete(ctx);
+
+	/*
+
+	if(!regex){
+
+		printf("PROBLEM!!!\n");
+	}
 
 	_graph_walk_init(regex->parse_tree, 0);
 
@@ -89,12 +126,6 @@ void main(int argc, char* argv[]){
 
 		}
 	}
-
-	long pos = _regex_position(regex, source, 0);
-
-	_regex_delete(regex);
-	_string_delete(source);
-	_string_delete(rs);
-	_ctx_delete(ctx);
+	*/
 
 }

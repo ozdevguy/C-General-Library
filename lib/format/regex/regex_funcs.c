@@ -319,13 +319,58 @@ bool int_regex_eval(regex_analyzer* analyzer, graph_node* node){
 	
 }
 
+//Destroy an analyzer + list of captures.
+void int_regex_destroy_analyzer_wlist(regex_analyzer* analyzer){
+
+	standard_library_context* ctx;
+	regex_capture* current;
+
+	ctx = analyzer->input->ctx;
+
+	_string_delete(analyzer->input);
+	_stack_delete(analyzer->current_capture);
+	_stack_delete(analyzer->swap_stack);
+
+	_list_reset_iterator(analyzer->captures);
+
+	while(_list_has_next(analyzer->captures)){
+
+		current = _list_get_next(analyzer->captures);
+		_string_delete(current->capture);
+		destroy(ctx, current);
+
+	}
+
+	_list_delete(analyzer->captures);
+	destroy(ctx, analyzer);
+
+}
+
+//Destroy an analyzer - list of captures.
+void int_regex_destroy_analyzer_nlist(regex_analyzer* analyzer){
+
+	standard_library_context* ctx;
+
+	ctx = analyzer->input->ctx;
+
+	_string_delete(analyzer->input);
+	_stack_delete(analyzer->current_capture);
+	_stack_delete(analyzer->swap_stack);
+
+	_list_reset_iterator(analyzer->captures);
+
+	destroy(ctx, analyzer);
+
+}
 
 //Initialize a new regex operation.
-regex_analyzer* int_regex_match_init(regex_compiled* obj, string* input){
+regex_results* int_regex_match_init(regex_compiled* obj, string* input){
 
 	standard_library_context* ctx;
 	regex_analyzer* analyzer;
+	regex_results* ret;
 	bool result;
+	int i;
 
 	ctx = input->ctx;
 
@@ -337,26 +382,47 @@ regex_analyzer* int_regex_match_init(regex_compiled* obj, string* input){
 	analyzer->swap_stack = _stack_new(ctx, 2);
 	analyzer->pos = -1;
 
-	destroy(ctx, analyzer->input);
-	analyzer->input->data = input->data;
+	_string_copy(analyzer->input, input);
 	_string_reset_iterator(analyzer->input);
 
 	//Start the process.
-	result = int_regex_eval(analyzer, obj->parse_tree->nodes);
 
-	if(result)
-		return analyzer;
-	else
-		return 0; //NEED TO DELETE ANALYZER OBJECT.
+	for(i = 0; i < analyzer->input->length; i++){
+
+		result = int_regex_eval(analyzer, obj->parse_tree->nodes);
+
+		if(result)
+			break;
+
+		analyzer->input->iter_pos++;
+
+	}
+
+	if(result){
+
+		int_regex_destroy_analyzer_nlist(analyzer);
+		ret = allocate(ctx, sizeof(regex_results));
+		ret->captures = analyzer->captures;
+		ret->start_pos = i;
+
+		return ret;
+
+	}
+	else{
+
+		int_regex_destroy_analyzer_wlist(analyzer);
+		return 0;
+
+	}
 
 }
 
 long _regex_position(regex_compiled* regex, string* input, size_t start_pos){
 
-	size_t i;
-	graph_node* current;
+	long pos;
 	standard_library_context* ctx;
-	regex_analyzer* results;
+	regex_results* results;
+	regex_capture* current;
 
 	if(!regex || !input)
 		return -1;
@@ -365,25 +431,40 @@ long _regex_position(regex_compiled* regex, string* input, size_t start_pos){
 	
 	results = int_regex_match_init(regex, input);
 
-	if(results)
-		printf("MATCH!\n");
-	else
-		printf("NO MATCH!\n");
+	if(!results)
+		return -1;
 
-	printf("List size: %ld\n", results->captures->used);
+	pos = results->start_pos;
 
 	_list_reset_iterator(results->captures);
 
 	while(_list_has_next(results->captures)){
 
-		regex_capture* capture = _list_get_next(results->captures);
-
-		size_t size;
-		char* dat = _string_pull(capture->capture, &size);
-		printf("Capture: ->%s<- | START: %ld, END: %ld\n", dat, capture->start, capture->end);
+		current = _list_get_next(results->captures);
+		_string_delete(current->capture);
+		destroy(ctx, current);
 
 	}
 
-	return results->pos;
+	_list_delete(results->captures);
+	destroy(ctx, results);
+
+	return pos;
+
+}
+
+regex_results* _regex_results(regex_compiled* regex, string* input, size_t start_pos){
+
+	regex_results* results;
+
+	if(!regex || !input)
+		return 0;
+
+	results = int_regex_match_init(regex, input);
+
+	if(!results)
+		return 0;
+
+	return results;
 
 }	
