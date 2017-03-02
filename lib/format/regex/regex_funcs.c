@@ -130,11 +130,7 @@ bool int_regex_capture_op(regex_analyzer* analyzer, graph_node* node){
 
 		if(!int_regex_eval(analyzer, edge->to)){
 			
-			capture = _stack_pop(analyzer->current_capture);
-			_string_delete(capture->capture);
-			destroy(analyzer->input->ctx, capture);
-			_list_remove(analyzer->captures, analyzer->captures->used - 1);
-
+			_stack_pop(analyzer->current_capture);
 			return false;
 
 		}

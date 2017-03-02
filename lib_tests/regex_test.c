@@ -11,14 +11,14 @@ void main(int argc, char* argv[]){
 
 	regex_compiled* regex;
 
-	char* test = " *(static|inline)? +([A-Za-z0-9\\-_]+) +([A-Za-z0-9\\-_]+)\\(([A-Za-z0-9\\-_\\,\\[\\] ]*)\\)";
+	char* test = "([A-Za-z0-9\\-_]+)(?:(?:([\\*]+) +)|(?: +([\\*]+)))([A-Za-z0-9\\-_]+)";
 	//char* test = "(public|protected|private) +(static) +([A-Za-z0-9\\-_]+) +([A-Za-z0-9\\-_]+)\\(([A-Za-z 0-9\\[\\]]+)\\)";
 
 	//char* test = "llo";
 	//char* test = "(?:([A-Za-z0-9\\-_\\[\\]]+) +([A-Za-z0-9\\-_\\[\\]]+))( *, *(([A-Za-z0-9\\-_\\[\\]]+) +([A-Za-z0-9\\-_\\[\\]]+)))*";
 
 	//char* test = "a{1,3}";
-	string* source = _string_new_fbytes(ctx, "static int testFunction(int t1, int t2)\n");
+	string* source = _string_new_fbytes(ctx, "void **tmp");
 
 	string* rs = _string_new_fbytes(ctx, test);
 
