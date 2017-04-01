@@ -37,9 +37,6 @@ struct regex_analyzer{
 	//Capture swap stack.
 	stack* swap_stack;
 
-	//Temporary stack pointer.
-	stack* tmp_stack;
-
 	//Input string.
 	string* input;
 

@@ -234,41 +234,116 @@ bool int_regex_mm_op(regex_analyzer* analyzer, graph_node* node){
 
 }
 
-bool int_regex_or_op(regex_analyzer* analyzer, graph_node* node){
+void int_regex_sub_or_revert(stack* tmp_current_capture, list* tmp_captures, regex_analyzer* analyzer){
 
-	bool result1;
-	bool result2;
+	standard_library_context* ctx;
+	regex_capture* base_capture;
 
-	result1 = int_regex_eval(analyzer, node->edges->to);
-	result2 = int_regex_eval(analyzer, node->edges->next->to);
+	ctx = analyzer->input->ctx;
+	base_capture = _stack_pop(analyzer->current_capture);
+	_string_delete(base_capture->capture);
+	destroy(ctx, base_capture);
 
-	if(result1 || result2)
-		return true;
+	_stack_delete(analyzer->current_capture);
+	_list_delete(analyzer->captures);
 
-	return false;
+	analyzer->current_capture = tmp_current_capture;
+	analyzer->captures = tmp_captures;
 
 }
 
+//Check the sub-or expression.
 bool int_regex_or_sub(regex_analyzer* analyzer, graph_node* node){
 
-	bool result;
+	standard_library_context* ctx;
+	regex_capture* base_capture;
 	graph_edge* edge;
+	stack* tmp_current_capture;
+	list* tmp_captures;
+	utf8_char* current_char;
+	regex_capture* current_capture;
 
-	if(!node->edges)
-		return false;
+	//Safely stow away original pointers.
+	ctx = analyzer->input->ctx;
+	tmp_current_capture = analyzer->current_capture;
+	tmp_captures = analyzer->captures;
+
+	//Create a new captures stack and list.
+	analyzer->current_capture = _stack_new(ctx, 2);
+	analyzer->captures = _list_new(ctx, 2);
+
+	//Create a base capture.
+	base_capture = allocate(ctx, sizeof(regex_capture));
+	base_capture->capture = _string_new(ctx);
+
+	//Push the new base capture to the stack.
+	_stack_push(analyzer->current_capture, base_capture);
 
 	edge = node->edges;
 
 	while(edge){
 
-		if(!int_regex_eval(analyzer, edge->to))
+		if(!int_regex_eval(analyzer, edge->to)){
+
+			int_regex_sub_or_revert(tmp_current_capture, tmp_captures, analyzer);
 			return false;
+
+		}
 
 		edge = edge->next;
 
 	}
 
+
+	//Success! Copy base capture characters.
+	_string_reset_iterator(base_capture->capture);
+
+	while(_string_has_next(base_capture->capture)){
+
+		current_char = _string_get_next(base_capture->capture);
+
+		while(tmp_current_capture->top){
+
+			_stack_push(analyzer->swap_stack, _stack_pop(tmp_current_capture));
+			current_capture = _stack_peek(analyzer->swap_stack);
+			_string_append_fchar(current_capture->capture, current_char);
+
+		}
+
+		while(analyzer->swap_stack->top){
+
+			_stack_push(tmp_current_capture, _stack_pop(analyzer->swap_stack));
+
+		}
+
+	}
+
+	//Copy captures list.
+	_list_reset_iterator(analyzer->captures);
+
+	while(_list_has_next(analyzer->captures))
+		_list_add(tmp_captures, _list_get_next(analyzer->captures));
+
+	int_regex_sub_or_revert(tmp_current_capture, tmp_captures, analyzer);
 	return true;
+
+}
+
+bool int_regex_or_op(regex_analyzer* analyzer, graph_node* node){
+
+	size_t or_start = analyzer->input->iter_pos;
+
+	if(int_regex_eval(analyzer, node->edges->to))
+		return true;
+
+	analyzer->input->iter_pos = or_start;
+
+	if(int_regex_eval(analyzer, node->edges->next->to))
+		return true;
+
+	analyzer->input->iter_pos = or_start;
+
+	return false;
 
 }
 
@@ -315,47 +390,23 @@ bool int_regex_eval(regex_analyzer* analyzer, graph_node* node){
 	
 }
 
-//Destroy an analyzer + list of captures.
-void int_regex_destroy_analyzer_wlist(regex_analyzer* analyzer){
+void int_regex_clear_captures_list(list* captures){
 
 	standard_library_context* ctx;
 	regex_capture* current;
 
-	ctx = analyzer->input->ctx;
+	ctx = captures->ctx;
+	_list_reset_iterator(captures);
 
-	_string_delete(analyzer->input);
-	_stack_delete(analyzer->current_capture);
-	_stack_delete(analyzer->swap_stack);
+	while(_list_has_next(captures)){
 
-	_list_reset_iterator(analyzer->captures);
-
-	while(_list_has_next(analyzer->captures)){
-
-		current = _list_get_next(analyzer->captures);
+		current = _list_get_next(captures);
 		_string_delete(current->capture);
 		destroy(ctx, current);
 
 	}
 
-	_list_delete(analyzer->captures);
-	destroy(ctx, analyzer);
-
-}
-
-//Destroy an analyzer - list of captures.
-void int_regex_destroy_analyzer_nlist(regex_analyzer* analyzer){
-
-	standard_library_context* ctx;
-
-	ctx = analyzer->input->ctx;
-
-	_string_delete(analyzer->input);
-	_stack_delete(analyzer->current_capture);
-	_stack_delete(analyzer->swap_stack);
-
-	_list_reset_iterator(analyzer->captures);
-
-	destroy(ctx, analyzer);
+	_list_clear(captures);
 
 }
 
@@ -363,8 +414,9 @@ void int_regex_destroy_analyzer_nlist(regex_analyzer* analyzer){
 regex_results* int_regex_match_init(regex_compiled* obj, string* input){
 
 	standard_library_context* ctx;
+	regex_capture* garbage;
 	regex_analyzer* analyzer;
-	regex_results* ret;
+	regex_results* ret = 0;
 	bool result;
 	int i;
 
@@ -390,26 +442,32 @@ regex_results* int_regex_match_init(regex_compiled* obj, string* input){
 		if(result)
 			break;
 
+		int_regex_clear_captures_list(analyzer->captures);
 		analyzer->input->iter_pos++;
 
 	}
 
+	_stack_delete(analyzer->swap_stack);
+	_stack_delete(analyzer->current_capture);
+	_string_delete(analyzer->input);
+
 	if(result){
 
-		int_regex_destroy_analyzer_nlist(analyzer);
 		ret = allocate(ctx, sizeof(regex_results));
 		ret->captures = analyzer->captures;
 		ret->start_pos = i;
 
-		return ret;
-
 	}
 	else{
 
-		int_regex_destroy_analyzer_wlist(analyzer);
-		return 0;
+		int_regex_clear_captures_list(analyzer->captures);
+		_list_delete(analyzer->captures);
 
 	}
+
+	
+	destroy(ctx, analyzer);
+	return ret;
 
 }
 
@@ -432,16 +490,7 @@ long _regex_position(regex_compiled* regex, string* input, size_t start_pos){
 
 	pos = results->start_pos;
 
-	_list_reset_iterator(results->captures);
-
-	while(_list_has_next(results->captures)){
-
-		current = _list_get_next(results->captures);
-		_string_delete(current->capture);
-		destroy(ctx, current);
-
-	}
-
+	int_regex_clear_captures_list(results->captures);
 	_list_delete(results->captures);
 	destroy(ctx, results);
 
@@ -463,4 +512,22 @@ regex_results* _regex_results(regex_compiled* regex, string* input, size_t start
 
 	return results;
 
-}	
+}
+
+void _regex_delete_results(regex_results* results){
+
+	standard_library_context* ctx;
+
+	if(!results)
+		return;
+
+	if(!results->captures)
+		return;
+
+	ctx = results->captures->ctx;
+
+	int_regex_clear_captures_list(results->captures);
+	_list_delete(results->captures);
+	destroy(ctx, results);
+
+}

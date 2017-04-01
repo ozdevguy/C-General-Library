@@ -116,6 +116,15 @@ void* _list_get_next(list* lst){
 
 }
 
+void* _list_get_last(list* lst){
+
+	if(lst->used <= 0)
+		return 0;
+
+	return lst->data[lst->used - 1];
+	
+}
+
 bool _list_remove(list* lst, size_t pos){
 
 	size_t i;
@@ -134,6 +143,24 @@ bool _list_remove(list* lst, size_t pos){
 
 	return true;
 
+}
+
+void _list_clear(list* lst){
+
+	lst->used = 0;
+
+}
+
+void* _list_remove_last(list* lst){
+
+	if(!lst)
+		return 0;
+
+	if(!lst->used)
+		return 0;
+
+	return lst->data[lst->used-- - 1];
+	
 }
 
 void* _list_get(list* lst, size_t pos){

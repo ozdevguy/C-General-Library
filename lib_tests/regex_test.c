@@ -1,29 +1,32 @@
+#include <time.h>
 #include "../lib/genlib.h"
 
 void main(int argc, char* argv[]){
 
 	genlib_context* ctx;
 
-	printf("Hello world!\n");
-
 	_lib_init();
 	ctx = _ctx_init();
 
 	regex_compiled* regex;
 
-	char* test = "([A-Za-z0-9\\-_]+)(?:(?:([\\*]+) +)|(?: +([\\*]+)))([A-Za-z0-9\\-_]+)";
-	//char* test = "(public|protected|private) +(static) +([A-Za-z0-9\\-_]+) +([A-Za-z0-9\\-_]+)\\(([A-Za-z 0-9\\[\\]]+)\\)";
+	//char* test = "(?:int b|in(t a))";
+	char* test = "(public|protected|private) +(static) +([A-Za-z0-9\\-_]+) +([A-Za-z0-9\\-_]+)\\(([A-Za-z 0-9\\[\\]]+)\\)";
 
 	//char* test = "llo";
+
 	//char* test = "(?:([A-Za-z0-9\\-_\\[\\]]+) +([A-Za-z0-9\\-_\\[\\]]+))( *, *(([A-Za-z0-9\\-_\\[\\]]+) +([A-Za-z0-9\\-_\\[\\]]+)))*";
 
 	//char* test = "a{1,3}";
-	string* source = _string_new_fbytes(ctx, "void **tmp");
+	string* source = _string_new_fbytes(ctx, "public static void test(int a)");
 
 	string* rs = _string_new_fbytes(ctx, test);
 
 	//Compile the regex...
 	regex = _regex_new(rs);
+
+	clock_t t;
+	t = clock();
 
 	//Run the compiled regex against the source string and receive results.
 	regex_results* res = _regex_results(regex, source, 0);
@@ -45,6 +48,8 @@ void main(int argc, char* argv[]){
 		}
 	}
 
+	_regex_delete_results(res);
+
 	long pos = _regex_position(regex, source, 0);
 
 	printf("Position: %ld\n", pos);
@@ -53,6 +58,12 @@ void main(int argc, char* argv[]){
 	_string_delete(source);
 	_string_delete(rs);
 	_ctx_delete(ctx);
+
+	t = clock() - t;
+	double time_taken = ((double)t)/CLOCKS_PER_SEC; // in seconds
+ 
+    printf("Operation took %f seconds to execute \n", time_taken);
+
 
 	/*
 
